@@ -143,7 +143,7 @@ For every trip, one month (yellow + green together) at a time:
 
 This is the **full dataset** of the collection: one CSV with 23,318,979 rows and 14 columns, about **3.2 GB**. Rows are in month order and sorted by pickup time within each month. The few trips a TLC file carries from the last minutes of the previous month appear at the start of the next month's block.
 
-The file is too large for GitHub (100 MB limit per file), so it is **not committed**. It is shared with the team as a private Kaggle dataset, and anyone can also rebuild it by running the notebook. How to get it and load it: [data/DATA_GUIDE.md](../DATA_GUIDE.md).
+The file is too large for GitHub (100 MB limit per file), so it is **not committed**. It is shared with the team as a private Kaggle dataset, [adithyaajay1210/nyc-taxi-demand-manhattan-queens](https://www.kaggle.com/datasets/adithyaajay1210/nyc-taxi-demand-manhattan-queens), and anyone can also rebuild it by running the notebook. How to get it and load it: [data/DATA_GUIDE.md](../DATA_GUIDE.md).
 
 ## 4. Output files
 
@@ -151,7 +151,7 @@ All outputs of the collection are in `data/raw/`:
 
 | File | In git | Rows | Size | Description |
 |---|---|---:|---:|---|
-| `NYC-taxi-demand-Manhattan-Queens.csv` | no (private Kaggle dataset) | 23,318,979 | 3.2 GB | **Full dataset**: every trip with the weather at its pickup zone and hour |
+| `NYC-taxi-demand-Manhattan-Queens.csv` | no ([private Kaggle dataset](https://www.kaggle.com/datasets/adithyaajay1210/nyc-taxi-demand-manhattan-queens)) | 23,318,979 | 3.2 GB | **Full dataset**: every trip with the weather at its pickup zone and hour |
 | `taxi_zones_manhattan_queens.csv` | yes | 138 | 8 KB | Zones with centroid latitude/longitude |
 | `weather_hourly_by_zone.csv` | yes | 599,472 | 39 MB | Hourly weather for every zone and hour (138 × 4,344), with the grid cell Open-Meteo used |
 | `taxi_collection_summary.csv` | yes | 12 | 2 KB | Audit of each downloaded TLC file |

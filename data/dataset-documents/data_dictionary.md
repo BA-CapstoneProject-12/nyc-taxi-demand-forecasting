@@ -16,7 +16,7 @@ This file describes the datasets produced by the collection pipeline and every f
 | Sources | NYC TLC Trip Record Data (yellow + green), TLC Taxi Zones, Open-Meteo Historical Forecast API |
 | Join | Weather is matched to each trip on **pickup zone + pickup hour** |
 | Missing values | None |
-| Size | about 3.2 GB (CSV). Not in git because of its size. Shared as a private Kaggle dataset, or rebuilt by running `scripts/data_collection.ipynb` (see `data/DATA_GUIDE.md`) |
+| Size | about 3.2 GB (CSV). Not in git because of its size. Shared as a private Kaggle dataset ([adithyaajay1210/nyc-taxi-demand-manhattan-queens](https://www.kaggle.com/datasets/adithyaajay1210/nyc-taxi-demand-manhattan-queens)), or rebuilt by running `scripts/data_collection.ipynb` (see `data/DATA_GUIDE.md`) |
 | Row order | By month, sorted by pickup time within each month |
 
 ### Field descriptions
