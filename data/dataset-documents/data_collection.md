@@ -38,7 +38,7 @@ Both sources are free and need no API key.
 
 ## 3. Collection steps
 
-All the code is in one notebook, [`scripts/data_collection.ipynb`](../scripts/data_collection.ipynb), which explains every step in text cells next to the code. Run all cells from top to bottom to rebuild everything (about 15 minutes, mostly downloads, API pauses and writing the 3.2 GB CSV):
+All the code is in one notebook, [`scripts/data_collection.ipynb`](../../scripts/data_collection.ipynb), which explains every step in text cells next to the code. Run all cells from top to bottom to rebuild everything (about 15 minutes, mostly downloads, API pauses and writing the 3.2 GB CSV):
 
 ```bash
 pip install -r requirements.txt
@@ -131,7 +131,7 @@ For every trip, one month (yellow + green together) at a time:
 
 This is the **full dataset** of the collection: one CSV with 23,318,979 rows and 14 columns, about **3.2 GB**. Rows are in month order and sorted by pickup time within each month. The few trips a TLC file carries from the last minutes of the previous month appear at the start of the next month's block.
 
-The file is too large for GitHub (100 MB limit per file), so it is **not committed**. It is shared with the team as a private Kaggle dataset, and anyone can also rebuild it by running the notebook. How to get it and load it: [data/DATA_GUIDE.md](../data/DATA_GUIDE.md).
+The file is too large for GitHub (100 MB limit per file), so it is **not committed**. It is shared with the team as a private Kaggle dataset, and anyone can also rebuild it by running the notebook. How to get it and load it: [data/DATA_GUIDE.md](../DATA_GUIDE.md).
 
 ## 4. Output files
 
@@ -145,7 +145,7 @@ All outputs of the collection are in `data/raw/`:
 | `taxi_collection_summary.csv` | yes | 12 | 2 KB | Audit of each downloaded TLC file |
 | `tlc_downloads/` | no | n/a | ~425 MB | Cache of the original TLC files, so reruns skip the downloads |
 
-`data/processed/` is empty. It is reserved for the next stages of the project. The dataset CSV and `tlc_downloads/` are in `.gitignore` because of their size. Where each file is and how to use it: [data/DATA_GUIDE.md](../data/DATA_GUIDE.md).
+`data/processed/` is empty. It is reserved for the next stages of the project. The dataset CSV and `tlc_downloads/` are in `.gitignore` because of their size. Where each file is and how to use it: [data/DATA_GUIDE.md](../DATA_GUIDE.md).
 
 The weather table is also kept on its own. It has weather for **every** zone and hour, including hours with no trips, which later steps can use.
 
@@ -199,7 +199,7 @@ These numbers come from Step 5 (Dataset profile) of the notebook.
 
 ## 7. Notebook
 
-All the collection code is in [`scripts/data_collection.ipynb`](../scripts/data_collection.ipynb):
+All the collection code is in [`scripts/data_collection.ipynb`](../../scripts/data_collection.ipynb):
 
 | Notebook section | What it does |
 |---|---|
