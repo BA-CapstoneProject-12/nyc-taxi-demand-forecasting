@@ -38,11 +38,11 @@ Both sources are free and need no API key.
 
 ## 3. Collection steps
 
-The whole process is scripted. One command runs it from start to finish (about 10 minutes, most of it downloads and API pauses):
+All the code is in one notebook, [`scripts/data_collection.ipynb`](../scripts/data_collection.ipynb), which explains every step in text cells next to the code. Run all cells from top to bottom to rebuild everything (about 10 minutes, mostly downloads and API pauses):
 
 ```bash
 pip install -r requirements.txt
-python scripts/run_pipeline.py
+# then open scripts/data_collection.ipynb and run all cells
 ```
 
 ```
@@ -61,7 +61,7 @@ python scripts/run_pipeline.py
                               (data/interim/trips_with_weather/)  ◄── FINAL DATASET
 ```
 
-### Step 1: Zones and their coordinates (`scripts/collect_zones.py`)
+### Step 1: Zones and their coordinates (notebook Step 1)
 
 1. Download `taxi_zone_lookup.csv` (265 zones) and keep the rows where `Borough` is `Manhattan` or `Queens`. This gives **138 zones** (69 each).
 2. Download `taxi_zones.zip`, the TLC zone boundary shapefile. The coordinates are in the NY State Plane Long Island system (**EPSG:2263**, US feet).
@@ -71,7 +71,7 @@ python scripts/run_pipeline.py
 
 The script stops with an error if any zone has no shape. Spot checks: Central Park (43) → 40.7825, −73.9656; JFK Airport (132) → 40.6470, −73.7865; LaGuardia Airport (138) → 40.7744, −73.8736.
 
-### Step 2: Hourly weather per zone (`scripts/collect_weather.py`)
+### Step 2: Hourly weather per zone (notebook Step 2)
 
 1. Read the 138 zone centroids from Step 1.
 2. Call the Open-Meteo Historical Forecast API. The API accepts several comma-separated coordinates in one request, so the zones are sent in **14 requests of up to 10 zones**. Parameters:
@@ -93,7 +93,7 @@ The script stops with an error if any zone has no shape. Spot checks: Central Pa
 5. **Check completeness**: every zone must have exactly one row for each of the **4,344 hours** in the period. The script stops with an error if not. No values were missing.
 6. Save to `data/processed/weather_hourly_by_zone.parquet` (138 × 4,344 = **599,472 rows**).
 
-### Step 3: Taxi trips (`scripts/collect_taxi.py`)
+### Step 3: Taxi trips (notebook Step 3)
 
 For each taxi type (yellow, green) and each month (2025-09 to 2026-02), that is 12 files, one file at a time to keep memory low:
 
@@ -118,7 +118,7 @@ For each taxi type (yellow, green) and each month (2025-09 to 2026-02), that is 
 
 In total **23,318,979 of the 24,562,021 trips (94.9%)** in the 12 files were picked up in Manhattan or Queens. The rest started in Brooklyn, the Bronx, Staten Island, Newark Airport or an unknown zone.
 
-### Step 4: Add weather to every trip (`scripts/build_dataset.py`)
+### Step 4: Add weather to every trip (notebook Step 4)
 
 For every trip, one monthly file at a time:
 
@@ -129,7 +129,7 @@ For every trip, one monthly file at a time:
 5. Check that the row count did not change (each join is validated as many-to-one) and that every trip has weather. **All 23,318,979 trips got weather.**
 6. Save to `data/interim/trips_with_weather/{taxi_type}_{month}.parquet`.
 
-This is the **final dataset** of the collection: 23,318,979 rows in 12 files (one per taxi type and month), about 345 MB. It is too large for GitHub, so it is **not committed**. Anyone can rebuild it with `python scripts/run_pipeline.py`. To load it:
+This is the **final dataset** of the collection: 23,318,979 rows in 12 files (one per taxi type and month), about 345 MB. It is too large for GitHub, so it is **not committed**. Anyone can rebuild it by running the notebook. To load it:
 
 ```python
 import pandas as pd
@@ -148,13 +148,13 @@ nov = pd.read_parquet("data/interim/trips_with_weather/yellow_2025-11.parquet") 
 | `data/interim/trips/*.parquet` | no | 23,318,979 | Filtered trips before the weather join (12 files, ~247 MB) |
 | `data/raw/` | no | n/a | Downloaded TLC files (~425 MB) |
 
-`data/raw/` and `data/interim/` are in `.gitignore` because of their size. Run `python scripts/run_pipeline.py` to rebuild them.
+`data/raw/` and `data/interim/` are in `.gitignore` because of their size. Run the notebook to rebuild them.
 
 The weather table is also kept on its own. It has weather for **every** zone and hour, including hours with no trips, which later steps can use.
 
 ## 5. Dataset summary
 
-Run `python scripts/profile_dataset.py` to reproduce these numbers.
+These numbers come from Step 5 (Dataset profile) of the notebook.
 
 **Trips with weather**: 23,318,979 rows, 14 columns, pickups from 2025-09-01 00:00:00 to 2026-02-28 23:59:59. There are no missing values.
 
@@ -196,19 +196,19 @@ Run `python scripts/profile_dataset.py` to reproduce these numbers.
 
 **Centroid as the zone location.** A zone centroid stands for the whole zone. Manhattan zones are small, so the centroid is close to anywhere in the zone. Some Queens zones (Jamaica Bay, the airports, parks) are large, so their centroid is a rougher stand-in for the whole zone.
 
-**Rain vs showers.** In Open-Meteo, `rain` is rain from large-scale weather systems and `showers` is convective rain, reported separately. `showers` is not one of the four required variables, so short convective downpours are not counted in `rain`. If this matters for modelling, add `showers` to `WEATHER_VARIABLES` in `scripts/config.py` and rerun.
+**Rain vs showers.** In Open-Meteo, `rain` is rain from large-scale weather systems and `showers` is convective rain, reported separately. `showers` is not one of the four required variables, so short convective downpours are not counted in `rain`. If this matters for modelling, add `showers` to `WEATHER_VARIABLES` in the notebook's settings cell and rerun.
 
 **Data versions.** Data was collected on **30 Sep 2026**. The TLC 2026-02 files were last modified on 25 Mar 2026. TLC occasionally republishes files, so rerunning the pipeline later could give slightly different counts. `taxi_collection_summary.csv` records the file sizes that were used.
 
-## 7. Scripts
+## 7. Notebook
 
-| Script | What it does |
+All the collection code is in [`scripts/data_collection.ipynb`](../scripts/data_collection.ipynb):
+
+| Notebook section | What it does |
 |---|---|
-| `scripts/config.py` | Study period, boroughs, taxi types, URLs, weather variables, output paths |
-| `scripts/utils.py` | Logging, HTTP GET with retries (including API rate limits), cached file download |
-| `scripts/collect_zones.py` | Step 1: Manhattan and Queens zones and centroid coordinates |
-| `scripts/collect_weather.py` | Step 2: hourly weather per zone from Open-Meteo |
-| `scripts/collect_taxi.py` | Step 3: download TLC files and keep Manhattan/Queens pickups |
-| `scripts/build_dataset.py` | Step 4: add the pickup zone's weather to every trip |
-| `scripts/run_pipeline.py` | Runs steps 1–4 in order |
-| `scripts/profile_dataset.py` | Prints the summary numbers used in this document |
+| 0. Setup | Imports, settings (study period, boroughs, taxi types, URLs, weather variables, output paths), and helpers for logging, HTTP requests with retries (including API rate limits) and cached file downloads |
+| Step 1 | Manhattan and Queens zones and their centroid coordinates |
+| Step 2 | Hourly weather per zone from Open-Meteo |
+| Step 3 | Download the TLC files and keep Manhattan/Queens pickups |
+| Step 4 | Add the pickup zone's weather to every trip |
+| Step 5 | Dataset profile: the summary numbers used in this document |

@@ -16,7 +16,7 @@ This file describes the datasets produced by the collection pipeline and every f
 | Sources | NYC TLC Trip Record Data (yellow + green), TLC Taxi Zones, Open-Meteo Historical Forecast API |
 | Join | Weather is matched to each trip on **pickup zone + pickup hour** |
 | Missing values | None |
-| Size | about 345 MB (Parquet). Not in git because of its size. Rebuilt by `python scripts/run_pipeline.py` |
+| Size | about 345 MB (Parquet). Not in git because of its size. Rebuilt by running `scripts/data_collection.ipynb` |
 
 ### Field descriptions
 
