@@ -7,6 +7,12 @@ accepts several coordinates in one request and returns one result per
 coordinate, in the same order. Times are requested in America/New_York so they
 line up with the (naive, local) TLC timestamps.
 
+Rain, snowfall and precipitation probability are returned for the preceding
+hour, so they are shifted back one hour: after this script, the row for 07:00
+holds the apparent temperature at 07:00 and the rain/snow/probability for
+07:00-08:00. One extra day is requested so the last hour of the period can be
+filled.
+
 Output: data/processed/weather_hourly_by_zone.csv
 """
 import pandas as pd
@@ -23,7 +29,7 @@ def fetch_weather(zones):
         "latitude": ",".join(zones["latitude"].astype(str)),
         "longitude": ",".join(zones["longitude"].astype(str)),
         "start_date": config.START_DATE,
-        "end_date": config.END_DATE,
+        "end_date": str((pd.Timestamp(config.END_DATE) + pd.Timedelta(days=1)).date()),
         "hourly": ",".join(config.WEATHER_VARIABLES),
         "timezone": config.TIMEZONE,
     }
@@ -43,6 +49,16 @@ def fetch_weather(zones):
         hourly["grid_elevation_m"] = result["elevation"]
         frames.append(hourly)
     return frames
+
+
+def align_to_hour_start(weather):
+    """Shift preceding-hour variables so each row covers [hour, hour + 1)."""
+    weather = weather.sort_values(["LocationID", "weather_hour"]).reset_index(drop=True)
+    cols = config.PRECEDING_HOUR_VARIABLES
+    weather[cols] = weather.groupby("LocationID")[cols].shift(-1)
+    weather["precipitation_probability"] = weather["precipitation_probability"].round().astype("Int64")
+    last_hour = pd.Timestamp(f"{config.END_DATE} 23:00")
+    return weather[weather["weather_hour"] <= last_hour].reset_index(drop=True)
 
 
 def check_weather(weather, zones):
@@ -73,6 +89,7 @@ def main():
     weather = pd.concat(frames, ignore_index=True)
     weather = weather.rename(columns={"time": "weather_hour"})
     weather["weather_hour"] = pd.to_datetime(weather["weather_hour"])
+    weather = align_to_hour_start(weather)
     check_weather(weather, zones)
 
     config.PROCESSED_DIR.mkdir(parents=True, exist_ok=True)

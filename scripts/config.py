@@ -38,6 +38,9 @@ WEATHER_VARIABLES = [
     "snowfall",
     "precipitation_probability",
 ]
+# Open-Meteo reports these for the hour *before* the timestamp (07:00 = 06:00-07:00).
+# collect_weather.py shifts them so every row covers the hour that starts at its timestamp.
+PRECEDING_HOUR_VARIABLES = ["rain", "snowfall", "precipitation_probability"]
 
 # Output files
 ZONES_FILE = EXTERNAL_DIR / "staten_island_zones.csv"

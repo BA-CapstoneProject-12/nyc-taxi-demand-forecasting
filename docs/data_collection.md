@@ -98,17 +98,18 @@ For each taxi type (yellow, green) and each month (2025-09 to 2026-02), that is 
    | Parameter | Value | Why |
    |---|---|---|
    | `latitude`, `longitude` | zone centroids | weather at each zone |
-   | `start_date`, `end_date` | `2025-09-01`, `2026-02-28` | study period |
+   | `start_date`, `end_date` | `2025-09-01`, `2026-03-01` | study period + 1 day (see point 4) |
    | `hourly` | `apparent_temperature,rain,snowfall,precipitation_probability` | variables from the instructions |
    | `timezone` | `America/New_York` | returns local NYC hours, the same clock as the TLC timestamps |
 
    Example request (one zone):
    ```
-   https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=40.63897&longitude=-74.10231&start_date=2025-09-01&end_date=2026-02-28&hourly=apparent_temperature,rain,snowfall,precipitation_probability&timezone=America/New_York
+   https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=40.63897&longitude=-74.10231&start_date=2025-09-01&end_date=2026-03-01&hourly=apparent_temperature,rain,snowfall,precipitation_probability&timezone=America/New_York
    ```
 3. Turn each zone's response into rows of `LocationID, weather_hour, <4 variables>`. We also keep the grid-cell latitude, longitude and elevation that Open-Meteo actually used.
-4. **Check completeness**: every zone must have exactly one row for each of the **4,344 hours** in the period (181 days × 24), with no missing values. The script stops with an error if not.
-5. Save to `data/processed/weather_hourly_by_zone.csv` (20 × 4,344 = **86,880 rows**).
+4. **Align every value to the hour that starts at its timestamp.** Open-Meteo reports `apparent_temperature` as an instant value at the timestamp, but `rain`, `snowfall` and `precipitation_probability` as totals or probabilities for the **preceding** hour (the 07:00 value covers 06:00–07:00). These three are shifted back one hour, so the 07:00 row holds the temperature at 07:00 and the rain, snow and probability for **07:00–08:00**. To fill the last hour of the period, the request asks for one extra day (up to 1 Mar 2026), which is then trimmed off.
+5. **Check completeness**: every zone must have exactly one row for each of the **4,344 hours** in the period (181 days × 24), with no missing values. The script stops with an error if not.
+6. Save to `data/processed/weather_hourly_by_zone.csv` (20 × 4,344 = **86,880 rows**).
 
 This table covers **every hour**, including hours with no taxi trips. The forecasting stage will need weather for zero-demand hours too, when it builds the Zone × Hour demand table.
 
@@ -118,7 +119,7 @@ For every trip:
 
 1. Take the pickup zone `PULocationID`.
 2. Look up the zone name and centroid latitude/longitude (Step 1). This is the location used for the weather request.
-3. Round the pickup time **down to the hour**: `pickup_hour = floor(pickup_datetime, 1h)`. Open-Meteo hourly values are labelled by the start of the hour. For example, a pickup at 07:42 gets the 07:00 weather row.
+3. Round the pickup time **down to the hour**: `pickup_hour = floor(pickup_datetime, 1h)`. After the alignment in Step 3, a weather row describes the hour that starts at its timestamp. For example, a pickup at 07:42 gets the 07:00 row: the apparent temperature at 07:00 and the rain, snowfall and precipitation probability for 07:00–08:00, the hour the trip started in.
 4. Left-join the weather table on **(`PULocationID`, `pickup_hour`)**.
 5. Add a sequential `trip_id`.
 
@@ -152,7 +153,7 @@ Run `python scripts/profile_dataset.py` to reproduce these numbers.
 - **19 of the 20 zones** have at least one pickup. Great Kills Park (110) has none. The busiest zones are Arrochar/Fort Wadsworth (580), Stapleton (416), South Beach/Dongan Hills (267), Grymes Hill/Clifton (234) and Bloomfield/Emerson Hill (200).
 - **Clear morning peak**: 494 pickups start between 07:00 and 07:59, the busiest hour of the day, compared with roughly 40–120 in most other hours.
 - **Destinations**: Brooklyn 1,304, Staten Island 740, Manhattan 464, Queens 85, Bronx 18, Newark Airport 9, unknown 17.
-- **Weather at pickup**: apparent temperature from −24.9 °C to 32.2 °C. 147 trips started during rain and 62 during snowfall.
+- **Weather at pickup**: apparent temperature from −24.9 °C to 32.2 °C. 129 trips started in an hour with rain and 56 in an hour with snowfall.
 
 | Month | Trips | Mean apparent temp. at pickup (°C) |
 |---|---:|---:|
