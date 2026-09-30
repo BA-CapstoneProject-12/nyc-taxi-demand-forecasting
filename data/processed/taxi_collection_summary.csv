@@ -1,0 +1,13 @@
+taxi_type,month,source_url,file_size_mb,rows_in_file,borough_pickups,outside_period_dropped,rows_kept
+yellow,2025-09,https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2025-09.parquet,72.4,4251015,438,0,438
+yellow,2025-10,https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2025-10.parquet,75.3,4428699,409,0,409
+yellow,2025-11,https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2025-11.parquet,71.1,4181444,392,0,392
+yellow,2025-12,https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2025-12.parquet,73.7,4305006,462,0,462
+yellow,2026-01,https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2026-01.parquet,64.2,3724889,486,0,486
+yellow,2026-02,https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2026-02.parquet,58.7,3399866,429,0,429
+green,2025-09,https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2025-09.parquet,1.2,48893,4,0,4
+green,2025-10,https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2025-10.parquet,1.2,49416,0,0,0
+green,2025-11,https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2025-11.parquet,1.2,46912,4,0,4
+green,2025-12,https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2025-12.parquet,1.2,48236,3,0,3
+green,2026-01,https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2026-01.parquet,1.0,40272,4,0,4
+green,2026-02,https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2026-02.parquet,0.9,37373,6,0,6
