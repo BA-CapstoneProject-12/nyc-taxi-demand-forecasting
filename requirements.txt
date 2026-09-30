@@ -3,3 +3,4 @@ pyarrow>=15.0
 requests>=2.31
 pyshp>=2.3
 pyproj>=3.6
+notebook>=7.0
