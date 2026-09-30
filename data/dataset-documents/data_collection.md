@@ -143,7 +143,7 @@ For every trip, one month (yellow + green together) at a time:
 
 This is the **full dataset** of the collection: one CSV with 23,318,979 rows and 14 columns, about **3.2 GB**. Rows are in month order and sorted by pickup time within each month. The few trips a TLC file carries from the last minutes of the previous month appear at the start of the next month's block.
 
-The file is too large for GitHub (100 MB limit per file), so it is **not committed**. It is shared with the team as a private Kaggle dataset, [NYC Taxi Demand Manhattan Queens on Kaggle](https://www.kaggle.com/datasets/adithyaajay1210/nyc-taxi-demand-manhattan-queens), and anyone can also rebuild it by running the notebook. How to get it and load it: [data/DATA_GUIDE.md](../DATA_GUIDE.md).
+The file is too large for GitHub (100 MB limit per file), so it is **not committed**. It is shared with the team as a private Kaggle dataset, [adithyaajay1210/nyc-taxi-demand-manhattan-queens](https://www.kaggle.com/datasets/adithyaajay1210/nyc-taxi-demand-manhattan-queens), and anyone can also rebuild it by running the notebook. How to get it and load it: [data/DATA_GUIDE.md](../DATA_GUIDE.md).
 
 ## 4. Output files
 
