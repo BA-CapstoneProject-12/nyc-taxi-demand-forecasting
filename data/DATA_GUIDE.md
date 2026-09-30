@@ -1,12 +1,15 @@
 # Data Guide
 
-This guide explains what is in the `data/` folder, how to get the full dataset, and how to load and use it. How the data was collected is described in [docs/data_collection.md](../docs/data_collection.md). Every column is described in [docs/data_dictionary.md](../docs/data_dictionary.md).
+This guide explains what is in the `data/` folder, how to get the full dataset, and how to load and use it. How the data was collected is described in [dataset-documents/data_collection.md](dataset-documents/data_collection.md). Every column is described in [dataset-documents/data_dictionary.md](dataset-documents/data_dictionary.md).
 
 ## 1. Folder layout
 
 ```
 data/
 ├── DATA_GUIDE.md                             this file
+├── dataset-documents/                        documentation of the dataset
+│   ├── data_collection.md                      how the data was collected (sources, APIs, steps)
+│   └── data_dictionary.md                      every field, its purpose and why it was chosen
 ├── raw/                                      everything collected in the data collection stage
 │   ├── NYC-taxi-demand-Manhattan-Queens.csv    full dataset (3.2 GB, NOT in git, on Kaggle)
 │   ├── taxi_zones_manhattan_queens.csv         the 138 taxi zones with latitude/longitude
@@ -120,7 +123,7 @@ These steps are done once by the person who collected the data.
 1. Zip the four files in `data/raw/` (not `tlc_downloads/`) to make the upload much smaller. Kaggle unzips archives automatically.
 2. On kaggle.com: *Create → New Dataset*. Upload the zip, set the title to *NYC Taxi Demand Manhattan Queens*, and keep the visibility **Private**.
 3. On the dataset page, open **Settings → Sharing** and add each teammate by Kaggle username with view access.
-4. Put `data/DATA_GUIDE.md` and `docs/data_dictionary.md` in the dataset description, or link to the GitHub repo.
+4. Put `data/DATA_GUIDE.md` and `data/dataset-documents/data_dictionary.md` in the dataset description, or link to the GitHub repo.
 
 **With the Kaggle command line** (after the API token setup in 3.2 Option B)
 1. Put the four files in an empty folder, for example `kaggle_upload/`.

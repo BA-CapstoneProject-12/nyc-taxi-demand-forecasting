@@ -13,8 +13,8 @@ Scope: **Manhattan + Queens** (138 taxi zones), **yellow + green taxis**, **Sep 
 Full dataset: `data/raw/NYC-taxi-demand-Manhattan-Queens.csv`, with **23,318,979 trips**. Each trip has its pickup/dropoff time, pickup/dropoff zone and the weather at its pickup zone and hour. The file is 3.2 GB, too large for GitHub, so it is shared as a private Kaggle dataset. The notebook below can also rebuild it. The zone list, hourly weather per zone and collection summary are small and are in `data/raw/` in this repo.
 
 - [data/DATA_GUIDE.md](data/DATA_GUIDE.md): what each data file is, and how to get and use the dataset
-- [docs/data_collection.md](docs/data_collection.md): sources, collection steps, output files, dataset summary and known issues
-- [docs/data_dictionary.md](docs/data_dictionary.md): every field, its purpose, and why these fields were chosen
+- [data/dataset-documents/data_collection.md](data/dataset-documents/data_collection.md): sources, collection steps, output files, dataset summary and known issues
+- [data/dataset-documents/data_dictionary.md](data/dataset-documents/data_dictionary.md): every field, its purpose, and why these fields were chosen
 
 ### Reproduce
 
@@ -29,12 +29,10 @@ pip install -r requirements.txt
 
 ```
 data/
-  DATA_GUIDE.md   what each file is and how to get and use the dataset
-  raw/            everything collected: full dataset (on Kaggle), zones, weather, summary
-  processed/      empty, for the next stages of the project
-docs/
-  data_collection.md
-  data_dictionary.md
+  DATA_GUIDE.md        what each file is and how to get and use the dataset
+  dataset-documents/   data_collection.md (collection method), data_dictionary.md (fields)
+  raw/                 everything collected: full dataset (on Kaggle), zones, weather, summary
+  processed/           empty, for the next stages of the project
 scripts/
   data_collection.ipynb   all data collection code: zones, weather API, TLC trips,
                           weather join and dataset profile
