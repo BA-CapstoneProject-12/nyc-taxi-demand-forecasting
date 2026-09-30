@@ -42,6 +42,6 @@ WEATHER_VARIABLES = [
 # Output files
 ZONES_FILE = EXTERNAL_DIR / "staten_island_zones.csv"
 TRIPS_FILE = INTERIM_DIR / "taxi_trips_staten_island.parquet"
-WEATHER_FILE = INTERIM_DIR / "weather_hourly_by_zone.parquet"
+WEATHER_FILE = PROCESSED_DIR / "weather_hourly_by_zone.csv"
 TAXI_SUMMARY_FILE = PROCESSED_DIR / "taxi_collection_summary.csv"
 DATASET_NAME = "staten_island_taxi_weather_2025-09_2026-02"
