@@ -1,4 +1,4 @@
-"""Collect hourly weather for every Staten Island taxi zone from Open-Meteo.
+"""Collect hourly weather for every Manhattan and Queens taxi zone from Open-Meteo.
 
 API docs: https://open-meteo.com/en/docs/historical-forecast-api
 
@@ -13,14 +13,21 @@ holds the apparent temperature at 07:00 and the rain/snow/probability for
 07:00-08:00. One extra day is requested so the last hour of the period can be
 filled.
 
-Output: data/processed/weather_hourly_by_zone.csv
+The free API allows 600 "calls" per minute, and one location for six months
+counts as about 13 calls. Requests are therefore sent in batches of 10 zones
+with a pause between them (138 zones = 14 requests, about 5 minutes).
+
+Output: data/processed/weather_hourly_by_zone.parquet
 """
+import time
+
 import pandas as pd
 
 import config
 from utils import get_with_retry, log, setup_logging
 
 LOCATIONS_PER_REQUEST = 10
+PAUSE_BETWEEN_REQUESTS = 15  # seconds, keeps us under the per-minute limit
 
 
 def fetch_weather(zones):
@@ -82,6 +89,8 @@ def main():
 
     frames = []
     for start in range(0, len(zones), LOCATIONS_PER_REQUEST):
+        if start:
+            time.sleep(PAUSE_BETWEEN_REQUESTS)
         batch = zones.iloc[start:start + LOCATIONS_PER_REQUEST]
         log.info("Requesting weather for zones %s", batch["LocationID"].tolist())
         frames.extend(fetch_weather(batch))
@@ -93,7 +102,7 @@ def main():
     check_weather(weather, zones)
 
     config.PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
-    weather.to_csv(config.WEATHER_FILE, index=False)
+    weather.to_parquet(config.WEATHER_FILE, index=False)
     log.info("Saved %d hourly rows for %d zones to %s",
              len(weather), weather["LocationID"].nunique(), config.WEATHER_FILE)
 

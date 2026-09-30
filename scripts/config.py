@@ -10,7 +10,7 @@ PROCESSED_DIR = DATA_DIR / "processed"
 EXTERNAL_DIR = DATA_DIR / "external"
 
 # Scope
-BOROUGH = "Staten Island"
+BOROUGHS = ["Manhattan", "Queens"]
 TAXI_TYPES = ["yellow", "green"]
 MONTHS = ["2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02"]
 START_DATE = "2025-09-01"  # inclusive
@@ -28,7 +28,6 @@ TIMESTAMP_COLUMNS = {
     "yellow": ("tpep_pickup_datetime", "tpep_dropoff_datetime"),
     "green": ("lpep_pickup_datetime", "lpep_dropoff_datetime"),
 }
-TRIP_COLUMNS = ["pickup_datetime", "dropoff_datetime", "PULocationID", "DOLocationID"]
 
 # Open-Meteo Historical Forecast API (https://open-meteo.com/en/docs/historical-forecast-api)
 WEATHER_URL = "https://historical-forecast-api.open-meteo.com/v1/forecast"
@@ -43,8 +42,8 @@ WEATHER_VARIABLES = [
 PRECEDING_HOUR_VARIABLES = ["rain", "snowfall", "precipitation_probability"]
 
 # Output files
-ZONES_FILE = EXTERNAL_DIR / "staten_island_zones.csv"
-TRIPS_FILE = INTERIM_DIR / "taxi_trips_staten_island.parquet"
-WEATHER_FILE = PROCESSED_DIR / "weather_hourly_by_zone.csv"
+ZONES_FILE = EXTERNAL_DIR / "taxi_zones_manhattan_queens.csv"
+WEATHER_FILE = PROCESSED_DIR / "weather_hourly_by_zone.parquet"
+TRIPS_DIR = INTERIM_DIR / "trips"  # one file per taxi type and month
+TRIPS_WITH_WEATHER_DIR = INTERIM_DIR / "trips_with_weather"  # same, with weather added
 TAXI_SUMMARY_FILE = PROCESSED_DIR / "taxi_collection_summary.csv"
-DATASET_NAME = "staten_island_taxi_weather_2025-09_2026-02"

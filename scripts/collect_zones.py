@@ -1,11 +1,11 @@
-"""Get the Staten Island taxi zones and the latitude/longitude of each zone.
+"""Get the Manhattan and Queens taxi zones and the latitude/longitude of each zone.
 
 The TLC zone lookup gives the zone names and boroughs. The TLC zone shapefile
 gives the zone boundaries in NY State Plane coordinates (EPSG:2263, feet). We
 take the centroid of each zone polygon and convert it to WGS84 lat/lon, which
 is what the Open-Meteo API expects.
 
-Output: data/external/staten_island_zones.csv
+Output: data/external/taxi_zones_manhattan_queens.csv
 """
 import zipfile
 
@@ -22,10 +22,11 @@ def load_zone_lookup():
     return pd.read_csv(path)
 
 
-def borough_zones(lookup, borough=config.BOROUGH):
-    zones = lookup[lookup["Borough"] == borough].copy()
-    if zones.empty:
-        raise ValueError(f"No zones found for borough {borough!r}")
+def borough_zones(lookup, boroughs=config.BOROUGHS):
+    zones = lookup[lookup["Borough"].isin(boroughs)].copy()
+    missing = set(boroughs) - set(zones["Borough"])
+    if missing:
+        raise ValueError(f"No zones found for boroughs {sorted(missing)}")
     return zones.sort_values("LocationID").reset_index(drop=True)
 
 
@@ -94,7 +95,8 @@ def main():
 
     config.EXTERNAL_DIR.mkdir(parents=True, exist_ok=True)
     zones.to_csv(config.ZONES_FILE, index=False)
-    log.info("%d %s zones saved to %s", len(zones), config.BOROUGH, config.ZONES_FILE)
+    counts = zones["Borough"].value_counts().to_dict()
+    log.info("%d zones %s saved to %s", len(zones), counts, config.ZONES_FILE)
 
 
 if __name__ == "__main__":
