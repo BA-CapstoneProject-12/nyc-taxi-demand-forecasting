@@ -1,0 +1,15 @@
+# Raw downloads are large - rebuild them with scripts/run_pipeline.py
+data/raw/
+data/interim/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
