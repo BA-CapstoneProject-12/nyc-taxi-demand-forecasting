@@ -45,6 +45,21 @@ def fetch_weather(zones):
     return frames
 
 
+def check_weather(weather, zones):
+    """Every zone should have one row per hour of the study period, with no gaps."""
+    expected_hours = pd.date_range(config.START_DATE, f"{config.END_DATE} 23:00", freq="h")
+    per_zone = weather.groupby("LocationID")["weather_hour"].agg(["count", "nunique"])
+    if set(per_zone.index) != set(zones["LocationID"]):
+        raise ValueError("Weather is missing for some zones")
+    if (per_zone["count"] != len(expected_hours)).any() or (per_zone["nunique"] != len(expected_hours)).any():
+        raise ValueError(f"Expected {len(expected_hours)} unique hours per zone:\n{per_zone}")
+
+    nulls = weather[config.WEATHER_VARIABLES].isna().sum()
+    if nulls.any():
+        log.warning("Missing weather values:\n%s", nulls[nulls > 0].to_string())
+    log.info("Weather check passed: %d zones x %d hours", len(per_zone), len(expected_hours))
+
+
 def main():
     setup_logging()
     zones = pd.read_csv(config.ZONES_FILE)
@@ -58,6 +73,7 @@ def main():
     weather = pd.concat(frames, ignore_index=True)
     weather = weather.rename(columns={"time": "weather_hour"})
     weather["weather_hour"] = pd.to_datetime(weather["weather_hour"])
+    check_weather(weather, zones)
 
     config.PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
     weather.to_csv(config.WEATHER_FILE, index=False)
