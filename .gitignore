@@ -1,6 +1,7 @@
-# Raw downloads are large - rebuild them with scripts/run_pipeline.py
-data/raw/
-data/interim/
+# Large data files - rebuilt by scripts/data_collection.ipynb (see data/DATA_GUIDE.md)
+data/raw/tlc_downloads/
+data/raw/NYC-taxi-demand-Manhattan-Queens.csv
+data/raw/*.part
 
 # Python
 __pycache__/
