@@ -10,32 +10,28 @@ Scope: **Manhattan + Queens** (138 taxi zones), **yellow + green taxis**, **Sep 
 | [NYC TLC Trip Record Data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page) | Trip pickup/dropoff times and zones, taxi zone lookup and boundaries |
 | [Open-Meteo Historical Forecast API](https://open-meteo.com/en/docs/historical-forecast-api) | Hourly apparent temperature, rain, snowfall, precipitation probability per zone |
 
-Final dataset: **23,318,979 trips**, each with its pickup/dropoff time, pickup/dropoff zone and the weather at its pickup zone and hour. It is saved as 12 monthly Parquet files in `data/interim/trips_with_weather/` (about 345 MB). The files are not in git because of their size, and the notebook below rebuilds them. The hourly weather for every zone is in [`data/processed/weather_hourly_by_zone.parquet`](data/processed/weather_hourly_by_zone.parquet).
+Full dataset: `data/raw/NYC-taxi-demand-Manhattan-Queens.csv`, with **23,318,979 trips**. Each trip has its pickup/dropoff time, pickup/dropoff zone and the weather at its pickup zone and hour. The file is 3.2 GB, too large for GitHub, so it is shared as a private Kaggle dataset. The notebook below can also rebuild it. The zone list, hourly weather per zone and collection summary are small and are in `data/raw/` in this repo.
 
+- [data/DATA_GUIDE.md](data/DATA_GUIDE.md): what each data file is, and how to get and use the dataset
 - [docs/data_collection.md](docs/data_collection.md): sources, collection steps, output files, dataset summary and known issues
 - [docs/data_dictionary.md](docs/data_dictionary.md): every field, its purpose, and why these fields were chosen
 
 ### Reproduce
 
-All the collection code is in [`scripts/data_collection.ipynb`](scripts/data_collection.ipynb), with an explanation of each step. Install the packages, then run all cells. The first run downloads ~425 MB of TLC files and takes about 10 minutes.
+All the collection code is in [`scripts/data_collection.ipynb`](scripts/data_collection.ipynb), with an explanation of each step. Install the packages, then run all cells. The first run downloads ~425 MB of TLC files and takes about 15 minutes.
 
 ```bash
 pip install -r requirements.txt
 ```
 
-```python
-import pandas as pd
-nov = pd.read_parquet("data/interim/trips_with_weather/yellow_2025-11.parquet")  # one month
-```
 
 ## Project structure
 
 ```
 data/
-  external/    taxi_zones_manhattan_queens.csv (zones + centroid lat/lon)
-  processed/   hourly weather per zone, collection summary
-  raw/         downloaded TLC files (not in git)
-  interim/     trips, and trips with weather, one file per month (not in git)
+  DATA_GUIDE.md   what each file is and how to get and use the dataset
+  raw/            everything collected: full dataset (on Kaggle), zones, weather, summary
+  processed/      empty, for the next stages of the project
 docs/
   data_collection.md
   data_dictionary.md

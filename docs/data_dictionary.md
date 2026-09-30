@@ -4,7 +4,7 @@ This file describes the datasets produced by the collection pipeline and every f
 
 ## 1. Main dataset: trips with weather
 
-**Files:** `data/interim/trips_with_weather/{taxi_type}_{month}.parquet` (12 files: yellow and green, 2025-09 to 2026-02)
+**File:** `data/raw/NYC-taxi-demand-Manhattan-Queens.csv`
 
 | Property | Value |
 |---|---|
@@ -16,19 +16,20 @@ This file describes the datasets produced by the collection pipeline and every f
 | Sources | NYC TLC Trip Record Data (yellow + green), TLC Taxi Zones, Open-Meteo Historical Forecast API |
 | Join | Weather is matched to each trip on **pickup zone + pickup hour** |
 | Missing values | None |
-| Size | about 345 MB (Parquet). Not in git because of its size. Rebuilt by running `scripts/data_collection.ipynb` |
+| Size | about 3.2 GB (CSV). Not in git because of its size. Shared as a private Kaggle dataset, or rebuilt by running `scripts/data_collection.ipynb` (see `data/DATA_GUIDE.md`) |
+| Row order | By month, sorted by pickup time within each month |
 
 ### Field descriptions
 
 | # | Field | Type | Unit / format | Source | Description | Purpose in the project |
 |---|---|---|---|---|---|---|
-| 1 | `taxi_type` | category | `yellow` / `green` | from the file name | Which TLC fleet the trip came from | Lets yellow and green trips share one schema and be analysed together or separately |
+| 1 | `taxi_type` | text | `yellow` / `green` | from the source file name | Which TLC fleet the trip came from | Lets yellow and green trips share one schema and be analysed together or separately |
 | 2 | `pickup_datetime` | datetime | `YYYY-MM-DD HH:MM:SS`, local NYC time | TLC `tpep_pickup_datetime` (yellow) / `lpep_pickup_datetime` (green) | When the meter was engaged, i.e. when the passenger was picked up | **When** demand happened. The basis for hourly demand and time features (hour, weekday, month, weekend), and used to match weather |
 | 3 | `dropoff_datetime` | datetime | `YYYY-MM-DD HH:MM:SS`, local NYC time | TLC `tpep_dropoff_datetime` / `lpep_dropoff_datetime` | When the meter was disengaged | Gives trip duration, which is needed to spot bad records (dropoff before pickup, trips of many hours), and shows when the cab becomes free again |
 | 4 | `PULocationID` | integer | TLC zone ID (1–265) | TLC | Zone where the trip started. Always one of the 138 Manhattan/Queens zones | **Where** demand happened. Used for the borough filter and the weather lookup, and it is the spatial unit of the forecast |
 | 5 | `DOLocationID` | integer | TLC zone ID (1–265) | TLC | Zone where the trip ended. Can be in any borough | Where riders go and where cabs end up after a trip, which matters for fleet positioning |
-| 6 | `pickup_borough` | category | `Manhattan` / `Queens` | TLC zone lookup | Borough of the pickup zone | Group and compare the two boroughs |
-| 7 | `pickup_zone` | category | zone name | TLC zone lookup | Name of the pickup zone, e.g. *Midtown Center*, *JFK Airport* | Readable label for EDA, charts and the dashboard |
+| 6 | `pickup_borough` | text | `Manhattan` / `Queens` | TLC zone lookup | Borough of the pickup zone | Group and compare the two boroughs |
+| 7 | `pickup_zone` | text | zone name | TLC zone lookup | Name of the pickup zone, e.g. *Midtown Center*, *JFK Airport* | Readable label for EDA, charts and the dashboard |
 | 8 | `pickup_zone_latitude` | float | decimal degrees (WGS84) | computed from the TLC zone shapefile | Latitude of the pickup zone's centroid | The point sent to Open-Meteo for this zone's weather. Also usable for maps |
 | 9 | `pickup_zone_longitude` | float | decimal degrees (WGS84) | computed from the TLC zone shapefile | Longitude of the pickup zone's centroid | Same as above |
 | 10 | `pickup_hour` | datetime | `YYYY-MM-DD HH:00:00`, local NYC time | `pickup_datetime` rounded down to the hour | The clock hour the trip started in | **Join key with the weather table**, and the time key for hourly analysis |
@@ -47,7 +48,7 @@ Notes:
 
 ## 2. Supporting files
 
-### `data/processed/weather_hourly_by_zone.parquet`
+### `data/raw/weather_hourly_by_zone.csv`
 
 Hourly weather for every zone and every hour: 599,472 rows = 138 zones × 4,344 hours.
 
@@ -63,7 +64,7 @@ Hourly weather for every zone and every hour: 599,472 rows = 138 zones × 4,344 
 | `grid_longitude` | float | degrees | Longitude of the grid cell actually used |
 | `grid_elevation_m` | float | metres | Elevation of the grid cell used by the API |
 
-### `data/external/taxi_zones_manhattan_queens.csv`
+### `data/raw/taxi_zones_manhattan_queens.csv`
 
 | Field | Type | Description |
 |---|---|---|
@@ -74,7 +75,7 @@ Hourly weather for every zone and every hour: 599,472 rows = 138 zones × 4,344 
 | `latitude` | float | Zone centroid latitude (WGS84) |
 | `longitude` | float | Zone centroid longitude (WGS84) |
 
-### `data/processed/taxi_collection_summary.csv`
+### `data/raw/taxi_collection_summary.csv`
 
 One row per downloaded TLC file, as an audit trail.
 
