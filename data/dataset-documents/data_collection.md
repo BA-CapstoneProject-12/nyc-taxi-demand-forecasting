@@ -20,10 +20,10 @@ A trip belongs to the study when it is **picked up** in a Manhattan or Queens zo
 
 | # | Data | Provider | Access method | Endpoint |
 |---|---|---|---|---|
-| 1 | Yellow taxi trip records | NYC Taxi & Limousine Commission (TLC) | HTTP download of the official monthly Parquet files | `https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_YYYY-MM.parquet` |
+| 1 | Yellow taxi trip records | NYC Taxi & Limousine Commission (TLC) | Programmatic HTTP requests to the official monthly Parquet files | `https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_YYYY-MM.parquet` |
 | 2 | Green taxi trip records | NYC TLC | Same as above | `https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_YYYY-MM.parquet` |
-| 3 | Taxi zone lookup (ID → zone name → borough) | NYC TLC | HTTP download (CSV) | `https://d37ci6vzurychx.cloudfront.net/misc/taxi_zone_lookup.csv` |
-| 4 | Taxi zone boundaries | NYC TLC | HTTP download (zipped shapefile) | `https://d37ci6vzurychx.cloudfront.net/misc/taxi_zones.zip` |
+| 3 | Taxi zone lookup (ID → zone name → borough) | NYC TLC | Programmatic HTTP request (CSV) | `https://d37ci6vzurychx.cloudfront.net/misc/taxi_zone_lookup.csv` |
+| 4 | Taxi zone boundaries | NYC TLC | Programmatic HTTP request (zipped shapefile) | `https://d37ci6vzurychx.cloudfront.net/misc/taxi_zones.zip` |
 | 5 | Hourly weather | Open-Meteo | REST API (JSON) | `https://historical-forecast-api.open-meteo.com/v1/forecast` |
 
 - TLC trip record page: <https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page>
@@ -31,9 +31,21 @@ A trip belongs to the study when it is **picked up** in a Manhattan or Queens zo
 
 Both sources are free and need no API key.
 
+### How the data was accessed
+
+Taxi trip data was collected programmatically through HTTP requests to the NYC TLC's official trip-data endpoint. The NYC Open Data API was not used because it does not yet publish yellow taxi data for 2025 or any taxi data for 2026. Weather data was collected through the Open-Meteo Historical Forecast REST API.
+
+All requests are made from Python code in the collection notebook, with no manual downloads. The TLC endpoint serves one complete file per taxi type per month, at the same URLs that the TLC Trip Record Data page links to. The Open-Meteo API answers queries: we send the coordinates, dates, variables and timezone, and it returns JSON.
+
 ### Why these sources
 
-- **TLC monthly Parquet files.** These are the official trip records linked from the TLC page. Each month has a fixed URL, so the download can be scripted and repeated, and every team member gets the same input. The same data is on NYC Open Data (Socrata API), but that API returns rows in pages of up to 50,000. Pulling the 23 million trips we need would take hundreds of paged requests, with rate limits and a risk of gaps. Downloading each monthly file once and filtering locally is much faster and gives a fixed version of the data.
+- **TLC monthly Parquet files.** These are the official trip records linked from the TLC Trip Record Data page. Each month has a fixed URL, so the collection can be scripted and repeated, and every team member gets the same input. The endpoint returns whole monthly files, not query results, so the notebook fetches each file once and does the filtering (borough, date, columns) itself.
+- **Why not the NYC Open Data (Socrata) API.** NYC Open Data publishes TLC trip data as one dataset per year and taxi type, with a query API. When we checked its catalog on 30 Sep 2026, it could not cover our study period:
+  - the newest yellow dataset is *2024 Yellow Taxi Trip Data*. There is no 2025 yellow dataset yet.
+  - *2025 Green Taxi Trip Data* exists, but its trips end around 1 Jan 2026.
+  - there are no 2026 taxi trip datasets at all.
+
+  The API would also return rows in pages of up to 50,000. Pulling our 23 million trips would take hundreds of paged requests, with rate limits and a risk of gaps.
 - **Open-Meteo Historical Forecast API.** It gives hourly weather for any latitude/longitude, which lets us get weather **per taxi zone** instead of one weather station for the whole city. It is built from archived runs of high-resolution weather models, and it has `precipitation_probability`. The Historical Weather (reanalysis archive) API does not have that variable.
 
 ## 3. Collection steps
