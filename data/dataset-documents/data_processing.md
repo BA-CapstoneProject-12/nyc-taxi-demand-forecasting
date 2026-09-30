@@ -175,7 +175,7 @@ The notebook writes directly to the final outputs with no intermediate files sav
 
 > Exact row counts depend on the cleaning results and are printed by the notebook when it runs. Feature file rows = 599,472 − 23,184 warm-up rows, split by borough.
 
-**Kaggle.** The three feature files and `cleaning_report.md` will be uploaded to the same private Kaggle dataset used for the raw data: [adithyaajay1210/nyc-taxi-demand-manhattan-queens](https://www.kaggle.com/datasets/adithyaajay1210/nyc-taxi-demand-manhattan-queens). Ask the dataset owner to add your Kaggle username for access. How to download and use the dataset: [data/DATA_GUIDE.md](../DATA_GUIDE.md).
+**Kaggle.** The three feature files and `cleaning_report.md` will be uploaded to the same private Kaggle dataset used for the raw data: [adithyaajay1210/nyc-taxi-demand-manhattan-queens](https://www.kaggle.com/datasets/adithyaajay1210/nyc-taxi-demand-manhattan-queens). How to download and use the dataset: [data/DATA_GUIDE.md](../DATA_GUIDE.md).
 
 **Column list for the three feature files (`features*.csv`):**
 
