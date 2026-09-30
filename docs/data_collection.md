@@ -1,21 +1,20 @@
 # Data Collection
 
-This document describes how the raw data for the project was collected: which sources were used, how each API was called, how the taxi trips were combined with weather, and what the final dataset looks like. Field-level descriptions and the reasons for choosing each field are in [data_dictionary.md](data_dictionary.md).
+This document describes how the data for the project was collected: which sources were used, how each API was called, and how every taxi trip was matched with the weather at its pickup zone and hour. Field-level descriptions and the reasons for choosing each field are in [data_dictionary.md](data_dictionary.md).
 
 ## 1. Scope
 
-The scope below was given in the project instructions.
-
 | Item | Value |
 |---|---|
-| Area | **Staten Island** borough only (20 TLC taxi zones) |
+| Area | **Manhattan** and **Queens** (69 + 69 = 138 TLC taxi zones) |
 | Taxi types | **Yellow** and **Green** taxis |
-| Period | **1 Sep 2025 00:00 to 28 Feb 2026 23:59** (6 months, 181 days), local NYC time |
+| Period | **1 Sep 2025 00:00 to 28 Feb 2026 23:59** (6 months, 181 days, 4,344 hours), local NYC time |
 | Taxi fields | Pickup time, dropoff time, `PULocationID`, `DOLocationID` |
 | Weather fields | Hourly apparent temperature, rain, snowfall, precipitation probability |
 | Weather location | One point per taxi zone (the zone's centroid latitude/longitude) |
+| Final output | **One row per trip**: the four taxi fields plus the weather at the trip's pickup zone and hour |
 
-A trip counts as Staten Island demand when it is **picked up** in a Staten Island zone (`PULocationID` in the 20 Staten Island zones). The drop-off can be anywhere. We filter on the pickup because the project forecasts where passengers need a cab, and the weather joined to a trip is the weather the passenger faced when they got in.
+A trip belongs to the study when it is **picked up** in a Manhattan or Queens zone (`PULocationID` in the 138 zones). The drop-off can be anywhere. We filter on the pickup because the project forecasts where passengers need a cab, and the weather joined to a trip is the weather the passenger faced when they got in.
 
 ## 2. Data sources
 
@@ -34,12 +33,12 @@ Both sources are free and need no API key.
 
 ### Why these sources
 
-- **TLC monthly Parquet files.** These are the official trip records linked from the TLC page. Each month has a fixed URL, so the download can be scripted and repeated, and every team member gets the same input. The same data is on NYC Open Data (Socrata API), but that API returns rows in pages, so pulling a whole month means hundreds of requests. We need about 25 million yellow rows to find the 2,616 that start in Staten Island, so downloading each file once and filtering locally is much faster and gives a fixed version of the data.
-- **Open-Meteo Historical Forecast API.** It gives hourly weather for any latitude/longitude, which lets us get weather **per taxi zone** instead of using one weather station for the whole city. It is built from archived runs of high-resolution weather models, and it has `precipitation_probability`. The Historical Weather (reanalysis archive) API does not have that variable.
+- **TLC monthly Parquet files.** These are the official trip records linked from the TLC page. Each month has a fixed URL, so the download can be scripted and repeated, and every team member gets the same input. The same data is on NYC Open Data (Socrata API), but that API returns rows in pages of up to 50,000. Pulling the 23 million trips we need would take hundreds of paged requests, with rate limits and a risk of gaps. Downloading each monthly file once and filtering locally is much faster and gives a fixed version of the data.
+- **Open-Meteo Historical Forecast API.** It gives hourly weather for any latitude/longitude, which lets us get weather **per taxi zone** instead of one weather station for the whole city. It is built from archived runs of high-resolution weather models, and it has `precipitation_probability`. The Historical Weather (reanalysis archive) API does not have that variable.
 
 ## 3. Collection steps
 
-The whole process is scripted. One command runs it from start to finish:
+The whole process is scripted. One command runs it from start to finish (about 10 minutes, most of it downloads and API pauses):
 
 ```bash
 pip install -r requirements.txt
@@ -48,142 +47,156 @@ python scripts/run_pipeline.py
 
 ```
  TLC zone lookup ─┐
-                  ├─► Step 1: Staten Island zones + centroid lat/lon ─┬─────────────────────┐
- TLC zone shapes ─┘         (data/external/staten_island_zones.csv)   │                     │
-                                                                      ▼                     ▼
- TLC monthly Parquet ─► Step 2: trips picked up in Staten Island   Step 3: Open-Meteo hourly weather
- (yellow + green,          (data/interim/taxi_trips_...parquet)       for every zone centroid
-  Sep 2025 – Feb 2026)                    │                         (data/processed/weather_hourly_by_zone.csv)
-                                          │                                  │
-                                          └──────────► Step 4: join on (pickup zone, pickup hour) ◄──┘
-                                                       (data/processed/staten_island_taxi_weather_2025-09_2026-02.csv)
+                  ├─► Step 1: 138 Manhattan + Queens zones with centroid lat/lon
+ TLC zone shapes ─┘            (data/external/taxi_zones_manhattan_queens.csv)
+                                  │                                  │
+                                  ▼                                  ▼
+                   Step 2: Open-Meteo hourly weather      Step 3: TLC monthly files (yellow + green,
+                   for every zone centroid                Sep 2025 – Feb 2026) → trips picked up
+                   (weather_hourly_by_zone.parquet)       in these zones (data/interim/trips/)
+                                  │                                  │
+                                  └──────────────┬───────────────────┘
+                                                 ▼
+                              Step 4: every trip + the weather at its pickup zone and hour
+                              (data/interim/trips_with_weather/)  ◄── FINAL DATASET
 ```
 
-### Step 1: Staten Island zones and their coordinates (`scripts/collect_zones.py`)
+### Step 1: Zones and their coordinates (`scripts/collect_zones.py`)
 
-1. Download `taxi_zone_lookup.csv` (265 zones) and keep the rows where `Borough == "Staten Island"`. This gives **20 zones**.
+1. Download `taxi_zone_lookup.csv` (265 zones) and keep the rows where `Borough` is `Manhattan` or `Queens`. This gives **138 zones** (69 each).
 2. Download `taxi_zones.zip`, the TLC zone boundary shapefile. The coordinates are in the NY State Plane Long Island system (**EPSG:2263**, US feet).
-3. For each zone polygon, compute the **area-weighted centroid** in State Plane coordinates. Holes and multi-part zones are handled by summing the signed areas of all rings.
+3. For each zone polygon, compute the **area-weighted centroid** in State Plane coordinates. Holes and multi-part zones (for example islands) are handled by summing the signed areas of all rings.
 4. Convert the centroid to **WGS84 latitude/longitude** (EPSG:4326) with `pyproj`, since that is what Open-Meteo expects.
-5. Save `data/external/staten_island_zones.csv` with `LocationID, Borough, Zone, service_zone, latitude, longitude`.
+5. Save `data/external/taxi_zones_manhattan_queens.csv` with `LocationID, Borough, Zone, service_zone, latitude, longitude`.
 
-The script stops with an error if any Staten Island zone has no shape.
+The script stops with an error if any zone has no shape. Spot checks: Central Park (43) → 40.7825, −73.9656; JFK Airport (132) → 40.6470, −73.7865; LaGuardia Airport (138) → 40.7744, −73.8736.
 
-### Step 2: Taxi trips (`scripts/collect_taxi.py`)
+### Step 2: Hourly weather per zone (`scripts/collect_weather.py`)
 
-For each taxi type (yellow, green) and each month (2025-09 to 2026-02), that is 12 files:
-
-1. **Download** the monthly Parquet file into `data/raw/trips/`. Downloads are streamed to disk and retried on network errors or HTTP 429/5xx. A file that is already on disk is not downloaded again.
-2. **Read only the four needed columns**, pushing the filter `PULocationID IN (20 Staten Island zone IDs)` into the Parquet reader, so the other 99.99% of rows never reach memory as a DataFrame.
-3. **Standardise the column names.** Yellow files use `tpep_pickup_datetime` / `tpep_dropoff_datetime` and green files use `lpep_…`. Both are renamed to `pickup_datetime` / `dropoff_datetime`, and a `taxi_type` column is added so the two types can be stacked in one table.
-4. **Keep only trips whose pickup falls in the study period.** TLC files sometimes contain a few trips from other months (meter clock errors). We would have no weather for those. In this collection no trip was dropped by this rule.
-5. Stack all 12 months, sort by pickup time, and save to `data/interim/taxi_trips_staten_island.parquet`.
-6. Write a per-file audit table to `data/processed/taxi_collection_summary.csv` (URL, file size, rows in file, Staten Island pickups, rows dropped, rows kept).
-
-| Month | Yellow rows in file | Yellow SI pickups | Green rows in file | Green SI pickups |
-|---|---:|---:|---:|---:|
-| 2025-09 | 4,251,015 | 438 | 48,893 | 4 |
-| 2025-10 | 4,428,699 | 409 | 49,416 | 0 |
-| 2025-11 | 4,181,444 | 392 | 46,912 | 4 |
-| 2025-12 | 4,305,006 | 462 | 48,236 | 3 |
-| 2026-01 | 3,724,889 | 486 | 40,272 | 4 |
-| 2026-02 | 3,399,866 | 429 | 37,373 | 6 |
-| **Total** | **24,290,919** | **2,616** | **271,102** | **21** |
-
-### Step 3: Hourly weather per zone (`scripts/collect_weather.py`)
-
-1. Read the 20 zone centroids from Step 1.
-2. Call the Open-Meteo Historical Forecast API. The API accepts several comma-separated coordinates in one request, so the 20 zones are sent in **2 requests of 10 zones each**. Parameters:
+1. Read the 138 zone centroids from Step 1.
+2. Call the Open-Meteo Historical Forecast API. The API accepts several comma-separated coordinates in one request, so the zones are sent in **14 requests of up to 10 zones**. Parameters:
 
    | Parameter | Value | Why |
    |---|---|---|
    | `latitude`, `longitude` | zone centroids | weather at each zone |
    | `start_date`, `end_date` | `2025-09-01`, `2026-03-01` | study period + 1 day (see point 4) |
-   | `hourly` | `apparent_temperature,rain,snowfall,precipitation_probability` | variables from the instructions |
+   | `hourly` | `apparent_temperature,rain,snowfall,precipitation_probability` | the four required variables |
    | `timezone` | `America/New_York` | returns local NYC hours, the same clock as the TLC timestamps |
 
-   Example request (one zone):
+   Example request (one zone, Midtown Center):
    ```
-   https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=40.63897&longitude=-74.10231&start_date=2025-09-01&end_date=2026-03-01&hourly=apparent_temperature,rain,snowfall,precipitation_probability&timezone=America/New_York
+   https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=40.75803&longitude=-73.9777&start_date=2025-09-01&end_date=2026-03-01&hourly=apparent_temperature,rain,snowfall,precipitation_probability&timezone=America/New_York
    ```
+   **Rate limits.** The free API allows 600 "calls" per minute. Open-Meteo counts one location over six months as about 13 calls, so a 10-zone request is about 130 calls. The script waits 15 seconds between requests. If it still gets HTTP 429 (limit reached), it waits a full minute and retries. Network errors are retried as well.
 3. Turn each zone's response into rows of `LocationID, weather_hour, <4 variables>`. We also keep the grid-cell latitude, longitude and elevation that Open-Meteo actually used.
 4. **Align every value to the hour that starts at its timestamp.** Open-Meteo reports `apparent_temperature` as an instant value at the timestamp, but `rain`, `snowfall` and `precipitation_probability` as totals or probabilities for the **preceding** hour (the 07:00 value covers 06:00–07:00). These three are shifted back one hour, so the 07:00 row holds the temperature at 07:00 and the rain, snow and probability for **07:00–08:00**. To fill the last hour of the period, the request asks for one extra day (up to 1 Mar 2026), which is then trimmed off.
-5. **Check completeness**: every zone must have exactly one row for each of the **4,344 hours** in the period (181 days × 24), with no missing values. The script stops with an error if not.
-6. Save to `data/processed/weather_hourly_by_zone.csv` (20 × 4,344 = **86,880 rows**).
+5. **Check completeness**: every zone must have exactly one row for each of the **4,344 hours** in the period. The script stops with an error if not. No values were missing.
+6. Save to `data/processed/weather_hourly_by_zone.parquet` (138 × 4,344 = **599,472 rows**).
 
-This table covers **every hour**, including hours with no taxi trips. The forecasting stage will need weather for zero-demand hours too, when it builds the Zone × Hour demand table.
+### Step 3: Taxi trips (`scripts/collect_taxi.py`)
 
-### Step 4: Combine trips and weather (`scripts/build_dataset.py`)
+For each taxi type (yellow, green) and each month (2025-09 to 2026-02), that is 12 files, one file at a time to keep memory low:
 
-For every trip:
+1. **Download** the monthly Parquet file into `data/raw/trips/`. Downloads are streamed to disk and retried on errors. A file that is already on disk is not downloaded again.
+2. **Read only the four needed columns**, pushing the filter `PULocationID IN (138 Manhattan/Queens zone IDs)` into the Parquet reader.
+3. **Standardise the column names.** Yellow files use `tpep_pickup_datetime` / `tpep_dropoff_datetime` and green files use `lpep_…`. Both are renamed to `pickup_datetime` / `dropoff_datetime`, and a `taxi_type` column is added so the two fleets can be combined.
+4. **Keep only trips whose pickup falls in the study period.** TLC files contain a few trips with meter clock errors (dates from other months or years). We have no weather for those. **33 trips** were dropped this way.
+5. Save the trips to `data/interim/trips/{taxi_type}_{month}.parquet`.
+6. Write a per-file audit table to `data/processed/taxi_collection_summary.csv`: URL, file size, rows in the file, Manhattan/Queens pickups, rows dropped, rows kept, and the data-quality counts in section 6.
+
+| Month | Yellow rows in file | Yellow kept | Green rows in file | Green kept |
+|---|---:|---:|---:|---:|
+| 2025-09 | 4,251,015 | 4,048,166 | 48,893 | 40,059 |
+| 2025-10 | 4,428,699 | 4,234,338 | 49,416 | 40,573 |
+| 2025-11 | 4,181,444 | 3,982,593 | 46,912 | 38,373 |
+| 2025-12 | 4,305,006 | 4,096,636 | 48,236 | 39,806 |
+| 2026-01 | 3,724,889 | 3,525,433 | 40,272 | 32,792 |
+| 2026-02 | 3,399,866 | 3,209,710 | 37,373 | 30,500 |
+| **Total** | **24,290,919** | **23,096,876** | **271,102** | **222,103** |
+
+"Kept" is counted by the file a trip came from. A file can hold a few trips from the last minutes of the previous month, so monthly totals by pickup date (section 5) differ very slightly.
+
+In total **23,318,979 of the 24,562,021 trips (94.9%)** in the 12 files were picked up in Manhattan or Queens. The rest started in Brooklyn, the Bronx, Staten Island, Newark Airport or an unknown zone.
+
+### Step 4: Add weather to every trip (`scripts/build_dataset.py`)
+
+For every trip, one monthly file at a time:
 
 1. Take the pickup zone `PULocationID`.
-2. Look up the zone name and centroid latitude/longitude (Step 1). This is the location used for the weather request.
-3. Round the pickup time **down to the hour**: `pickup_hour = floor(pickup_datetime, 1h)`. After the alignment in Step 3, a weather row describes the hour that starts at its timestamp. For example, a pickup at 07:42 gets the 07:00 row: the apparent temperature at 07:00 and the rain, snowfall and precipitation probability for 07:00–08:00, the hour the trip started in.
+2. Look up the zone's borough, name and centroid latitude/longitude (Step 1). This is the location used for the weather request.
+3. Round the pickup time **down to the hour**: `pickup_hour = floor(pickup_datetime, 1h)`. For example, a pickup at 07:42 gets the 07:00 weather row: the apparent temperature at 07:00 and the rain, snowfall and precipitation probability for 07:00–08:00.
 4. Left-join the weather table on **(`PULocationID`, `pickup_hour`)**.
-5. Add a sequential `trip_id`.
+5. Check that the row count did not change (each join is validated as many-to-one) and that every trip has weather. **All 23,318,979 trips got weather.**
+6. Save to `data/interim/trips_with_weather/{taxi_type}_{month}.parquet`.
 
-Checks run before saving:
-- The row count is unchanged by the joins (each join is validated as many-to-one, so no trip can be duplicated).
-- Every trip has a zone name and all four weather values. **0 trips are missing weather.**
+This is the **final dataset** of the collection: 23,318,979 rows in 12 files (one per taxi type and month), about 345 MB. It is too large for GitHub, so it is **not committed**. Anyone can rebuild it with `python scripts/run_pipeline.py`. To load it:
 
-The result is saved as CSV and Parquet:
-`data/processed/staten_island_taxi_weather_2025-09_2026-02.csv` / `.parquet`.
+```python
+import pandas as pd
+trips = pd.read_parquet("data/interim/trips_with_weather/")  # all 12 files, needs several GB of RAM
+nov = pd.read_parquet("data/interim/trips_with_weather/yellow_2025-11.parquet")  # one month
+```
 
 ## 4. Output files
 
 | File | In git | Rows | Description |
 |---|---|---:|---|
-| `data/processed/staten_island_taxi_weather_2025-09_2026-02.csv` (+ `.parquet`) | yes | 2,637 | **Final dataset**: one row per trip with the weather at pickup |
-| `data/processed/weather_hourly_by_zone.csv` | yes | 86,880 | Hourly weather for every Staten Island zone and every hour |
+| `data/interim/trips_with_weather/*.parquet` | no | 23,318,979 | **Final dataset**: every trip with the weather at its pickup zone and hour (12 files, ~345 MB) |
+| `data/processed/weather_hourly_by_zone.parquet` | yes | 599,472 | Hourly weather for every zone and hour (138 × 4,344), with the grid cell Open-Meteo used |
 | `data/processed/taxi_collection_summary.csv` | yes | 12 | Audit of each downloaded TLC file |
-| `data/external/staten_island_zones.csv` | yes | 20 | Staten Island zones with centroid latitude/longitude |
-| `data/interim/taxi_trips_staten_island.parquet` | no | 2,637 | Filtered trips before the weather join |
-| `data/raw/` | no | n/a | Downloaded TLC files (about 430 MB), rebuilt by the pipeline |
+| `data/external/taxi_zones_manhattan_queens.csv` | yes | 138 | Zones with centroid latitude/longitude |
+| `data/interim/trips/*.parquet` | no | 23,318,979 | Filtered trips before the weather join (12 files, ~247 MB) |
+| `data/raw/` | no | n/a | Downloaded TLC files (~425 MB) |
 
-`data/raw/` and `data/interim/` are in `.gitignore`. Run `python scripts/run_pipeline.py` to rebuild them.
+`data/raw/` and `data/interim/` are in `.gitignore` because of their size. Run `python scripts/run_pipeline.py` to rebuild them.
+
+The weather table is also kept on its own. It has weather for **every** zone and hour, including hours with no trips, which later steps can use.
 
 ## 5. Dataset summary
 
 Run `python scripts/profile_dataset.py` to reproduce these numbers.
 
-- **2,637 trips**: 2,616 yellow (99.2%) and 21 green (0.8%).
-- **Pickups from** 2025-09-01 00:24 **to** 2026-02-28 23:11.
-- **About 14.6 trips per day** for the whole borough.
-- **19 of the 20 zones** have at least one pickup. Great Kills Park (110) has none. The busiest zones are Arrochar/Fort Wadsworth (580), Stapleton (416), South Beach/Dongan Hills (267), Grymes Hill/Clifton (234) and Bloomfield/Emerson Hill (200).
-- **Clear morning peak**: 494 pickups start between 07:00 and 07:59, the busiest hour of the day, compared with roughly 40–120 in most other hours.
-- **Destinations**: Brooklyn 1,304, Staten Island 740, Manhattan 464, Queens 85, Bronx 18, Newark Airport 9, unknown 17.
-- **Weather at pickup**: apparent temperature from −24.9 °C to 32.2 °C. 129 trips started in an hour with rain and 56 in an hour with snowfall.
+**Trips with weather**: 23,318,979 rows, 14 columns, pickups from 2025-09-01 00:00:00 to 2026-02-28 23:59:59. There are no missing values.
 
-| Month | Trips | Mean apparent temp. at pickup (°C) |
-|---|---:|---:|
-| 2025-09 | 442 | 20.0 |
-| 2025-10 | 409 | 10.0 |
-| 2025-11 | 396 | 2.5 |
-| 2025-12 | 465 | −5.9 |
-| 2026-01 | 490 | −9.0 |
-| 2026-02 | 435 | −7.3 |
+| Pickup borough | Zones | Yellow trips | Green trips | Total trips |
+|---|---:|---:|---:|---:|
+| Manhattan | 69 | 20,856,906 | 159,610 | 21,016,516 |
+| Queens | 69 | 2,239,970 | 62,493 | 2,302,463 |
+| **Total** | **138** | **23,096,876** | **222,103** | **23,318,979** |
+
+| Month (by pickup time) | Yellow | Green | Total |
+|---|---:|---:|---:|
+| 2025-09 | 4,048,175 | 40,052 | 4,088,227 |
+| 2025-10 | 4,234,347 | 40,575 | 4,274,922 |
+| 2025-11 | 3,982,584 | 38,375 | 4,020,959 |
+| 2025-12 | 4,096,633 | 39,799 | 4,136,432 |
+| 2026-01 | 3,525,437 | 32,792 | 3,558,229 |
+| 2026-02 | 3,209,700 | 30,510 | 3,240,210 |
+
+- **Busiest zones**: Upper East Side South (1,090,154 pickups), JFK Airport (988,812), Midtown Center (988,458), Upper East Side North (984,375), Penn Station/Madison Sq West (748,457).
+- **Quietest zones**: the three Governor's Island/Ellis Island/Liberty Island zones (103, 104, 105) had 0, 0 and 7 pickups. Jamaica Bay (2) had 38 and Breezy Point/Fort Tilden/Riis Beach (27) had 98.
+- **Time of day**: pickups are lowest at 04:00 (161,898 over the whole period) and highest at 18:00 (1,676,922).
+- **Destinations of the collected trips**: Manhattan 20.6 M, Queens 1.31 M, Brooklyn 977 K, Bronx 231 K, Newark Airport 42 K, Staten Island 5 K, Unknown / outside NYC 133 K.
+- **Weather**: apparent temperature from −25.3 °C to 35.4 °C. Rain fell in 5.3% of zone-hours and snow in 2.4%. 1,090,584 trips started in an hour with rain and 312,615 in an hour with snowfall.
 
 ## 6. Things to know before using the data
 
-**Timezone and daylight saving.** TLC timestamps are naive local NYC time, and weather was requested in `America/New_York`, so both use the same clock. Daylight saving ended on 2 Nov 2025, so 01:00–01:59 happened twice. TLC timestamps cannot tell the two apart, and Open-Meteo returns a single 01:00 row for that day, so trips from both 01:00 hours get the same weather. The spring-forward change (8 Mar 2026) is outside the study period.
+**Trips are not cleaned yet.** Collection filters only by borough and period, so the dataset includes every collected trip. The TLC files contain records the data preparation step may want to remove. They are counted per file in `taxi_collection_summary.csv`:
 
-**Weather resolution.** Weather is requested at each zone's centroid, but Open-Meteo returns the value of the nearest model grid cell. The 20 Staten Island zones map to **13 distinct grid cells**, so some neighbouring zones share identical weather. The grid cell used for each zone is kept in `weather_hourly_by_zone.csv` (`grid_latitude`, `grid_longitude`, `grid_elevation_m`).
+| Issue | Trips | Share |
+|---|---:|---:|
+| Same values in all five collected fields as another trip in the same file (possible duplicate) | 276,749 | 1.2% |
+| Dropoff at or before pickup | 329,681 | 1.4% |
+| Trip longer than 6 hours | 6,877 | 0.03% |
+| Dropoff zone Unknown / Outside NYC (264, 265) | 133,038 | 0.6% |
 
-**Centroid as the zone location.** A zone centroid stands for the whole zone. Staten Island zones are a few kilometres across, which is about the size of a weather-model grid cell, so this adds little error.
+**Timezone and daylight saving.** TLC timestamps are naive local NYC time, and weather was requested in `America/New_York`, so both use the same clock. When daylight saving ended on 2 Nov 2025, 01:00–01:59 happened twice. TLC timestamps cannot tell the two apart, so trips from both hours get `pickup_hour` **2025-11-02 01:00** (10,850 trips, against 6,684 at the same hour the following Sunday). Open-Meteo returns one 01:00 row for that day, so all of these trips get the same weather. The spring-forward change (8 Mar 2026) is outside the study period.
 
-**Rain vs showers.** In Open-Meteo, `rain` is rain from large-scale weather systems and `showers` is convective rain, reported separately. `showers` was not in the requested variables, so short convective downpours (mostly in September) are not counted in `rain`. If this matters for modelling, add `showers` to `WEATHER_VARIABLES` in `scripts/config.py` and rerun.
+**Weather resolution.** Weather is requested at each zone's centroid, but Open-Meteo returns the value of the nearest model grid cell. The 138 zones map to **50 distinct grid cells**, so some neighbouring zones share identical weather. The grid cell used for each zone is kept in `weather_hourly_by_zone.parquet` (`grid_latitude`, `grid_longitude`, `grid_elevation_m`).
 
-**Low volume.** Staten Island has very little street-hail taxi activity: about 15 pickups a day for the whole borough, spread over 20 zones. Most zone-hours will have **zero** pickups. This should be taken into account in the Zone × Hour aggregation and in the choice of models. For comparison, **6,529** yellow/green trips in the same period came *into* Staten Island from other boroughs. They are not in this dataset because they were not picked up in Staten Island.
+**Centroid as the zone location.** A zone centroid stands for the whole zone. Manhattan zones are small, so the centroid is close to anywhere in the zone. Some Queens zones (Jamaica Bay, the airports, parks) are large, so their centroid is a rougher stand-in for the whole zone.
 
-**Left for the data preparation step.** Collection only filters by borough and period. It does not remove records. The profile script reports these issues for the cleaning step:
-
-| Issue | Trips |
-|---|---:|
-| Exact duplicate rows (same type, times and zones) | 26 |
-| Dropoff at or before pickup | 3 |
-| Trip longer than 6 hours | 5 |
-| Dropoff zone Unknown / Outside NYC (264, 265) | 17 |
+**Rain vs showers.** In Open-Meteo, `rain` is rain from large-scale weather systems and `showers` is convective rain, reported separately. `showers` is not one of the four required variables, so short convective downpours are not counted in `rain`. If this matters for modelling, add `showers` to `WEATHER_VARIABLES` in `scripts/config.py` and rerun.
 
 **Data versions.** Data was collected on **30 Sep 2026**. The TLC 2026-02 files were last modified on 25 Mar 2026. TLC occasionally republishes files, so rerunning the pipeline later could give slightly different counts. `taxi_collection_summary.csv` records the file sizes that were used.
 
@@ -191,11 +204,11 @@ Run `python scripts/profile_dataset.py` to reproduce these numbers.
 
 | Script | What it does |
 |---|---|
-| `scripts/config.py` | Study period, borough, taxi types, URLs, weather variables, output paths |
-| `scripts/utils.py` | Logging, HTTP GET with retries, cached file download |
-| `scripts/collect_zones.py` | Step 1: Staten Island zones and centroid coordinates |
-| `scripts/collect_taxi.py` | Step 2: download TLC files and filter Staten Island pickups |
-| `scripts/collect_weather.py` | Step 3: hourly weather per zone from Open-Meteo |
-| `scripts/build_dataset.py` | Step 4: join trips with weather and save the final dataset |
+| `scripts/config.py` | Study period, boroughs, taxi types, URLs, weather variables, output paths |
+| `scripts/utils.py` | Logging, HTTP GET with retries (including API rate limits), cached file download |
+| `scripts/collect_zones.py` | Step 1: Manhattan and Queens zones and centroid coordinates |
+| `scripts/collect_weather.py` | Step 2: hourly weather per zone from Open-Meteo |
+| `scripts/collect_taxi.py` | Step 3: download TLC files and keep Manhattan/Queens pickups |
+| `scripts/build_dataset.py` | Step 4: add the pickup zone's weather to every trip |
 | `scripts/run_pipeline.py` | Runs steps 1–4 in order |
 | `scripts/profile_dataset.py` | Prints the summary numbers used in this document |
