@@ -2,6 +2,7 @@
 data/raw/tlc_downloads/
 data/raw/NYC-taxi-demand-Manhattan-Queens.csv
 data/raw/*.part
+kaggle_download/
 
 # Python
 __pycache__/

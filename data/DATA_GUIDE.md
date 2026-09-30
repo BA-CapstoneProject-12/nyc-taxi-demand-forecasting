@@ -89,19 +89,24 @@ git clone https://github.com/BA-CapstoneProject-12/nyc-taxi-demand-forecasting.g
 
 The 3.2 GB CSV is shared as a **private Kaggle dataset**. Only teammates who have been added can see it.
 
-**Getting access:** send your Kaggle username to the data collection owner. They add you to the dataset, and it then shows up under *Your Work → Datasets → Shared with you* on Kaggle.
+**Dataset:** [adithyaajay1210/nyc-taxi-demand-manhattan-queens](https://www.kaggle.com/datasets/adithyaajay1210/nyc-taxi-demand-manhattan-queens)
+
+The Kaggle dataset has the same files as `data/raw/` (except `tlc_downloads/`), plus this guide and the `dataset-documents/` folder.
+
+**Getting access:** send your Kaggle username to the dataset owner (Kaggle user `adithyaajay1210`). Once you have been added, the link above opens for you, and the dataset also shows up under *Your Work → Datasets → Shared with you* on Kaggle.
 
 **Option A: download from the website**
-1. Open the dataset page on Kaggle and click **Download**.
-2. Unzip if needed, and put `NYC-taxi-demand-Manhattan-Queens.csv` in `data/raw/` of your local copy of the repo.
+1. Open the [dataset page](https://www.kaggle.com/datasets/adithyaajay1210/nyc-taxi-demand-manhattan-queens) and click **Download**.
+2. Unzip it and move `NYC-taxi-demand-Manhattan-Queens.csv` into `data/raw/` of your local copy of the repo. The other files are already in the repo.
 
 **Option B: download with the Kaggle command line**
 1. `pip install kaggle`
 2. On kaggle.com go to *Settings → API → Create New Token*. This downloads `kaggle.json`. Put it in `C:\Users\<you>\.kaggle\kaggle.json` (Windows) or `~/.kaggle/kaggle.json` (Mac/Linux).
-3. From the project root:
+3. Download and unzip the dataset into a folder of its own, then move the CSV into `data/raw/`:
    ```bash
-   kaggle datasets download -d <owner-username>/nyc-taxi-demand-manhattan-queens -p data/raw --unzip
+   kaggle datasets download -d adithyaajay1210/nyc-taxi-demand-manhattan-queens -p kaggle_download --unzip
    ```
+   Windows: `move kaggle_download\NYC-taxi-demand-Manhattan-Queens.csv data\raw\`. Mac/Linux: `mv kaggle_download/NYC-taxi-demand-Manhattan-Queens.csv data/raw/`. Then delete the `kaggle_download` folder, so the extra copies don't end up in git.
 
 **Option C: work directly on Kaggle.** In a Kaggle notebook, click *Add Input*, search for the dataset under *Your datasets / Shared with you*, and read it from `/kaggle/input/nyc-taxi-demand-manhattan-queens/`. Nothing needs to be downloaded, and Kaggle notebooks have enough memory for the full file.
 
@@ -117,20 +122,20 @@ Then open `scripts/data_collection.ipynb` and run all cells. It takes about 15 m
 
 ### 3.4 For the owner: creating the Kaggle dataset
 
-These steps are done once by the person who collected the data.
+The dataset has been created at [adithyaajay1210/nyc-taxi-demand-manhattan-queens](https://www.kaggle.com/datasets/adithyaajay1210/nyc-taxi-demand-manhattan-queens) (private, shared with the team). These are the steps that were used. Follow them again only if it ever has to be recreated.
 
 **On the website**
-1. Zip the four files in `data/raw/` (not `tlc_downloads/`) to make the upload much smaller. Kaggle unzips archives automatically.
+1. Zip the four files in `data/raw/` (not `tlc_downloads/`), together with `data/DATA_GUIDE.md` and the `data/dataset-documents/` folder, keeping the same layout. This makes the upload much smaller, and Kaggle unzips archives automatically.
 2. On kaggle.com: *Create → New Dataset*. Upload the zip, set the title to *NYC Taxi Demand Manhattan Queens*, and keep the visibility **Private**.
 3. On the dataset page, open **Settings → Sharing** and add each teammate by Kaggle username with view access.
-4. Put `data/DATA_GUIDE.md` and `data/dataset-documents/data_dictionary.md` in the dataset description, or link to the GitHub repo.
+4. Write the dataset description (About Dataset), with a link to the GitHub repo.
 
 **With the Kaggle command line** (after the API token setup in 3.2 Option B)
-1. Put the four files in an empty folder, for example `kaggle_upload/`.
-2. `kaggle datasets init -p kaggle_upload` creates `dataset-metadata.json`. Edit it: set `"title": "NYC Taxi Demand Manhattan Queens"` and `"id": "<your-username>/nyc-taxi-demand-manhattan-queens"`.
+1. Put the same files in an empty folder, for example `kaggle_upload/`.
+2. `kaggle datasets init -p kaggle_upload` creates `dataset-metadata.json`. Edit it: set `"title": "NYC Taxi Demand Manhattan Queens"` and `"id": "adithyaajay1210/nyc-taxi-demand-manhattan-queens"`.
 3. `kaggle datasets create -p kaggle_upload`. New datasets are **private by default**. Don't add `--public`.
 4. Add teammates in the dataset's Settings on the website, as in step 3 above.
-5. If the data changes later, upload a new version: `kaggle datasets version -p kaggle_upload -m "what changed"`.
+5. If the data or these documents change later, upload a new version so Kaggle and GitHub stay the same: `kaggle datasets version -p kaggle_upload -m "what changed"`, or on the website use *New Version* on the dataset page.
 
 ## 4. How to use the dataset
 
