@@ -16,8 +16,12 @@ def setup_logging():
     )
 
 
-def get_with_retry(url, params=None, retries=4, timeout=120, stream=False):
-    """GET a URL, retrying on network errors and 429/5xx responses."""
+def get_with_retry(url, params=None, retries=5, timeout=120, stream=False):
+    """GET a URL, retrying on network errors and 429/5xx responses.
+
+    A 429 means the API rate limit was hit, so we wait a full minute before
+    trying again. Other errors are retried after a short pause.
+    """
     for attempt in range(1, retries + 1):
         try:
             response = requests.get(url, params=params, timeout=timeout, stream=stream)
@@ -29,7 +33,7 @@ def get_with_retry(url, params=None, retries=4, timeout=120, stream=False):
             status = getattr(err.response, "status_code", None)
             if attempt == retries or (status is not None and status < 500 and status != 429):
                 raise
-            wait = 5 * attempt
+            wait = 65 if status == 429 else 5 * attempt
             log.warning("Request failed (%s), retrying in %ss", err, wait)
             time.sleep(wait)
 
