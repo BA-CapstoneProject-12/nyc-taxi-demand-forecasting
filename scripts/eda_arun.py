@@ -433,13 +433,189 @@ def issue64(data, zones):
     print(f"#64: borough, airport and calendar outputs saved; peak city hour {hour_profile.idxmax():02d}:00.", flush=True)
 
 
+def issue66(data, zones):
+    stats = zone_stats(data)
+    content = "\nFleet planning charts describe pickup volume and timing. Counts alone do not estimate\nvehicle availability, trip duration, airport queues or unmet demand. Historical\npercentiles below are empirical pickup counts, not calibrated forecast intervals.\n"
+    # Use only complete 168-label weeks for profile consistency.
+    week_sizes = data.groupby("week_start").pickup_hour.nunique()
+    complete = week_sizes.index[week_sizes.eq(168)]
+    full = data.loc[data.week_start.isin(complete)].assign(hour_of_week=lambda x: x.day_of_week*24+x.hour)
+    metrics, profiles = [], {}
+    for zone_id, group in full.groupby("PULocationID"):
+        matrix = group.pivot(index="week_start", columns="hour_of_week", values="trip_count").reindex(columns=range(168))
+        assert matrix.shape == (len(complete), 168) and not matrix.isna().any().any()
+        profiles[zone_id] = matrix
+        values = matrix.to_numpy(dtype=float)
+        other = (values.sum(axis=0)[None, :] - values) / (len(values)-1)
+        v = values-values.mean(axis=1, keepdims=True)
+        o = other-other.mean(axis=1, keepdims=True)
+        denom = np.sqrt((v*v).sum(axis=1) * (o*o).sum(axis=1))
+        corr = np.divide((v*o).sum(axis=1), denom, out=np.full(len(values), np.nan), where=denom>0)
+        for week, correlation, mean in zip(matrix.index, corr, values.mean(axis=1)):
+            metrics.append({"PULocationID": zone_id, "week_start": week, "profile_correlation": correlation, "mean_weekly_hourly_demand": mean})
+    weekly_metrics = pd.DataFrame(metrics)
+    consistency = weekly_metrics.groupby("PULocationID").agg(median_profile_correlation=("profile_correlation", "median"),
+        valid_profile_weeks=("profile_correlation", "count"), weekly_mean=("mean_weekly_hourly_demand", "mean"),
+        weekly_std=("mean_weekly_hourly_demand", "std"))
+    consistency["weekly_level_cv"] = consistency.weekly_std / consistency.weekly_mean.replace(0, np.nan)
+    consistency = consistency.join(stats[["Zone", "Borough", "mean"]])
+    table(weekly_metrics, "H3_weekly_profile_correlations.csv")
+    table(consistency.reset_index(), "H3_zone_consistency.csv")
+    chosen = [243, 161, 79, 132, 138, 7]
+    fig, axes = plt.subplots(3, 2, figsize=(14, 10))
+    for ax, zone_id in zip(axes.flat, chosen):
+        matrix = profiles[zone_id]
+        for _, row in matrix.iterrows(): ax.plot(range(168), row, color="#2878ad", alpha=.13, linewidth=.7)
+        ax.plot(range(168), matrix.mean(axis=0), color="#e78632", linewidth=2, label="Mean profile")
+        ax.set_xticks(np.arange(0, 168, 24), DAY_NAMES)
+        ax.set(ylabel="Pickups / hour", title=label_zone(zone_id, stats.loc[zone_id, "Zone"], 40))
+    fig.suptitle(f"H3 | Weekly profiles: {len(complete)} full weeks (thin lines), mean (orange)")
+    save(fig, "H3_weekly_profile_overlays.png")
+    active = consistency.loc[consistency["mean"].ge(1)]
+    content += finding("H3", "Week-to-week consistency", f"Across {len(complete)} complete weeks, median zone correlation with the other weeks' 168-hour template is {active.median_profile_correlation.median():.2f} among zones with mean >=1/hour; median CV of weekly levels={active.weekly_level_cv.median():.2f}. Each comparison excludes its own week from the template. Constant/all-zero profiles have undefined correlation; valid-week counts are exported.",
+                       ["H3_weekly_profile_overlays.png", "H3_zone_consistency.csv", "H3_weekly_profile_correlations.csv"], "Separate repeatable timing from changing volume. This retrospective template uses other weeks and is descriptive only; a forecasting baseline must use prior weeks.")
+    previous_time = data.groupby("PULocationID").pickup_hour.shift()
+    delta = data.groupby("PULocationID").trip_count.diff()
+    eligible = data.pickup_hour.sub(previous_time).eq(pd.Timedelta(hours=1)) & ~data.pickup_hour.eq(DST) & ~previous_time.eq(DST)
+    changes = data.loc[eligible, ["PULocationID", "pickup_hour", "Borough", "hour"]].assign(change=delta.loc[eligible])
+    change_stats = changes.groupby("Borough").change.agg(rows="size", mean="mean", median="median",
+        p01=lambda x: x.quantile(.01), p99=lambda x: x.quantile(.99), mean_abs=lambda x: x.abs().mean(), max_abs=lambda x: x.abs().max())
+    table(change_stats.reset_index(), "H4_hourly_change_summary.csv")
+    change_hour = changes.groupby(["hour", "Borough"]).change.mean().unstack()
+    table(change_hour.reset_index(), "H4_change_by_hour.csv")
+    fig, axes = plt.subplots(1, 2, figsize=(13, 4))
+    for borough, group in changes.groupby("Borough"):
+        axes[0].hist(group.change, bins=np.arange(-650, 651, 10), color=COLORS[borough], alpha=.6, label=borough)
+    axes[0].set(yscale="log", xlabel="Current minus previous hour pickups (per zone)", ylabel="Transitions (log scale)", title="H4 | Adjacent-hour changes; DST transitions excluded")
+    axes[0].legend(); change_hour.plot(ax=axes[1], color=COLORS)
+    axes[1].axhline(0, color="black", linewidth=.8)
+    axes[1].set(xlabel="Local hour at end of transition", ylabel="Mean signed change / zone", title="Typical increases and decreases by hour")
+    save(fig, "H4_hourly_changes.png")
+    content += finding("H4", "Hour-over-hour changes", "; ".join(f"{b}: mean absolute change {r.mean_abs:.1f} pickups/zone, 1st--99th percentile {r.p01:.0f} to {r.p99:.0f}" for b, r in change_stats.iterrows()) + f". {len(changes):,} valid within-zone transitions; no cross-zone boundary differences, first-row or DST-adjacent differences.",
+                       ["H4_hourly_changes.png", "H4_hourly_change_summary.csv", "H4_change_by_hour.csv"], "Repositioning needs to anticipate rising slots, with larger count changes in busy Manhattan zones. Changes remain signed; zero previous counts are valid.")
+    stats["peak_average_ratio"] = stats.maximum / stats["mean"].replace(0, np.nan)
+    table(stats.reset_index(), "H5_I3_zone_peak_demand.csv")
+    selected = stats.loc[stats["mean"].ge(1)].nlargest(20, "peak_average_ratio")
+    fig, ax = plt.subplots(figsize=(11, 7))
+    ax.barh(range(len(selected)), selected.peak_average_ratio, color=[COLORS[b] for b in selected.Borough])
+    ax.set_yticks(range(len(selected)), [label_zone(i, n) for i, n in selected.Zone.items()]); ax.invert_yaxis()
+    ax.set(xlabel="Maximum recorded hourly pickups / mean", title="H5 | Top 20 peak-to-average ratios among zones averaging >=1/hour")
+    save(fig, "H5_peak_average_ratios.png")
+    content += finding("H5", "Peak-to-average ratios", f"Among zones with mean >=1/hour, median maximum/mean={stats.loc[stats['mean'].ge(1), 'peak_average_ratio'].median():.2f}; {selected.Zone.iloc[0]} leads at {selected.peak_average_ratio.iloc[0]:.2f}x. Ratios for all 138 zones are exported; two all-zero zones are undefined.",
+                       ["H5_peak_average_ratios.png", "H5_I3_zone_peak_demand.csv"], "Maximum/mean is sensitive to one event and tiny means. Use P95/P99 and conditional calendar profiles alongside maxima.")
+    means = data.groupby(["PULocationID", "hour"]).trip_count.mean().unstack("hour").sort_index()
+    # Deterministic tie-break: lower zone ID first.
+    ranks = means.rank(axis=0, ascending=False, method="first")
+    ranked = []
+    for h in range(24):
+        top = means[h].sort_values(ascending=False, kind="stable").head(10)
+        for rank, (zone_id, value) in enumerate(top.items(), 1):
+            ranked.append({"hour": h, "rank": rank, "PULocationID": zone_id, "Zone": stats.loc[zone_id, "Zone"], "mean_pickups_per_hour": value})
+    table(pd.DataFrame(ranked), "I1_top10_zones_each_hour.csv")
+    union = ranks.index[ranks.le(10).any(axis=1)]
+    fig, ax = plt.subplots(figsize=(15, 7))
+    palette = [*plt.get_cmap("tab20").colors, *plt.get_cmap("tab20b").colors]
+    for j, zone_id in enumerate(union):
+        ax.plot(range(24), ranks.loc[zone_id].where(ranks.loc[zone_id].le(10)), marker="o", markersize=3,
+                color=palette[j], label=label_zone(zone_id, stats.loc[zone_id, "Zone"], 26), linewidth=1.5)
+    ax.set(ylim=(10.5, .5), yticks=range(1, 11), xticks=range(24), xlabel="Local hour", ylabel="Rank (1 = busiest)", title="I1 | Top-ten ranks through the day; lines hidden when rank >10")
+    ax.legend(bbox_to_anchor=(1.02, 1), loc="upper left", fontsize=8)
+    save(fig, "I1_top_zone_bump_chart.png")
+    coverage = pd.DataFrame(index=range(24))
+    for n in [5, 10, 20]:
+        coverage[f"top_{n}_share_pct"] = [100 * means[h].nlargest(n).sum() / means[h].sum() for h in range(24)]
+    coverage.index.name = "hour"
+    table(coverage.reset_index(), "I2_topN_hourly_coverage.csv")
+    fig, ax = plt.subplots(figsize=(11, 4)); coverage.plot(ax=ax, marker="o")
+    ax.set(xlabel="Local hour", ylabel="Share of pickups (%)", title="I2 | Coverage by the busiest N zones at each hour")
+    save(fig, "I2_topN_coverage.png")
+    content += finding("I1/I2", "Changing hotspots and top-N coverage", f"{len(union)} distinct zones enter the top ten at some hour. Top-five coverage ranges {coverage.top_5_share_pct.min():.1f}%--{coverage.top_5_share_pct.max():.1f}%; top-ten {coverage.top_10_share_pct.min():.1f}%--{coverage.top_10_share_pct.max():.1f}%; top-twenty {coverage.top_20_share_pct.min():.1f}%--{coverage.top_20_share_pct.max():.1f}%. Rankings use average zone pickups at each clock hour and ties use the lower zone ID.",
+                       ["I1_top_zone_bump_chart.png", "I1_top10_zones_each_hour.csv", "I2_topN_coverage.png", "I2_topN_hourly_coverage.csv"], "Top-N sets change by hour and are selected retrospectively over the full period; a fixed deployment or forward test needs historical-only selection.")
+    busy = stats.nlargest(15, "mean")
+    fig, ax = plt.subplots(figsize=(13, 6))
+    busy[["mean", "p95", "p99"]].set_axis([label_zone(i, n, 23) for i, n in busy.Zone.items()]).plot.bar(ax=ax, color=["#2878ad", "#e78632", "#9056a0"])
+    ax.set(ylabel="Pickups / zone-hour", xlabel="Pickup zone", title="I3 | Mean vs empirical P95/P99 in the 15 busiest zones")
+    ax.tick_params(axis="x", rotation=60); save(fig, "I3_mean_p95_p99.png")
+    content += finding("I3", "Demand percentiles", f"{busy.Zone.iloc[0]} averages {busy['mean'].iloc[0]:.1f} pickups/hour, with P95={busy.p95.iloc[0]:.0f} and P99={busy.p99.iloc[0]:.0f}. All-zero and sparse zones remain in the exported percentile table; linear empirical quantiles can be fractional.",
+                       ["I3_mean_p95_p99.png", "H5_I3_zone_peak_demand.csv"], "Sizing against the average misses recurring busy hours. These unconditional pickup quantiles are not taxi counts or predictive uncertainty bounds.")
+    compare = pd.DataFrame({"Manhattan (all zones)": data.loc[data.Borough.eq("Manhattan")].groupby(["pickup_hour", "hour"]).trip_count.sum().groupby("hour").mean()})
+    for zone_id in [132, 138]:
+        compare[stats.loc[zone_id, "Zone"]] = means.loc[zone_id]
+    relative = compare.div(compare.mean(axis=0), axis=1)
+    table(compare.reset_index(), "I4_airport_manhattan_hourly.csv")
+    fig, axes = plt.subplots(1, 2, figsize=(13, 4))
+    compare.plot(ax=axes[0], logy=True); relative.plot(ax=axes[1])
+    axes[0].set(xlabel="Local hour", ylabel="Mean pickups / hour (log scale)", title="I4 | Airport vs Manhattan count levels")
+    axes[1].set(xlabel="Local hour", ylabel="Hourly mean / group's overall hourly mean", title="Relative timing (each group's mean = 1)")
+    save(fig, "I4_airport_manhattan_timing.png")
+    content += finding("I4", "Airport demand versus Manhattan", "; ".join(f"{n} peaks {int(compare[n].idxmax()):02d}:00" for n in compare) + ". Manhattan represents 69 zones; each airport represents one zone. Relative profiles divide by each group's own mean.",
+                       ["I4_airport_manhattan_timing.png", "I4_airport_manhattan_hourly.csv"], "Compare timing on a normalised scale; the borough's much larger level would otherwise hide the airport shapes.")
+    # Operational night starts at 20:00. Fri/Sat evening and Sat/Sun 00--04
+    # belong to weekend nights; early Friday belongs to Thursday night.
+    nights = data.loc[data.hour.ge(20) | data.hour.le(4)].copy()
+    nights["night_date"] = nights.date.where(nights.hour.ge(20), nights.date-pd.Timedelta(days=1))
+    nights["weekend_night"] = nights.night_date.dt.dayofweek.isin([4, 5])
+    periods = {
+        "late_night_00_04": data.loc[data.hour.le(4)],
+        "weekend_night_Fri_Sat_20_04": nights.loc[nights.weekend_night],
+    }
+    night_tables = []
+    fig, axes = plt.subplots(1, 2, figsize=(15, 7))
+    for ax, (name, group) in zip(axes, periods.items()):
+        result = group.groupby("PULocationID").trip_count.agg(total="sum", observed_hours="size", mean_per_hour="mean")
+        result = result.join(stats[["Zone", "Borough", "latitude", "longitude"]]).sort_values("mean_per_hour", ascending=False)
+        result["period"] = name; night_tables.append(result.reset_index())
+        top = result.head(12)
+        ax.barh(range(len(top)), top.mean_per_hour, color=[COLORS[b] for b in top.Borough])
+        ax.set_yticks(range(len(top)), [label_zone(i, n, 26) for i, n in top.Zone.items()]); ax.invert_yaxis()
+        ax.set(xlabel="Mean pickups / observed hour", title=name.replace("_", " "))
+    fig.suptitle("I5 | Late-night and Friday/Saturday-night pickup hotspots")
+    save(fig, "I5_night_hotspots.png")
+    night_results = pd.concat(night_tables, ignore_index=True)
+    table(night_results, "I5_night_hotspots.csv")
+    fig, axes = plt.subplots(1, 2, figsize=(13, 6))
+    for ax, name in zip(axes, periods):
+        group = night_results.loc[night_results.period.eq(name)]
+        norm = matplotlib.colors.LogNorm(vmin=.01, vmax=night_results.mean_per_hour.max())
+        im = ax.scatter(group.longitude, group.latitude, c=group.mean_per_hour.clip(lower=.01), cmap="magma", norm=norm,
+                        s=12+2*group.mean_per_hour, edgecolors="white", linewidth=.3)
+        labelled = group.head(8).sort_values("latitude")
+        city_labels = labelled.loc[labelled.Borough.eq("Manhattan")]
+        for (_, row), target_y in zip(city_labels.iterrows(), np.linspace(40.715, 40.79, len(city_labels))):
+            ax.annotate(str(row.PULocationID), (row.longitude, row.latitude), xytext=(-74.07, target_y),
+                        ha="right", va="center", fontsize=8, arrowprops={"arrowstyle": "-", "color": "#555555", "lw": .5})
+        for row in labelled.loc[labelled.Borough.eq("Queens")].itertuples():
+            ax.annotate(str(row.PULocationID), (row.longitude, row.latitude), xytext=(row.longitude+.015, row.latitude+.01),
+                        fontsize=8, arrowprops={"arrowstyle": "-", "color": "#555555", "lw": .5})
+        ax.set_xlim(-74.09, -73.70)
+        ax.set(xlabel="Longitude", ylabel="Latitude", title=name.replace("_", " "))
+        ax.set_aspect(1/np.cos(np.deg2rad(40.75)))
+        fig.colorbar(im, ax=ax, label="Mean pickups / hour; zeros shown at 0.01")
+    fig.suptitle("I5 | Zone-centroid map; labels are IDs of the top eight (no boundary map)")
+    save(fig, "I5_night_hotspot_map.png")
+    weekend_top = night_results.loc[night_results.period.eq("weekend_night_Fri_Sat_20_04")].iloc[0]
+    late_top = night_results.loc[night_results.period.eq("late_night_00_04")].iloc[0]
+    content += finding("I5", "Night hotspots", f"00--04 leader: {late_top.Zone} ({late_top.mean_per_hour:.1f} pickups/hour). Friday/Saturday 20:00--04:59 leader: {weekend_top.Zone} ({weekend_top.mean_per_hour:.1f}/hour). Weekend nights are assigned to their evening date: early Sat/Sun is included; early Fri is not. Means use actual available hour labels (boundary nights may be partial).",
+                       ["I5_night_hotspots.png", "I5_night_hotspot_map.png", "I5_night_hotspots.csv"], "Nightlife positioning differs from commuter coverage. Centroids are location proxies and do not identify exact pickup points or driving routes.")
+    outer = data.loc[data.service_zone.eq("Boro Zone")]
+    boro = outer.groupby(["hour", "Borough"]).trip_count.mean().unstack()
+    table(boro.reset_index(), "I6_boro_zone_hourly.csv")
+    fig, ax = plt.subplots(figsize=(11, 4)); boro.plot(ax=ax, color=COLORS)
+    ax.set(xlabel="Local hour", ylabel="Mean pickups / Boro zone-hour (zeros retained)", title="I6 | Outer service-area demand by borough")
+    save(fig, "I6_boro_zone_hourly.png")
+    content += finding("I6", "Boro Zone demand", f"The Boro Zone service area contains {outer.PULocationID.nunique()} zones. " + "; ".join(f"{b} peaks at {int(boro[b].idxmax()):02d}:00 ({boro[b].max():.2f} pickups/zone-hour)" for b in boro) + ".",
+                       ["I6_boro_zone_hourly.png", "I6_boro_zone_hourly.csv"], "Normalise by zone count and keep sparse areas visible. Boro Zone counts include both yellow and green taxis; supply requirements cannot be inferred from pickups alone.")
+    write_section(66, "Fleet planning and demand stability", content)
+    print(f"#66: {len(complete)} full-week profiles; {len(union)} hourly top-ten zones; fleet tables and charts saved.", flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--issues", type=int, nargs="+", default=[63, 64], choices=[63, 64])
+    parser.add_argument("--issues", type=int, nargs="+", default=[63, 64, 66], choices=[63, 64, 66])
     args = parser.parse_args()
     data, zones = load_data()
     for issue in args.issues:
-        {63: issue63, 64: issue64}[issue](data, zones)
+        {63: issue63, 64: issue64, 66: issue66}[issue](data, zones)
 
 
 if __name__ == "__main__":

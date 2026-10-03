@@ -1,0 +1,3 @@
+Borough,rows,mean,median,p01,p99,mean_abs,max_abs
+Manhattan,287937,0.039706602,0,-100,84,16.150029,461
+Queens,287937,0.00080225883,0,-19,23,2.7421103,430

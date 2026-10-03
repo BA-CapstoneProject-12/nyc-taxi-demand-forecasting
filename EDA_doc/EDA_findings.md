@@ -134,3 +134,61 @@ Weekend ratios compare mean pickups per observed weekend/weekday hour (not total
 - **Implication:** Shares measure recorded trips, not rates per band-hour; the bands have unequal durations. September's partial month and changing weekday mix can affect the overlays.
 
 <!-- arun-issue-64:end -->
+
+<!-- arun-issue-66:start -->
+
+## Fleet planning and demand stability (#66)
+
+Fleet planning charts describe pickup volume and timing. Counts alone do not estimate
+vehicle availability, trip duration, airport queues or unmet demand. Historical
+percentiles below are empirical pickup counts, not calibrated forecast intervals.
+
+**[H3] Week-to-week consistency**
+
+- **Finding:** Across 24 complete weeks, median zone correlation with the other weeks' 168-hour template is 0.90 among zones with mean >=1/hour; median CV of weekly levels=0.15. Each comparison excludes its own week from the template. Constant/all-zero profiles have undefined correlation; valid-week counts are exported.
+- **Evidence:** [H3_weekly_profile_overlays.png](figures/H3_weekly_profile_overlays.png), [H3_zone_consistency.csv](tables/H3_zone_consistency.csv), [H3_weekly_profile_correlations.csv](tables/H3_weekly_profile_correlations.csv)
+- **Implication:** Separate repeatable timing from changing volume. This retrospective template uses other weeks and is descriptive only; a forecasting baseline must use prior weeks.
+
+**[H4] Hour-over-hour changes**
+
+- **Finding:** Manhattan: mean absolute change 16.2 pickups/zone, 1st--99th percentile -100 to 84; Queens: mean absolute change 2.7 pickups/zone, 1st--99th percentile -19 to 23. 575,874 valid within-zone transitions; no cross-zone boundary differences, first-row or DST-adjacent differences.
+- **Evidence:** [H4_hourly_changes.png](figures/H4_hourly_changes.png), [H4_hourly_change_summary.csv](tables/H4_hourly_change_summary.csv), [H4_change_by_hour.csv](tables/H4_change_by_hour.csv)
+- **Implication:** Repositioning needs to anticipate rising slots, with larger count changes in busy Manhattan zones. Changes remain signed; zero previous counts are valid.
+
+**[H5] Peak-to-average ratios**
+
+- **Finding:** Among zones with mean >=1/hour, median maximum/mean=4.92; Maspeth leads at 23.79x. Ratios for all 138 zones are exported; two all-zero zones are undefined.
+- **Evidence:** [H5_peak_average_ratios.png](figures/H5_peak_average_ratios.png), [H5_I3_zone_peak_demand.csv](tables/H5_I3_zone_peak_demand.csv)
+- **Implication:** Maximum/mean is sensitive to one event and tiny means. Use P95/P99 and conditional calendar profiles alongside maxima.
+
+**[I1/I2] Changing hotspots and top-N coverage**
+
+- **Finding:** 31 distinct zones enter the top ten at some hour. Top-five coverage ranges 20.8%--37.5%; top-ten 35.5%--52.3%; top-twenty 54.9%--72.8%. Rankings use average zone pickups at each clock hour and ties use the lower zone ID.
+- **Evidence:** [I1_top_zone_bump_chart.png](figures/I1_top_zone_bump_chart.png), [I1_top10_zones_each_hour.csv](tables/I1_top10_zones_each_hour.csv), [I2_topN_coverage.png](figures/I2_topN_coverage.png), [I2_topN_hourly_coverage.csv](tables/I2_topN_hourly_coverage.csv)
+- **Implication:** Top-N sets change by hour and are selected retrospectively over the full period; a fixed deployment or forward test needs historical-only selection.
+
+**[I3] Demand percentiles**
+
+- **Finding:** Upper East Side South averages 243.2 pickups/hour, with P95=537 and P99=612. All-zero and sparse zones remain in the exported percentile table; linear empirical quantiles can be fractional.
+- **Evidence:** [I3_mean_p95_p99.png](figures/I3_mean_p95_p99.png), [H5_I3_zone_peak_demand.csv](tables/H5_I3_zone_peak_demand.csv)
+- **Implication:** Sizing against the average misses recurring busy hours. These unconditional pickup quantiles are not taxi counts or predictive uncertainty bounds.
+
+**[I4] Airport demand versus Manhattan**
+
+- **Finding:** Manhattan (all zones) peaks 18:00; JFK Airport peaks 16:00; LaGuardia Airport peaks 14:00. Manhattan represents 69 zones; each airport represents one zone. Relative profiles divide by each group's own mean.
+- **Evidence:** [I4_airport_manhattan_timing.png](figures/I4_airport_manhattan_timing.png), [I4_airport_manhattan_hourly.csv](tables/I4_airport_manhattan_hourly.csv)
+- **Implication:** Compare timing on a normalised scale; the borough's much larger level would otherwise hide the airport shapes.
+
+**[I5] Night hotspots**
+
+- **Finding:** 00--04 leader: East Village (183.5 pickups/hour). Friday/Saturday 20:00--04:59 leader: East Village (455.5/hour). Weekend nights are assigned to their evening date: early Sat/Sun is included; early Fri is not. Means use actual available hour labels (boundary nights may be partial).
+- **Evidence:** [I5_night_hotspots.png](figures/I5_night_hotspots.png), [I5_night_hotspot_map.png](figures/I5_night_hotspot_map.png), [I5_night_hotspots.csv](tables/I5_night_hotspots.csv)
+- **Implication:** Nightlife positioning differs from commuter coverage. Centroids are location proxies and do not identify exact pickup points or driving routes.
+
+**[I6] Boro Zone demand**
+
+- **Finding:** The Boro Zone service area contains 81 zones. Manhattan peaks at 17:00 (26.01 pickups/zone-hour); Queens peaks at 07:00 (3.33 pickups/zone-hour).
+- **Evidence:** [I6_boro_zone_hourly.png](figures/I6_boro_zone_hourly.png), [I6_boro_zone_hourly.csv](tables/I6_boro_zone_hourly.csv)
+- **Implication:** Normalise by zone count and keep sparse areas visible. Boro Zone counts include both yellow and green taxis; supply requirements cannot be inferred from pickups alone.
+
+<!-- arun-issue-66:end -->
