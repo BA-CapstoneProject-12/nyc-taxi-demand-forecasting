@@ -299,13 +299,147 @@ than adding separate government closure days. [Calendar reference](https://www.o
     print(f"#63: {len(checks)} checks passed; retained {retained:,} + warm-up {warmup:,} = clean {clean_total:,}.", flush=True)
 
 
+def label_zone(zone_id, name, width=30):
+    return f"{zone_id} {name[:width]}" + ("..." if len(name) > width else "")
+
+
+def issue64(data, zones):
+    content = "\nTotals use all retained pickups. Group means are per zone-hour and include zeros.\nWeekend ratios compare mean pickups per observed weekend/weekday hour (not totals).\n"
+    for col, code in [("Borough", "C3"), ("service_zone", "C4")]:
+        summary = data.groupby(col).trip_count.agg(total="sum", mean="mean", rows="size")
+        summary["zones"] = data.groupby(col).PULocationID.nunique()
+        summary["trip_share_pct"] = 100 * summary.total / data.trip_count.sum()
+        table(summary.reset_index(), f"{code}_group_demand.csv")
+        fig, axes = plt.subplots(1, 2, figsize=(11, 4))
+        axes[0].bar(summary.index, summary.total/1e6, color=[COLORS[n] for n in summary.index])
+        axes[1].bar(summary.index, summary["mean"], color=[COLORS[n] for n in summary.index])
+        axes[0].set(ylabel="Retained pickups (millions)", title="Total pickups")
+        axes[1].set(ylabel="Mean pickups / zone-hour", title="Normalised for number of zones")
+        fig.suptitle(f"{code} | Demand by {col}"); save(fig, f"{code}_group_demand.png")
+        rows = "; ".join(f"{n}: {r.total:,.0f} ({r.trip_share_pct:.1f}%), mean {r['mean']:.1f}/zone-hour across {int(r.zones)} zones" for n, r in summary.iterrows())
+        content += finding(code, f"Demand by {col}", rows + ".", [f"{code}_group_demand.png", f"{code}_group_demand.csv"], "Compare both volume and per-zone rates. Service areas are geography; this table cannot separate yellow from green taxis.")
+    borough_hour = data.groupby(["hour", "Borough"]).trip_count.sum().unstack()
+    shares = borough_hour.div(borough_hour.sum(axis=1), axis=0) * 100
+    table(shares.reset_index(), "C3_borough_hour_share.csv")
+    fig, ax = plt.subplots(figsize=(11, 4))
+    ax.stackplot(shares.index, *[shares[c] for c in shares], labels=shares.columns, colors=[COLORS[c] for c in shares])
+    ax.set(xlim=(0, 23), ylim=(0, 100), xlabel="Local hour", ylabel="Share of recorded pickups (%)", title="C3 | Borough share shifts through the day")
+    ax.legend(loc="lower right"); save(fig, "C3_borough_hour_share.png")
+    airport = data.loc[data.service_zone.eq("Airports")].copy()
+    airport["hour_of_week"] = airport.day_of_week * 24 + airport.hour
+    ap_hour = airport.groupby(["hour", "Zone"]).trip_count.mean().unstack()
+    ap_week = airport.groupby(["hour_of_week", "Zone"]).trip_count.mean().unstack()
+    ap_totals = airport.groupby(["week_start", "Zone"]).trip_count.sum().unstack()
+    ap_days = airport.groupby("week_start").date.nunique()
+    table(ap_hour.reset_index(), "C5_airport_hourly.csv")
+    table(ap_week.reset_index(), "C5_airport_weekly_profile.csv")
+    table(ap_totals.assign(observed_days=ap_days).reset_index(), "C5_airport_weekly_totals.csv")
+    fig, axes = plt.subplots(3, 1, figsize=(12, 10))
+    ap_hour.plot(ax=axes[0]); ap_week.plot(ax=axes[1]); ap_totals.plot(ax=axes[2])
+    axes[0].set(xlabel="Local hour", ylabel="Mean pickups / hour", title="C5 | JFK and LaGuardia hourly profiles")
+    axes[1].set(xlabel="Hour of week", ylabel="Mean pickups / hour", title="Weekly shape; Monday 00:00 = 0")
+    axes[1].set_xticks(np.arange(0, 168, 24), DAY_NAMES)
+    axes[2].set(xlabel="Week beginning Monday", ylabel="Pickups / observed week", title="Weekly totals; final week is six days")
+    save(fig, "C5_airport_profiles.png")
+    content += finding("C5", "Airport timing", "; ".join(f"{n} peaks at {int(ap_hour[n].idxmax()):02d}:00 ({ap_hour[n].max():.1f} pickups/hour)" for n in ap_hour) + ".",
+                       ["C5_airport_profiles.png", "C5_airport_hourly.csv", "C5_airport_weekly_profile.csv", "C5_airport_weekly_totals.csv"], "Plan airport pickup positioning by its own hourly and weekday pattern; flight schedules and supply are not measured here.")
+    ratio = data.groupby(["PULocationID", "is_weekend"]).trip_count.agg(mean="mean", total="sum", hours="size").unstack("is_weekend")
+    ratios = pd.DataFrame({"weekday_mean": ratio["mean"][False], "weekend_mean": ratio["mean"][True],
+                           "weekday_hours": ratio["hours"][False], "weekend_hours": ratio["hours"][True]})
+    ratios["weekend_weekday_ratio"] = ratios.weekend_mean / ratios.weekday_mean.replace(0, np.nan)
+    ratios = ratios.join(zone_stats(data)[["Zone", "Borough", "mean"]]).sort_values("weekend_weekday_ratio", ascending=False, na_position="last")
+    table(ratios.reset_index(), "C9_weekend_weekday_by_zone.csv")
+    fig, axes = plt.subplots(1, 2, figsize=(19, 18))
+    for ax, group in zip(axes, [ratios.iloc[:69], ratios.iloc[69:]]):
+        values = group.weekend_weekday_ratio
+        ax.barh(range(len(group)), values.fillna(0), color=[COLORS[b] for b in group.Borough])
+        ax.set_yticks(range(len(group)), [label_zone(i, n, 26) for i, n in group.Zone.items()], fontsize=8)
+        ax.invert_yaxis(); ax.axvline(1, color="black", linestyle="--")
+        for j, value in enumerate(values):
+            if pd.isna(value): ax.text(.02, j, "undefined (zero weekday demand)", fontsize=7)
+        ax.set(xlabel="Weekend mean / weekday mean", title="C9 | All zones ranked; includes sparse zones")
+    save(fig, "C9_weekend_weekday_ranked.png")
+    meaningful = ratios.loc[ratios["mean"].ge(1)]
+    content += finding("C9", "Weekend-to-weekday ratios", f"Each zone has {int(ratios.weekday_hours.iloc[0]):,} weekday labels and {int(ratios.weekend_hours.iloc[0]):,} weekend labels. Among zones averaging >=1 pickup/hour, {meaningful.Zone.iloc[0]} has the highest ratio ({meaningful.weekend_weekday_ratio.iloc[0]:.2f}x); {meaningful.Zone.iloc[-1]} has the lowest ({meaningful.weekend_weekday_ratio.iloc[-1]:.2f}x). All-zero zones have an undefined ratio, not zero.",
+                       ["C9_weekend_weekday_ranked.png", "C9_weekend_weekday_by_zone.csv"], "Use zone x weekend interactions; large ratios in near-empty zones may reflect tiny denominators. All flags, including holidays, are retained for this unadjusted comparison.")
+    city_hour = data.groupby("pickup_hour").trip_count.sum().rename("trips").to_frame()
+    city_hour["hour"] = city_hour.index.hour
+    city_hour["day_of_week"] = city_hour.index.dayofweek
+    city_hour["year_month"] = city_hour.index.to_period("M").astype(str)
+    daily = city_hour.trips.resample("D").sum().rename("trips").to_frame()
+    daily["year_month"] = daily.index.to_period("M").astype(str)
+    daily["day_of_week"] = daily.index.dayofweek
+    daily["week_start"] = daily.index - pd.to_timedelta(daily.day_of_week, unit="D")
+    weekly = daily.groupby("week_start").trips.agg(total="sum", observed_days="size", mean_per_day="mean")
+    weekly["complete_week"] = weekly.observed_days.eq(7)
+    table(weekly.reset_index(), "D3_weekly_totals.csv")
+    fig, ax = plt.subplots(figsize=(13, 4))
+    ax.bar(range(len(weekly)), weekly.total/1000, color=np.where(weekly.complete_week, "#2878ad", "#e78632"))
+    ax.set_xticks(range(len(weekly)), [d.strftime("%d %b") + ("*" if not full else "") for d, full in zip(weekly.index, weekly.complete_week)], rotation=60)
+    ax.set(ylabel="Pickups (thousands)", xlabel="Monday week start (* = six days)", title="D3 | Weekly pickup totals; incomplete weeks explicitly marked")
+    save(fig, "D3_weekly_totals.png")
+    monthly = daily.groupby("year_month").trips.agg(total="sum", observed_days="size", mean_per_day="mean")
+    monthly["calendar_days"] = pd.PeriodIndex(monthly.index, freq="M").days_in_month
+    monthly["complete_month"] = monthly.observed_days.eq(monthly.calendar_days)
+    table(monthly.reset_index(), "D4_monthly_trips_per_day.csv")
+    fig, ax = plt.subplots(figsize=(10, 4))
+    ax.bar(monthly.index, monthly.mean_per_day/1000, color="#27836a")
+    for j, days in enumerate(monthly.observed_days): ax.text(j, monthly.mean_per_day.iloc[j]/1000+1, f"{days} observed days", ha="center", fontsize=9)
+    ax.set(ylabel="Mean pickups / observed day (thousands)", xlabel="Year-month", title="D4 | Monthly daily demand; September covers only Sep 8--30")
+    save(fig, "D4_monthly_trips_per_day.png")
+    content += finding("D3/D4", "Calendar-adjusted totals", f"There are {weekly.complete_week.sum()} complete weeks and one final six-day week. September has 23 observed days, not 30. Average daily pickups range from {monthly.mean_per_day.min():,.0f} ({monthly.mean_per_day.idxmin()}) to {monthly.mean_per_day.max():,.0f} ({monthly.mean_per_day.idxmax()}).",
+                       ["D3_weekly_totals.png", "D4_monthly_trips_per_day.png", "D3_weekly_totals.csv", "D4_monthly_trips_per_day.csv"], "Compare means per observed day across months; do not interpret partial-week or partial-month totals as a full-period fall.")
+    hour_profile = city_hour.groupby("hour").trips.mean()
+    weekday_profile = daily.groupby("day_of_week").trips.mean()
+    table(hour_profile.rename("mean_trips").reset_index(), "D5_hourly_profile.csv")
+    table(weekday_profile.rename("mean_daily_trips").reset_index(), "D6_weekday_profile.csv")
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+    axes[0].plot(hour_profile, marker="o"); axes[0].set(xlabel="Local hour", ylabel="Mean total pickups / hour", title="D5 | Mean hourly profile")
+    axes[1].plot(weekday_profile, marker="o", color="#e78632"); axes[1].set_xticks(range(7), DAY_NAMES)
+    axes[1].set(ylabel="Mean total pickups / day", title="D6 | Mean weekday profile")
+    save(fig, "D5_D6_calendar_profiles.png")
+    fig, axes = plt.subplots(3, 1, figsize=(13, 10))
+    axes[0].boxplot([city_hour.loc[city_hour.hour.eq(h), "trips"] for h in range(24)], tick_labels=range(24), showfliers=False)
+    axes[0].set(xlabel="Hour", ylabel="Total pickups / hour", title="D5 | Across-date hourly distributions; outlier dots hidden")
+    axes[1].boxplot([daily.loc[daily.day_of_week.eq(d), "trips"] for d in range(7)], tick_labels=DAY_NAMES, showfliers=False)
+    axes[1].set(xlabel="Weekday", ylabel="Total pickups / day", title="D6 | Daily totals by weekday")
+    axes[2].boxplot([daily.loc[daily.year_month.eq(m), "trips"] for m in monthly.index], tick_labels=monthly.index, showfliers=False)
+    axes[2].set(xlabel="Year-month", ylabel="Total pickups / day", title="D4 | Daily totals by month; Sep 8--30 only")
+    save(fig, "D4_D5_D6_calendar_boxplots.png")
+    content += finding("D5/D6", "Hourly and weekday profiles", f"Peak hour={hour_profile.idxmax():02d}:00 ({hour_profile.max():,.0f} pickups/hour); trough={hour_profile.idxmin():02d}:00 ({hour_profile.min():,.0f}). Busiest average day={DAY_NAMES[weekday_profile.idxmax()]} ({weekday_profile.max():,.0f} pickups/day); quietest={DAY_NAMES[weekday_profile.idxmin()]} ({weekday_profile.min():,.0f}).",
+                       ["D5_D6_calendar_profiles.png", "D4_D5_D6_calendar_boxplots.png", "D5_hourly_profile.csv", "D6_weekday_profile.csv"], "Hour and weekday have different units here. Calendar variation and zone interactions should be evaluated with time-based validation.")
+    band_names = ["Late night 00-04", "Early morning 05-06", "AM 07-09", "Midday 10-15", "PM 16-19", "Evening 20-23"]
+    band_data = data.assign(time_band=pd.cut(data.hour, [-1, 4, 6, 9, 15, 19, 23], labels=band_names))
+    band_totals = band_data.groupby(["year_month", "time_band"], observed=True).trip_count.sum().unstack().reindex(columns=band_names)
+    band_share = band_totals.div(band_totals.sum(axis=1), axis=0) * 100
+    assert np.allclose(band_share.sum(axis=1), 100)
+    table(band_share.reset_index(), "D9_time_band_share.csv")
+    fig, ax = plt.subplots(figsize=(12, 5)); band_share.plot.bar(stacked=True, ax=ax, colormap="viridis")
+    ax.set(ylabel="Share of month's pickups (%)", xlabel="Year-month", title="D9 | Pickup shares in six disjoint time bands")
+    ax.tick_params(axis="x", rotation=0); ax.legend(bbox_to_anchor=(1.02, 1), loc="upper left")
+    save(fig, "D9_time_band_shares.png")
+    month_profiles = city_hour.groupby(["hour", "year_month"]).trips.mean().unstack()
+    normalised = month_profiles.div(month_profiles.sum(axis=0), axis=1) * 100
+    table(month_profiles.reset_index(), "D10_monthly_hourly_profiles.csv")
+    table(normalised.reset_index(), "D10_monthly_hourly_shares.csv")
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    month_profiles.plot(ax=axes[0]); normalised.plot(ax=axes[1])
+    axes[0].set(xlabel="Local hour", ylabel="Mean total pickups / hour", title="D10 | Monthly volume profiles")
+    axes[1].set(xlabel="Local hour", ylabel="Share of average daily pickups (%)", title="Monthly shape after volume normalisation")
+    save(fig, "D10_monthly_hourly_profiles.png")
+    content += finding("D9/D10", "Time bands and changing shape", f"The PM 16--19 band carries {band_share['PM 16-19'].min():.1f}%--{band_share['PM 16-19'].max():.1f}% of monthly pickups; late night 00--04 carries {band_share['Late night 00-04'].min():.1f}%--{band_share['Late night 00-04'].max():.1f}%. The two monthly overlays distinguish overall volume changes from changes in time-of-day shares.",
+                       ["D9_time_band_shares.png", "D10_monthly_hourly_profiles.png", "D9_time_band_share.csv", "D10_monthly_hourly_profiles.csv", "D10_monthly_hourly_shares.csv"], "Shares measure recorded trips, not rates per band-hour; the bands have unequal durations. September's partial month and changing weekday mix can affect the overlays.")
+    write_section(64, "Borough, airport and calendar patterns", content)
+    print(f"#64: borough, airport and calendar outputs saved; peak city hour {hour_profile.idxmax():02d}:00.", flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--issues", type=int, nargs="+", default=[63], choices=[63])
+    parser.add_argument("--issues", type=int, nargs="+", default=[63, 64], choices=[63, 64])
     args = parser.parse_args()
     data, zones = load_data()
     for issue in args.issues:
-        {63: issue63}[issue](data, zones)
+        {63: issue63, 64: issue64}[issue](data, zones)
 
 
 if __name__ == "__main__":

@@ -83,3 +83,54 @@ than adding separate government closure days. [Calendar reference](https://www.o
 - **Implication:** A constant-rate Poisson assumption is inadequate for pooled counts. Calendar/seasonal variation also contributes; this does not prove conditional overdispersion after modelling.
 
 <!-- arun-issue-63:end -->
+
+<!-- arun-issue-64:start -->
+
+## Borough, airport and calendar patterns (#64)
+
+Totals use all retained pickups. Group means are per zone-hour and include zeros.
+Weekend ratios compare mean pickups per observed weekend/weekday hour (not totals).
+
+**[C3] Demand by Borough**
+
+- **Finding:** Manhattan: 19,679,535 (90.6%), mean 68.3/zone-hour across 69 zones; Queens: 2,048,582 (9.4%), mean 7.1/zone-hour across 69 zones.
+- **Evidence:** [C3_group_demand.png](figures/C3_group_demand.png), [C3_group_demand.csv](tables/C3_group_demand.csv)
+- **Implication:** Compare both volume and per-zone rates. Service areas are geography; this table cannot separate yellow from green taxis.
+
+**[C4] Demand by service_zone**
+
+- **Finding:** Airports: 1,402,967 (6.5%), mean 168.0/zone-hour across 2 zones; Boro Zone: 1,571,172 (7.2%), mean 4.6/zone-hour across 81 zones; Yellow Zone: 18,753,978 (86.3%), mean 81.7/zone-hour across 55 zones.
+- **Evidence:** [C4_group_demand.png](figures/C4_group_demand.png), [C4_group_demand.csv](tables/C4_group_demand.csv)
+- **Implication:** Compare both volume and per-zone rates. Service areas are geography; this table cannot separate yellow from green taxis.
+
+**[C5] Airport timing**
+
+- **Finding:** JFK Airport peaks at 16:00 (380.9 pickups/hour); LaGuardia Airport peaks at 14:00 (258.6 pickups/hour).
+- **Evidence:** [C5_airport_profiles.png](figures/C5_airport_profiles.png), [C5_airport_hourly.csv](tables/C5_airport_hourly.csv), [C5_airport_weekly_profile.csv](tables/C5_airport_weekly_profile.csv), [C5_airport_weekly_totals.csv](tables/C5_airport_weekly_totals.csv)
+- **Implication:** Plan airport pickup positioning by its own hourly and weekday pattern; flight schedules and supply are not measured here.
+
+**[C9] Weekend-to-weekday ratios**
+
+- **Finding:** Each zone has 3,000 weekday labels and 1,176 weekend labels. Among zones averaging >=1 pickup/hour, Maspeth has the highest ratio (4.01x); Hammels/Arverne has the lowest (0.60x). All-zero zones have an undefined ratio, not zero.
+- **Evidence:** [C9_weekend_weekday_ranked.png](figures/C9_weekend_weekday_ranked.png), [C9_weekend_weekday_by_zone.csv](tables/C9_weekend_weekday_by_zone.csv)
+- **Implication:** Use zone x weekend interactions; large ratios in near-empty zones may reflect tiny denominators. All flags, including holidays, are retained for this unadjusted comparison.
+
+**[D3/D4] Calendar-adjusted totals**
+
+- **Finding:** There are 24 complete weeks and one final six-day week. September has 23 observed days, not 30. Average daily pickups range from 111,566 (2026-01) to 134,180 (2025-09).
+- **Evidence:** [D3_weekly_totals.png](figures/D3_weekly_totals.png), [D4_monthly_trips_per_day.png](figures/D4_monthly_trips_per_day.png), [D3_weekly_totals.csv](tables/D3_weekly_totals.csv), [D4_monthly_trips_per_day.csv](tables/D4_monthly_trips_per_day.csv)
+- **Implication:** Compare means per observed day across months; do not interpret partial-week or partial-month totals as a full-period fall.
+
+**[D5/D6] Hourly and weekday profiles**
+
+- **Finding:** Peak hour=18:00 (8,996 pickups/hour); trough=04:00 (870). Busiest average day=Sat (136,529 pickups/day); quietest=Mon (105,511).
+- **Evidence:** [D5_D6_calendar_profiles.png](figures/D5_D6_calendar_profiles.png), [D4_D5_D6_calendar_boxplots.png](figures/D4_D5_D6_calendar_boxplots.png), [D5_hourly_profile.csv](tables/D5_hourly_profile.csv), [D6_weekday_profile.csv](tables/D6_weekday_profile.csv)
+- **Implication:** Hour and weekday have different units here. Calendar variation and zone interactions should be evaluated with time-based validation.
+
+**[D9/D10] Time bands and changing shape**
+
+- **Finding:** The PM 16--19 band carries 26.2%--27.4% of monthly pickups; late night 00--04 carries 7.4%--8.5%. The two monthly overlays distinguish overall volume changes from changes in time-of-day shares.
+- **Evidence:** [D9_time_band_shares.png](figures/D9_time_band_shares.png), [D10_monthly_hourly_profiles.png](figures/D10_monthly_hourly_profiles.png), [D9_time_band_share.csv](tables/D9_time_band_share.csv), [D10_monthly_hourly_profiles.csv](tables/D10_monthly_hourly_profiles.csv), [D10_monthly_hourly_shares.csv](tables/D10_monthly_hourly_shares.csv)
+- **Implication:** Shares measure recorded trips, not rates per band-hour; the bands have unequal durations. September's partial month and changing weekday mix can affect the overlays.
+
+<!-- arun-issue-64:end -->
