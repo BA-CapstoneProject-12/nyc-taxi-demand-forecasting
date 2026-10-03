@@ -1,0 +1,6 @@
+stage,trips
+Raw,23318979
+Removed in cleaning,739186
+Clean,22579793
+Warm-up (recovered from 168h lag),851676
+Retained features,21728117

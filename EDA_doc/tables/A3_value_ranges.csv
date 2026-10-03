@@ -1,0 +1,15 @@
+column,min,max
+PULocationID,2,263
+trip_count,0,1122
+apparent_temperature,-25.3,32.3
+rain,0,52.2
+snowfall,0,4.06
+precipitation_probability,0,100
+hour,0,23
+day_of_week,0,6
+month,1,12
+trip_count_lag_1h,0,1122
+trip_count_lag_24h,0,1122
+trip_count_lag_168h,0,1122
+trip_count_roll_3h,0,863
+trip_count_roll_24h,0,403.83334

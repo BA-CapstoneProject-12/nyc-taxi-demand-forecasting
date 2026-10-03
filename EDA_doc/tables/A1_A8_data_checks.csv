@@ -1,0 +1,16 @@
+check,passed,detail
+A1 schema and nulls,True,17 expected columns; zero nulls
+A2 unique zone-hours,True,"576,288 rows"
+A2 complete rectangular grid,True,"138 zones x 4,176 local hour labels = 576,288"
+A1 numeric and Boolean types,True,"integer counts/calendar, float weather/rolling, Boolean flags"
+A3 finite values,True,all numeric fields finite
+A3 count and weather ranges,True,nonnegative counts/rain/snow; probability 0--100; calendar ranges valid
+A3 calendar derivation,True,matches pickup_hour
+A5 weekend and holiday flags,True,"23,184 holiday rows; 7 dates; Labor Day is in warm-up"
+A6 Manhattan exact split,True,"288,144 rows; all columns and values compared"
+A6 Queens exact split,True,"288,144 rows; all columns and values compared"
+A7 trip reconciliation,True,"21,728,117 retained + 851,676 warm-up = 22,579,793 cleaned pickups"
+A7 raw collection audit,True,"23,318,979 raw pickups; 739,186 removed"
+A8 weather join integrity,True,every retained zone-hour matches source weather
+A8 stable grid assignment,True,50 cells for 138 zones; max 13 zones/cell
+A8 DST audit,True,"9,166 pickups in combined 01:00 label"
