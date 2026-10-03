@@ -1,0 +1,59 @@
+condition,borough,time_band,change_%,zone_hours
+Rain,Manhattan,Late night,1.4,1075
+Rain,Manhattan,Early morning,22.1,333
+Rain,Manhattan,AM rush,14.6,852
+Rain,Manhattan,Midday,7.5,2233
+Rain,Manhattan,PM rush,9.9,1100
+Rain,Manhattan,Evening,-5.6,1099
+Rain,Queens,Late night,6.2,462
+Rain,Queens,Early morning,5.3,259
+Rain,Queens,AM rush,14.7,625
+Rain,Queens,Midday,3.1,1372
+Rain,Queens,PM rush,4.4,630
+Rain,Queens,Evening,3.4,686
+Heavy rain (> 2 mm),Manhattan,Late night,-13.5,179
+Heavy rain (> 2 mm),Manhattan,AM rush,14.7,192
+Heavy rain (> 2 mm),Manhattan,Midday,18.6,377
+Heavy rain (> 2 mm),Manhattan,PM rush,13.8,243
+Heavy rain (> 2 mm),Manhattan,Evening,0.5,325
+Heavy rain (> 2 mm),Queens,Late night,-32.5,80
+Heavy rain (> 2 mm),Queens,AM rush,21.2,131
+Heavy rain (> 2 mm),Queens,Midday,0.5,339
+Heavy rain (> 2 mm),Queens,PM rush,12.2,109
+Heavy rain (> 2 mm),Queens,Evening,-4.1,215
+Snow,Manhattan,Late night,-26.9,907
+Snow,Manhattan,Early morning,-36.1,423
+Snow,Manhattan,AM rush,-31.6,1105
+Snow,Manhattan,Midday,-37.5,1611
+Snow,Manhattan,PM rush,-44.0,927
+Snow,Manhattan,Evening,-57.3,1008
+Snow,Queens,Late night,-31.9,523
+Snow,Queens,Early morning,-13.5,313
+Snow,Queens,AM rush,-27.5,631
+Snow,Queens,Midday,-42.6,920
+Snow,Queens,PM rush,-44.4,527
+Snow,Queens,Evening,-51.5,619
+Heavy snow (> 0.5 cm),Manhattan,Late night,-62.0,517
+Heavy snow (> 0.5 cm),Manhattan,Early morning,-38.4,303
+Heavy snow (> 0.5 cm),Manhattan,AM rush,-49.0,616
+Heavy snow (> 0.5 cm),Manhattan,Midday,-53.1,728
+Heavy snow (> 0.5 cm),Manhattan,PM rush,-68.8,440
+Heavy snow (> 0.5 cm),Manhattan,Evening,-70.9,608
+Heavy snow (> 0.5 cm),Queens,Late night,-57.8,290
+Heavy snow (> 0.5 cm),Queens,Early morning,-19.9,186
+Heavy snow (> 0.5 cm),Queens,AM rush,-40.4,370
+Heavy snow (> 0.5 cm),Queens,Midday,-55.9,430
+Heavy snow (> 0.5 cm),Queens,PM rush,-60.5,287
+Heavy snow (> 0.5 cm),Queens,Evening,-60.3,387
+Very cold & dry (< -10 °C),Manhattan,Late night,4.4,6924
+Very cold & dry (< -10 °C),Manhattan,Early morning,1.8,2937
+Very cold & dry (< -10 °C),Manhattan,AM rush,-1.7,4819
+Very cold & dry (< -10 °C),Manhattan,Midday,2.0,4946
+Very cold & dry (< -10 °C),Manhattan,PM rush,6.0,2680
+Very cold & dry (< -10 °C),Manhattan,Evening,5.0,3724
+Very cold & dry (< -10 °C),Queens,Late night,13.3,4059
+Very cold & dry (< -10 °C),Queens,Early morning,6.5,1824
+Very cold & dry (< -10 °C),Queens,AM rush,8.6,2868
+Very cold & dry (< -10 °C),Queens,Midday,2.5,2917
+Very cold & dry (< -10 °C),Queens,PM rush,8.8,1625
+Very cold & dry (< -10 °C),Queens,Evening,5.6,2169
