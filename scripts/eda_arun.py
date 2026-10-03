@@ -609,13 +609,276 @@ def issue66(data, zones):
     print(f"#66: {len(complete)} full-week profiles; {len(union)} hourly top-ten zones; fleet tables and charts saved.", flush=True)
 
 
+SPECIAL_DAYS = {"2025-10-31": "Halloween", "2025-11-02": "NYC Marathon",
+                "2025-11-28": "Black Friday", "2025-12-24": "Christmas Eve"}
+
+
+def control_calendar(data):
+    dates = pd.DatetimeIndex(sorted(data.date.unique()))
+    excluded = set(pd.to_datetime(list(HOLIDAYS) + list(SPECIAL_DAYS) + ["2025-11-01"]))
+    excluded.update(pd.date_range("2025-11-24", "2025-11-30"))
+    excluded.update(pd.date_range("2025-12-20", "2026-01-04"))
+    # Per-zone daily totals followed by spatial median avoids counting the same
+    # storm once per taxi zone. Exclude days with median >=5 cm from normal days.
+    daily_snow = data.groupby(["date", "PULocationID"]).snowfall.sum().groupby("date").median()
+    snow_days = set(daily_snow.index[daily_snow.ge(5)])
+    excluded.update(snow_days)
+    return dates, excluded, snow_days
+
+
+def select_controls(target, dates, excluded, window=28, max_days=6):
+    candidate = [d for d in dates if d.dayofweek == target.dayofweek and d != target
+                 and abs((d-target).days) <= window and d not in excluded]
+    chosen = sorted(candidate, key=lambda d: (abs((d-target).days), d))[:max_days]
+    if len(chosen) < 3:
+        raise ValueError(f"Only {len(chosen)} normal same-weekday controls for {target.date()}")
+    return pd.DatetimeIndex(sorted(chosen))
+
+
+def issue65(data, zones):
+    dates, excluded, snow_days = control_calendar(data)
+    groups = {"All": data, **dict(tuple(data.groupby("Borough")))}
+    series = {name: group.groupby("pickup_hour").trip_count.sum() for name, group in groups.items()}
+    profiles = {name: s.to_numpy().reshape(len(dates), 24) for name, s in series.items()}
+    date_positions = {date: j for j, date in enumerate(dates)}
+
+    def event_rows(event_dates):
+        rows = []
+        for date_text, name in event_dates.items():
+            date = pd.Timestamp(date_text)
+            controls = select_controls(date, dates, excluded)
+            wider = select_controls(date, dates, excluded, window=42)
+            for scope in groups:
+                values = profiles[scope]
+                actual = float(values[date_positions[date]].sum())
+                control_values = np.array([values[date_positions[d]].sum() for d in controls])
+                mean = control_values.mean()
+                wider_mean = np.mean([values[date_positions[d]].sum() for d in wider])
+                rows.append({"date": date.strftime("%Y-%m-%d"), "event": name, "scope": scope,
+                    "weekday": DAY_NAMES[date.dayofweek], "actual_trips": actual, "normal_mean_trips": mean,
+                    "pct_change": 100*(actual/mean-1), "control_days": len(controls),
+                    "control_dates": ";".join(d.strftime("%Y-%m-%d") for d in controls),
+                    "normal_min_trips": control_values.min(), "normal_max_trips": control_values.max(),
+                    "normal_std_trips": control_values.std(ddof=1), "window_days": 28,
+                    "pct_change_window42": 100*(actual/wider_mean-1),
+                    "control_dates_window42": ";".join(d.strftime("%Y-%m-%d") for d in wider)})
+        return pd.DataFrame(rows)
+
+    present_holidays = {d: n for d, n in HOLIDAYS.items() if pd.Timestamp(d) in date_positions}
+    assert len(present_holidays) == 7
+    effects = event_rows(present_holidays)
+    table(effects, "holiday_effects.csv")
+    exclusions = pd.DataFrame({"date": sorted(d for d in excluded if d in date_positions)})
+    exclusions["reason"] = exclusions.date.map(lambda d: "heavy snow (median zone-day >=5cm)" if d in snow_days else "holiday, special day, spillover or holiday period")
+    table(exclusions, "E1_control_exclusions.csv")
+    all_effects = effects.loc[effects.scope.eq("All")].copy()
+    fig, ax = plt.subplots(figsize=(11, 5))
+    ax.barh(range(len(all_effects)), all_effects["pct_change"], color=np.where(all_effects["pct_change"].ge(0), "#27836a", "#c44e52"))
+    ax.set_yticks(range(len(all_effects)), all_effects.event); ax.invert_yaxis(); ax.axvline(0, color="black")
+    for j, row in enumerate(all_effects.itertuples()):
+        ax.annotate(f"{row.pct_change:+.1f}% (n={row.control_days})", (row.pct_change, j), xytext=(4 if row.pct_change>=0 else -4, 0),
+                    textcoords="offset points", va="center", ha="left" if row.pct_change>=0 else "right", fontsize=9)
+    ax.margins(x=.25)
+    ax.set(xlabel="Change from nearby normal same-weekday mean (%)", title="E1 | Seven recurring federal holidays; local controls within +/-28 days")
+    save(fig, "E1_holiday_pct_change.png")
+    hourly_rows = []
+    fig, axes = plt.subplots(4, 2, figsize=(14, 13))
+    for ax, (date_text, name) in zip(axes.flat, present_holidays.items()):
+        date = pd.Timestamp(date_text); controls = select_controls(date, dates, excluded)
+        normal = profiles["All"][[date_positions[d] for d in controls]]
+        actual = profiles["All"][date_positions[date]]
+        ax.plot(range(24), actual, label="Holiday", color="#c44e52")
+        ax.plot(range(24), normal.mean(axis=0), label="Normal-day mean", color="#2878ad")
+        ax.fill_between(range(24), np.quantile(normal, .25, axis=0), np.quantile(normal, .75, axis=0), color="#2878ad", alpha=.15, label="Control-day IQR")
+        ax.set(xlabel="Local hour", ylabel="Total pickups / hour", title=f"{name} | {date_text} (n={len(controls)})")
+        for h in range(24): hourly_rows.append({"date": date_text, "event": name, "hour": h, "actual_trips": actual[h], "normal_mean_trips": normal[:, h].mean(), "normal_p25": np.quantile(normal[:, h], .25), "normal_p75": np.quantile(normal[:, h], .75), "control_days": len(controls)})
+    axes.flat[-1].axis("off"); axes.flat[0].legend(fontsize=8)
+    fig.suptitle("E1 | Holiday shapes versus matched normal weekdays; IQR is descriptive")
+    save(fig, "E1_holiday_hourly_profiles.png")
+    table(pd.DataFrame(hourly_rows), "E1_holiday_hourly_profiles.csv")
+    content = """
+Normal-day baseline: up to six nearest dates of the **same weekday within +/-28 days**,
+with ties favouring the earlier date; at least three are required. Controls exclude
+the seven recurring federal holidays, Halloween and its next morning, the marathon/DST
+day, Thanksgiving week (Nov 24--30), the Christmas/New Year period (Dec 20--Jan 4),
+and heavy-snow days (median across zone daily snowfall totals >=5 cm). The exact control
+dates, counts, range and standard deviation are exported. A +/-42-day sensitivity uses
+the same exclusion rules and cap of six. IQR shading shows control-day variability,
+not a confidence interval. These local comparisons remain affected by weather, trend,
+events and supply; they are descriptive changes rather than causal holiday effects.
+The calendar is the upstream recurring federal calendar, with special days analysed
+separately. [Federal holiday dates](https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/).
+The marathon date is grounded in [NYRR's 2025 results](https://results.nyrr.org/event/M2025/result/9).
+"""
+    display_effects = all_effects[["date", "event", "actual_trips", "normal_mean_trips", "pct_change", "control_days"]].copy()
+    for col in ["actual_trips", "normal_mean_trips"]: display_effects[col] = display_effects[col].round().astype(int)
+    display_effects["pct_change"] = display_effects["pct_change"].map(lambda x: f"{x:+.1f}%")
+    content += "\n" + md_table(display_effects) + "\n"
+    worst = all_effects.loc[all_effects["pct_change"].idxmin()]
+    content += finding("E1", "Seven federal holidays", f"Largest decline: {worst.event}, {worst['pct_change']:+.1f}% relative to its matched normal weekday. All seven holidays have citywide and borough results (21 rows) in holiday_effects.csv. Labor Day cannot be estimated from features.csv because it is in the removed warm-up week. Control counts range {all_effects.control_days.min()}--{all_effects.control_days.max()}.",
+                       ["E1_holiday_pct_change.png", "E1_holiday_hourly_profiles.png", "holiday_effects.csv", "E1_holiday_hourly_profiles.csv", "E1_control_exclusions.csv"], "Use holiday identity and interactions, not only one pooled is_holiday coefficient. There is one observation of each holiday, so validate any proposed effect out of time.")
+    mlk = all_effects.loc[all_effects.date.eq("2026-01-19")].iloc[0]
+    content += (f"\nBaseline sensitivity matters: MLK Day changes from {mlk['pct_change']:+.1f}% "
+                f"with +/-28-day controls to {mlk['pct_change_window42']:+.1f}% with +/-42-day controls. "
+                "Where the same nearest six dates are selected, the sensitivity result is identical by construction. "
+                "Late-period holidays have fewer eligible controls because the dataset ends on Feb 28.\n")
+    periods = [("Thanksgiving week", "2025-11-24", "2025-11-30"), ("Christmas / New Year", "2025-12-20", "2026-01-04")]
+    period_rows = []
+    fig, axes = plt.subplots(2, 1, figsize=(13, 8))
+    period_findings = []
+    for ax, (name, start, end) in zip(axes, periods):
+        day_range = pd.date_range(start, end)
+        actuals, normals = [], []
+        for date in day_range:
+            controls = select_controls(date, dates, excluded)
+            actual = float(profiles["All"][date_positions[date]].sum())
+            normal = float(np.mean([profiles["All"][date_positions[d]].sum() for d in controls]))
+            actuals.append(actual); normals.append(normal)
+            period_rows.append({"period": name, "date": date.strftime("%Y-%m-%d"), "actual_trips": actual,
+                "normal_mean_trips": normal, "pct_change": 100*(actual/normal-1), "control_days": len(controls),
+                "control_dates": ";".join(d.strftime("%Y-%m-%d") for d in controls)})
+        ax.plot(day_range, actuals, marker="o", label="Actual", color="#c44e52")
+        ax.plot(day_range, normals, marker="o", label="Matched normal weekday", color="#2878ad")
+        ax.xaxis.set_major_locator(mdates.DayLocator(interval=1 if len(day_range)<10 else 2))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%d %b"))
+        ax.set(ylabel="Total pickups / day", title=f"E2 | {name}"); ax.legend()
+        period_findings.append(f"{name}: {100*(sum(actuals)/sum(normals)-1):+.1f}% across the period")
+    save(fig, "E2_holiday_periods.png")
+    table(pd.DataFrame(period_rows), "E2_holiday_periods.csv")
+    content += finding("E2", "Holiday periods", "; ".join(period_findings) + ". Each day's reference matches its own weekday, rather than comparing the entire period with a single day.",
+                       ["E2_holiday_periods.png", "E2_holiday_periods.csv"], "Holiday-period flags and lead/lag days may capture effects missed by exact holiday dates; local seasonal changes still confound the comparisons.")
+    zone_hour = data.pivot(index="pickup_hour", columns="PULocationID", values="trip_count")
+    event_night = pd.Timestamp("2025-12-31")
+    controls = select_controls(event_night, dates, excluded)
+    control_nights = [pd.date_range(d+pd.Timedelta(hours=20), periods=9, freq="h") for d in controls]
+    assert all(all(h in zone_hour.index for h in hours) for hours in control_nights)
+    night_hours = pd.date_range(event_night+pd.Timedelta(hours=20), periods=9, freq="h")
+    actual = zone_hour.loc[night_hours].to_numpy()
+    baseline = np.mean([zone_hour.loc[hours].to_numpy() for hours in control_nights], axis=0)
+    night_by_zone = pd.DataFrame({"PULocationID": zone_hour.columns,
+        "actual_night_trips": actual.sum(axis=0), "normal_night_trips": baseline.sum(axis=0)})
+    night_by_zone["pct_change"] = 100*(night_by_zone.actual_night_trips/night_by_zone.normal_night_trips.replace(0, np.nan)-1)
+    night_by_zone = night_by_zone.merge(zones[["LocationID", "Zone", "Borough"]], left_on="PULocationID", right_on="LocationID").drop(columns="LocationID")
+    night_by_zone["control_nights"] = len(controls)
+    night_by_zone["control_evening_dates"] = ";".join(d.strftime("%Y-%m-%d") for d in controls)
+    table(night_by_zone.sort_values("actual_night_trips", ascending=False), "E3_new_year_night_by_zone.csv")
+    night_hourly = []
+    for t, timestamp in enumerate(night_hours):
+        for j, zone_id in enumerate(zone_hour.columns):
+            night_hourly.append({"pickup_hour": timestamp, "PULocationID": zone_id, "actual_trips": actual[t, j],
+                                 "normal_mean_trips": baseline[t, j], "control_nights": len(controls)})
+    table(pd.DataFrame(night_hourly), "E3_new_year_night_hourly.csv")
+    chosen = night_by_zone.nlargest(8, "actual_night_trips")
+    fig, axes = plt.subplots(4, 2, figsize=(14, 12))
+    for ax, row in zip(axes.flat, chosen.itertuples()):
+        j = zone_hour.columns.get_loc(row.PULocationID)
+        ax.plot(range(9), actual[:, j], marker="o", color="#c44e52", label="NYE night")
+        ax.plot(range(9), baseline[:, j], marker="o", color="#2878ad", label="Normal Wed night")
+        ax.set_xticks(range(9), ["20", "21", "22", "23", "00", "01", "02", "03", "04"])
+        ax.axvline(3.5, color="black", linestyle="--", alpha=.4)
+        ax.set(xlabel="31 Dec evening -> 1 Jan morning (local hour)", ylabel="Pickups / zone-hour", title=label_zone(row.PULocationID, row.Zone, 40))
+    axes.flat[0].legend(fontsize=8)
+    fig.suptitle("E3 | New Year's Eve night: top eight zones by episode pickups")
+    save(fig, "E3_new_year_night_profiles.png")
+    content += finding("E3", "New Year's Eve night", f"The episode is Dec 31 20:00--Jan 1 04:59 (nine hour labels). Total pickups={actual.sum():,} versus {baseline.sum():,.0f} on {len(controls)} normal Wednesday nights ({100*(actual.sum()/baseline.sum()-1):+.1f}%). All 138 zones and 1,242 zone-hour comparisons are exported; the chart shows the eight largest episode totals.",
+                       ["E3_new_year_night_profiles.png", "E3_new_year_night_by_zone.csv", "E3_new_year_night_hourly.csv"], "A calendar-day holiday flag splits this cross-midnight event. Use a night-event flag attached to the full episode; top zones here are retrospective selections.")
+    special = event_rows(SPECIAL_DAYS)
+    table(special, "E4_special_day_effects.csv")
+    special_all = special.loc[special.scope.eq("All")]
+    fig, axes = plt.subplots(2, 2, figsize=(13, 8))
+    for ax, (date_text, name) in zip(axes.flat, SPECIAL_DAYS.items()):
+        date = pd.Timestamp(date_text); controls = select_controls(date, dates, excluded)
+        actual_profile = profiles["All"][date_positions[date]]
+        baseline_profile = profiles["All"][[date_positions[d] for d in controls]].mean(axis=0)
+        ax.plot(range(24), actual_profile, label="Special day", color="#c44e52")
+        ax.plot(range(24), baseline_profile, label="Normal same weekday", color="#2878ad")
+        ax.set(xlabel="Local hour", ylabel="Total pickups / hour", title=f"E4 | {name} ({date_text})")
+        if name == "NYC Marathon": ax.axvspan(.7, 1.3, color="red", alpha=.1, label="Combined DST hour")
+        ax.legend(fontsize=8)
+    save(fig, "E4_special_day_profiles.png")
+    marathon = pd.Timestamp("2025-11-02")
+    marathon_controls = select_controls(marathon, dates, excluded)
+    keep = np.arange(24) != 1
+    without_dst = profiles["All"][date_positions[marathon], keep].sum()
+    normal_without_dst = np.mean([profiles["All"][date_positions[d], keep].sum() for d in marathon_controls])
+    sensitivity = pd.DataFrame({"comparison": ["All recorded labels", "Omit 01:00 in event and every control"],
+        "actual_trips": [profiles["All"][date_positions[marathon]].sum(), without_dst],
+        "normal_mean_trips": [np.mean([profiles["All"][date_positions[d]].sum() for d in marathon_controls]), normal_without_dst]})
+    sensitivity["pct_change"] = 100*(sensitivity.actual_trips/sensitivity.normal_mean_trips-1)
+    table(sensitivity, "E4_marathon_DST_sensitivity.csv")
+    content += finding("E4", "Special days", "; ".join(f"{r.event}: {r.pct_change:+.1f}%" for r in special_all.itertuples()) + f". The marathon coincides with DST; omitting 01:00 from both event and controls gives {sensitivity['pct_change'].iloc[1]:+.1f}% versus {sensitivity['pct_change'].iloc[0]:+.1f}% with all labels. Halloween's calendar-day profile excludes the following night's spillover; the model recommendation covers both dates.",
+                       ["E4_special_day_profiles.png", "E4_special_day_effects.csv", "E4_marathon_DST_sensitivity.csv"], "Event flags may help, but marathon and DST effects cannot be separated causally from this one day. Black Friday and Christmas Eve are analysed separately from recurring federal flags.")
+    city = data.groupby("pickup_hour").agg(trips=("trip_count", "sum"), is_holiday=("is_holiday", "first"), is_weekend=("is_weekend", "first"))
+    city["day_class"] = np.where(city.is_holiday, "Holiday", np.where(city.is_weekend, "Weekend (nonholiday)", "Weekday (nonholiday)"))
+    city["hour"] = city.index.hour
+    shape = city.groupby(["hour", "day_class"]).trips.mean().unstack()
+    shape_share = shape.div(shape.sum(axis=0), axis=1) * 100
+    shape_days = city.groupby("day_class").size()/24
+    table(shape.reset_index(), "D8_day_class_hourly.csv")
+    fig, axes = plt.subplots(1, 2, figsize=(14, 4))
+    shape.plot(ax=axes[0]); shape_share.plot(ax=axes[1])
+    axes[0].set(xlabel="Local hour", ylabel="Mean total pickups / hour", title="D8 | Disjoint weekday / weekend / holiday classes")
+    axes[1].set(xlabel="Local hour", ylabel="Share of average daily pickups (%)", title="Shape normalised for different daily volumes")
+    save(fig, "D8_day_class_profiles.png")
+    content += finding("D8", "Weekday, weekend and holiday shapes", "; ".join(f"{n}: {int(shape_days[n])} days, peak {int(shape[n].idxmax()):02d}:00" for n in shape) + ". Holiday takes priority so classes are disjoint. Weekday/weekend profiles retain special non-federal days and are pooled over months.",
+                       ["D8_day_class_profiles.png", "D8_day_class_hourly.csv"], "Volume and shape both differ. Seven holidays are heterogeneous; this pooled comparison should not replace holiday-specific profiles.")
+    # G9 is deliberately produced after the data, calendar and fleet analyses.
+    required = ["A1_A8_data_checks.csv", "D10_monthly_hourly_profiles.csv", "H3_zone_consistency.csv", "I5_night_hotspots.csv"]
+    if not all((TABLES / f).exists() for f in required):
+        raise ValueError("Run #63, #64 and #66 before #65/G9")
+    recommendations = [
+        ("zone_x_hour_x_weekday", "G9; D5/D6; C5; I4", "Interactions of zone/service area with hour and weekday", "Known calendar and location", "Learn coefficients/encodings on training history only"),
+        ("zone_x_weekend_night", "G9; C9; I5", "Friday/Saturday evening plus following early morning, by zone", "Calendar known ahead", "Assign 00--04 to the preceding evening date"),
+        ("holiday_name_x_hour", "G9; E1; D8", "Separate recurring holiday identity and hourly shape", "Published calendar", "One observed example per holiday; test out of time"),
+        ("holiday_period_and_distance", "G9; E2", "Thanksgiving week, Dec20--Jan4, days before/after holiday", "Published calendar", "Fix event definitions before evaluation; avoid target-derived cutoffs"),
+        ("special_night_event", "G9; E3/E4", "NYE night, Halloween night/spillover, Black Friday, Christmas Eve, marathon day", "Published event calendar", "Match cross-midnight windows; no post-event counts as inputs"),
+        ("DST_and_affected_lags", "G9; A8", "Combined DST hour and lag_24h/lag_168h contamination indicators", "Timezone rules known", "Naive labels cannot recover the two physical hours; holiday flags cannot flag DST"),
+        ("seasonal_time_features", "G9; D3/D4; D10; H3", "Cyclic hour/weekday and month or smooth seasonal trend", "Calendar known ahead", "Only six months: annual seasonality not established"),
+        ("zone_demand_level_and_sparsity", "G9; B2/B4; H5", "Historical zero share and demand level; optional hierarchical zone grouping", "Past demand only", "Compute on training history or lagged rolling history, never full-data summaries"),
+        ("zone_weather_cell_metadata", "G9; A8", "Shared horizontal weather-cell ID for grouped spatial evaluation", "Static source metadata", "Elevation may vary within cell; this is an evaluation/grouping candidate, not proven predictive gain"),
+    ]
+    features = pd.DataFrame(recommendations, columns=["candidate_feature", "evidence_ids", "definition", "forecast_availability", "validation_note"])
+    table(features, "G9_suggested_features.csv")
+    content += finding("G9", "Modelling features suggested by all four analyses", "Nine candidate feature families are exported after #63, #64 and #66. They target geographic/calendar interactions, cross-midnight events, holiday periods, DST and seasonal level shifts. These are proposals; no feature engineering, model fitting or association-rule mining is included in this Review 1 work.",
+                       ["G9_suggested_features.csv"], "Retain existing lags and weather features for later ablation. Select candidate features using chronological validation; zone-level summaries must be learned on training data only.")
+    content += "\n" + md_table(features[["candidate_feature", "evidence_ids", "validation_note"]]) + "\n"
+    write_section(65, "Holidays, special days and modelling suggestions", content)
+    print(f"#65: 7 holidays, 4 special days and cross-midnight NYE analysed; G9 saved last.", flush=True)
+
+
+def write_manifest():
+    inputs = ["data/processed/features.csv", "data/processed/features_manhattan.csv", "data/processed/features_queens.csv",
+              "data/processed/cleaning_report.md", "data/raw/taxi_zones_manhattan_queens.csv",
+              "data/raw/weather_hourly_by_zone.csv", "data/raw/taxi_collection_summary.csv"]
+    rows = []
+    for name in inputs:
+        path = ROOT / name
+        digest = hashlib.sha256()
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1024*1024), b""):
+                digest.update(chunk)
+        rows.append({"input_path": name, "bytes": path.stat().st_size, "sha256": digest.hexdigest()})
+    table(pd.DataFrame(rows), "input_manifest.csv")
+    import sys
+    table(pd.DataFrame({"package": ["python", "numpy", "pandas", "matplotlib"],
+                        "version": [sys.version.split()[0], np.__version__, pd.__version__, matplotlib.__version__]}), "execution_environment.csv")
+    artifacts = []
+    for path in sorted(FIGURES.glob("*.png")) + sorted(TABLES.glob("*.csv")):
+        if path.name == "artifact_catalog.csv":
+            continue
+        artifacts.append({"path": path.relative_to(OUT).as_posix(), "type": path.suffix[1:],
+                          "ids_in_filename": ";".join(re.findall(r"[A-I]\d+", path.stem))})
+    table(pd.DataFrame(artifacts), "artifact_catalog.csv")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--issues", type=int, nargs="+", default=[63, 64, 66], choices=[63, 64, 66])
+    parser.add_argument("--issues", type=int, nargs="+", default=[63, 64, 66, 65], choices=[63, 64, 66, 65])
     args = parser.parse_args()
     data, zones = load_data()
     for issue in args.issues:
-        {63: issue63, 64: issue64, 66: issue66}[issue](data, zones)
+        {63: issue63, 64: issue64, 66: issue66, 65: issue65}[issue](data, zones)
+    write_manifest()
 
 
 if __name__ == "__main__":

@@ -192,3 +192,82 @@ percentiles below are empirical pickup counts, not calibrated forecast intervals
 - **Implication:** Normalise by zone count and keep sparse areas visible. Boro Zone counts include both yellow and green taxis; supply requirements cannot be inferred from pickups alone.
 
 <!-- arun-issue-66:end -->
+
+<!-- arun-issue-65:start -->
+
+## Holidays, special days and modelling suggestions (#65)
+
+Normal-day baseline: up to six nearest dates of the **same weekday within +/-28 days**,
+with ties favouring the earlier date; at least three are required. Controls exclude
+the seven recurring federal holidays, Halloween and its next morning, the marathon/DST
+day, Thanksgiving week (Nov 24--30), the Christmas/New Year period (Dec 20--Jan 4),
+and heavy-snow days (median across zone daily snowfall totals >=5 cm). The exact control
+dates, counts, range and standard deviation are exported. A +/-42-day sensitivity uses
+the same exclusion rules and cap of six. IQR shading shows control-day variability,
+not a confidence interval. These local comparisons remain affected by weather, trend,
+events and supply; they are descriptive changes rather than causal holiday effects.
+The calendar is the upstream recurring federal calendar, with special days analysed
+separately. [Federal holiday dates](https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/).
+The marathon date is grounded in [NYRR's 2025 results](https://results.nyrr.org/event/M2025/result/9).
+
+| date | event | actual_trips | normal_mean_trips | pct_change | control_days |
+|---|---|---|---|---|---|
+| 2025-10-13 | Columbus Day | 104735 | 114190 | -8.3% | 6 |
+| 2025-11-11 | Veterans Day | 123875 | 130882 | -5.4% | 6 |
+| 2025-11-27 | Thanksgiving Day | 86029 | 155811 | -44.8% | 6 |
+| 2025-12-25 | Christmas Day | 60817 | 143269 | -57.6% | 6 |
+| 2026-01-01 | New Year's Day | 102562 | 143269 | -28.4% | 6 |
+| 2026-01-19 | Martin Luther King Jr. Day | 93566 | 93566 | +0.0% | 5 |
+| 2026-02-16 | Washington's Birthday | 81311 | 90738 | -10.4% | 3 |
+
+**[E1] Seven federal holidays**
+
+- **Finding:** Largest decline: Christmas Day, -57.6% relative to its matched normal weekday. All seven holidays have citywide and borough results (21 rows) in holiday_effects.csv. Labor Day cannot be estimated from features.csv because it is in the removed warm-up week. Control counts range 3--6.
+- **Evidence:** [E1_holiday_pct_change.png](figures/E1_holiday_pct_change.png), [E1_holiday_hourly_profiles.png](figures/E1_holiday_hourly_profiles.png), [holiday_effects.csv](tables/holiday_effects.csv), [E1_holiday_hourly_profiles.csv](tables/E1_holiday_hourly_profiles.csv), [E1_control_exclusions.csv](tables/E1_control_exclusions.csv)
+- **Implication:** Use holiday identity and interactions, not only one pooled is_holiday coefficient. There is one observation of each holiday, so validate any proposed effect out of time.
+
+Baseline sensitivity matters: MLK Day changes from +0.0% with +/-28-day controls to -7.8% with +/-42-day controls. Where the same nearest six dates are selected, the sensitivity result is identical by construction. Late-period holidays have fewer eligible controls because the dataset ends on Feb 28.
+
+**[E2] Holiday periods**
+
+- **Finding:** Thanksgiving week: -24.4% across the period; Christmas / New Year: -26.8% across the period. Each day's reference matches its own weekday, rather than comparing the entire period with a single day.
+- **Evidence:** [E2_holiday_periods.png](figures/E2_holiday_periods.png), [E2_holiday_periods.csv](tables/E2_holiday_periods.csv)
+- **Implication:** Holiday-period flags and lead/lag days may capture effects missed by exact holiday dates; local seasonal changes still confound the comparisons.
+
+**[E3] New Year's Eve night**
+
+- **Finding:** The episode is Dec 31 20:00--Jan 1 04:59 (nine hour labels). Total pickups=58,216 versus 35,937 on 6 normal Wednesday nights (+62.0%). All 138 zones and 1,242 zone-hour comparisons are exported; the chart shows the eight largest episode totals.
+- **Evidence:** [E3_new_year_night_profiles.png](figures/E3_new_year_night_profiles.png), [E3_new_year_night_by_zone.csv](tables/E3_new_year_night_by_zone.csv), [E3_new_year_night_hourly.csv](tables/E3_new_year_night_hourly.csv)
+- **Implication:** A calendar-day holiday flag splits this cross-midnight event. Use a night-event flag attached to the full episode; top zones here are retrospective selections.
+
+**[E4] Special days**
+
+- **Finding:** Halloween: +9.1%; NYC Marathon: +13.7%; Black Friday: -38.8%; Christmas Eve: -30.9%. The marathon coincides with DST; omitting 01:00 from both event and controls gives +12.0% versus +13.7% with all labels. Halloween's calendar-day profile excludes the following night's spillover; the model recommendation covers both dates.
+- **Evidence:** [E4_special_day_profiles.png](figures/E4_special_day_profiles.png), [E4_special_day_effects.csv](tables/E4_special_day_effects.csv), [E4_marathon_DST_sensitivity.csv](tables/E4_marathon_DST_sensitivity.csv)
+- **Implication:** Event flags may help, but marathon and DST effects cannot be separated causally from this one day. Black Friday and Christmas Eve are analysed separately from recurring federal flags.
+
+**[D8] Weekday, weekend and holiday shapes**
+
+- **Finding:** Holiday: 7 days, peak 18:00; Weekday (nonholiday): 118 days, peak 18:00; Weekend (nonholiday): 49 days, peak 18:00. Holiday takes priority so classes are disjoint. Weekday/weekend profiles retain special non-federal days and are pooled over months.
+- **Evidence:** [D8_day_class_profiles.png](figures/D8_day_class_profiles.png), [D8_day_class_hourly.csv](tables/D8_day_class_hourly.csv)
+- **Implication:** Volume and shape both differ. Seven holidays are heterogeneous; this pooled comparison should not replace holiday-specific profiles.
+
+**[G9] Modelling features suggested by all four analyses**
+
+- **Finding:** Nine candidate feature families are exported after #63, #64 and #66. They target geographic/calendar interactions, cross-midnight events, holiday periods, DST and seasonal level shifts. These are proposals; no feature engineering, model fitting or association-rule mining is included in this Review 1 work.
+- **Evidence:** [G9_suggested_features.csv](tables/G9_suggested_features.csv)
+- **Implication:** Retain existing lags and weather features for later ablation. Select candidate features using chronological validation; zone-level summaries must be learned on training data only.
+
+| candidate_feature | evidence_ids | validation_note |
+|---|---|---|
+| zone_x_hour_x_weekday | G9; D5/D6; C5; I4 | Learn coefficients/encodings on training history only |
+| zone_x_weekend_night | G9; C9; I5 | Assign 00--04 to the preceding evening date |
+| holiday_name_x_hour | G9; E1; D8 | One observed example per holiday; test out of time |
+| holiday_period_and_distance | G9; E2 | Fix event definitions before evaluation; avoid target-derived cutoffs |
+| special_night_event | G9; E3/E4 | Match cross-midnight windows; no post-event counts as inputs |
+| DST_and_affected_lags | G9; A8 | Naive labels cannot recover the two physical hours; holiday flags cannot flag DST |
+| seasonal_time_features | G9; D3/D4; D10; H3 | Only six months: annual seasonality not established |
+| zone_demand_level_and_sparsity | G9; B2/B4; H5 | Compute on training history or lagged rolling history, never full-data summaries |
+| zone_weather_cell_metadata | G9; A8 | Elevation may vary within cell; this is an evaluation/grouping candidate, not proven predictive gain |
+
+<!-- arun-issue-65:end -->

@@ -1,0 +1,10 @@
+candidate_feature,evidence_ids,definition,forecast_availability,validation_note
+zone_x_hour_x_weekday,G9; D5/D6; C5; I4,Interactions of zone/service area with hour and weekday,Known calendar and location,Learn coefficients/encodings on training history only
+zone_x_weekend_night,G9; C9; I5,"Friday/Saturday evening plus following early morning, by zone",Calendar known ahead,Assign 00--04 to the preceding evening date
+holiday_name_x_hour,G9; E1; D8,Separate recurring holiday identity and hourly shape,Published calendar,One observed example per holiday; test out of time
+holiday_period_and_distance,G9; E2,"Thanksgiving week, Dec20--Jan4, days before/after holiday",Published calendar,Fix event definitions before evaluation; avoid target-derived cutoffs
+special_night_event,G9; E3/E4,"NYE night, Halloween night/spillover, Black Friday, Christmas Eve, marathon day",Published event calendar,Match cross-midnight windows; no post-event counts as inputs
+DST_and_affected_lags,G9; A8,Combined DST hour and lag_24h/lag_168h contamination indicators,Timezone rules known,Naive labels cannot recover the two physical hours; holiday flags cannot flag DST
+seasonal_time_features,G9; D3/D4; D10; H3,Cyclic hour/weekday and month or smooth seasonal trend,Calendar known ahead,Only six months: annual seasonality not established
+zone_demand_level_and_sparsity,G9; B2/B4; H5,Historical zero share and demand level; optional hierarchical zone grouping,Past demand only,"Compute on training history or lagged rolling history, never full-data summaries"
+zone_weather_cell_metadata,G9; A8,Shared horizontal weather-cell ID for grouped spatial evaluation,Static source metadata,"Elevation may vary within cell; this is an evaluation/grouping candidate, not proven predictive gain"
