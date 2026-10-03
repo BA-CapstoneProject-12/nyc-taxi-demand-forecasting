@@ -1,0 +1,277 @@
+PULocationID,total,observed_hours,mean_per_hour,Zone,Borough,latitude,longitude,period
+79,159665,870,183.52299,East Village,Manhattan,40.72762,-73.98594,late_night_00_04
+249,107601,870,123.67931,West Village,Manhattan,40.73458,-74.00288,late_night_00_04
+148,101625,870,116.81034,Lower East Side,Manhattan,40.71894,-73.9909,late_night_00_04
+114,88345,870,101.54598,Greenwich Village South,Manhattan,40.72834,-73.99738,late_night_00_04
+48,65977,870,75.835632,Clinton East,Manhattan,40.76225,-73.98984,late_night_00_04
+132,60699,870,69.768966,JFK Airport,Queens,40.64699,-73.78653,late_night_00_04
+144,52686,870,60.558621,Little Italy/NoLiTa,Manhattan,40.72089,-73.99692,late_night_00_04
+234,50227,870,57.732184,Union Sq,Manhattan,40.74034,-73.99046,late_night_00_04
+164,47241,870,54.3,Midtown South,Manhattan,40.74857,-73.98516,late_night_00_04
+230,46854,870,53.855172,Times Sq/Theatre District,Manhattan,40.75982,-73.9842,late_night_00_04
+68,44485,870,51.132184,East Chelsea,Manhattan,40.74843,-73.99992,late_night_00_04
+107,42519,870,48.872414,Gramercy,Manhattan,40.73682,-73.98405,late_night_00_04
+90,41240,870,47.402299,Flatiron,Manhattan,40.74228,-73.99697,late_night_00_04
+158,40152,870,46.151724,Meatpacking/West Village West,Manhattan,40.73504,-74.00898,late_night_00_04
+186,37449,870,43.044828,Penn Station/Madison Sq West,Manhattan,40.7485,-73.99244,late_night_00_04
+113,35334,870,40.613793,Greenwich Village North,Manhattan,40.73258,-73.9943,late_night_00_04
+246,33964,870,39.03908,West Chelsea/Hudson Yards,Manhattan,40.75331,-74.00402,late_night_00_04
+231,30937,870,35.55977,TriBeCa/Civic Center,Manhattan,40.71777,-74.00788,late_night_00_04
+161,29847,870,34.306897,Midtown Center,Manhattan,40.75803,-73.9777,late_night_00_04
+170,28851,870,33.162069,Murray Hill,Manhattan,40.74775,-73.97849,late_night_00_04
+138,27574,870,31.694253,LaGuardia Airport,Queens,40.77438,-73.87363,late_night_00_04
+263,24847,870,28.55977,Yorkville West,Manhattan,40.77877,-73.95101,late_night_00_04
+4,24710,870,28.402299,Alphabet City,Manhattan,40.72375,-73.97697,late_night_00_04
+211,23843,870,27.405747,SoHo,Manhattan,40.72389,-74.00154,late_night_00_04
+100,23550,870,27.068966,Garment District,Manhattan,40.75351,-73.98879,late_night_00_04
+137,23387,870,26.881609,Kips Bay,Manhattan,40.74044,-73.97649,late_night_00_04
+237,23243,870,26.716092,Upper East Side South,Manhattan,40.76862,-73.96563,late_night_00_04
+163,23141,870,26.598851,Midtown North,Manhattan,40.76442,-73.97757,late_night_00_04
+141,21570,870,24.793103,Lenox Hill West,Manhattan,40.76695,-73.95964,late_night_00_04
+162,21554,870,24.774713,Midtown East,Manhattan,40.75669,-73.97236,late_night_00_04
+142,21473,870,24.681609,Lincoln Square East,Manhattan,40.77363,-73.98153,late_night_00_04
+229,19707,870,22.651724,Sutton Place/Turtle Bay North,Manhattan,40.75673,-73.96515,late_night_00_04
+87,19463,870,22.371264,Financial District North,Manhattan,40.70681,-74.0075,late_night_00_04
+239,17837,870,20.502299,Upper West Side South,Manhattan,40.78396,-73.97863,late_night_00_04
+50,12822,870,14.737931,Clinton West,Manhattan,40.76624,-73.99514,late_night_00_04
+125,11923,870,13.704598,Hudson Sq,Manhattan,40.72629,-74.00749,late_night_00_04
+236,10588,870,12.170115,Upper East Side North,Manhattan,40.78044,-73.95701,late_night_00_04
+140,10471,870,12.035632,Lenox Hill East,Manhattan,40.76548,-73.95474,late_night_00_04
+238,10405,870,11.95977,Upper West Side North,Manhattan,40.7917,-73.97305,late_night_00_04
+88,9830,870,11.298851,Financial District South,Manhattan,40.70336,-74.01152,late_night_00_04
+233,9572,870,11.002299,UN/Turtle Bay South,Manhattan,40.74991,-73.97044,late_night_00_04
+232,9535,870,10.95977,Two Bridges/Seward Park,Manhattan,40.71473,-73.98302,late_night_00_04
+145,7949,870,9.1367816,Long Island City/Hunters Point,Queens,40.74538,-73.94889,late_night_00_04
+7,7921,870,9.1045977,Astoria,Queens,40.76149,-73.91969,late_night_00_04
+75,7784,870,8.9471264,East Harlem South,Manhattan,40.79001,-73.94575,late_night_00_04
+209,7411,870,8.5183908,Seaport,Manhattan,40.70907,-74.00366,late_night_00_04
+166,7370,870,8.4712644,Morningside Heights,Manhattan,40.80946,-73.96176,late_night_00_04
+41,7287,870,8.3758621,Central Harlem,Manhattan,40.80433,-73.95129,late_night_00_04
+74,6817,870,7.8356322,East Harlem North,Manhattan,40.80117,-73.93735,late_night_00_04
+42,6580,870,7.5632184,Central Harlem North,Manhattan,40.81826,-73.94077,late_night_00_04
+45,6103,870,7.0149425,Chinatown,Manhattan,40.71246,-73.99815,late_night_00_04
+143,6096,870,7.0068966,Lincoln Square West,Manhattan,40.77597,-73.98765,late_night_00_04
+262,6073,870,6.9804598,Yorkville East,Manhattan,40.77593,-73.94651,late_night_00_04
+129,5782,870,6.645977,Jackson Heights,Queens,40.75731,-73.88532,late_night_00_04
+151,5318,870,6.1126437,Manhattan Valley,Manhattan,40.79796,-73.96817,late_night_00_04
+226,5008,870,5.7563218,Sunnyside,Queens,40.7377,-73.92467,late_night_00_04
+261,4938,870,5.6758621,World Trade Center,Manhattan,40.70914,-74.01302,late_night_00_04
+130,4893,870,5.6241379,Jamaica,Queens,40.70437,-73.79398,late_night_00_04
+224,4889,870,5.6195402,Stuy Town/Peter Cooper Village,Manhattan,40.73182,-73.9766,late_night_00_04
+116,4548,870,5.2275862,Hamilton Heights,Manhattan,40.82701,-73.94852,late_night_00_04
+244,4508,870,5.1816092,Washington Heights South,Manhattan,40.84171,-73.9414,late_night_00_04
+43,3963,870,4.5551724,Central Park,Manhattan,40.78248,-73.96556,late_night_00_04
+24,3935,870,4.5229885,Bloomingdale,Manhattan,40.80197,-73.96548,late_night_00_04
+157,3565,870,4.0977011,Maspeth,Queens,40.72399,-73.90233,late_night_00_04
+82,3499,870,4.0218391,Elmhurst,Queens,40.7395,-73.87712,late_night_00_04
+146,2877,870,3.3068966,Long Island City/Queens Plaza,Queens,40.75424,-73.93483,late_night_00_04
+260,2849,870,3.2747126,Woodside,Queens,40.74423,-73.90631,late_night_00_04
+70,2816,870,3.2367816,East Elmhurst,Queens,40.76335,-73.8684,late_night_00_04
+13,2735,870,3.1436782,Battery Park City,Manhattan,40.71204,-74.01608,late_night_00_04
+198,2371,870,2.7252874,Ridgewood,Queens,40.70653,-73.90171,late_night_00_04
+243,2296,870,2.6390805,Washington Heights North,Manhattan,40.85711,-73.93283,late_night_00_04
+223,2205,870,2.5344828,Steinway,Queens,40.77743,-73.90541,late_night_00_04
+95,2166,870,2.4896552,Forest Hills,Queens,40.72143,-73.84767,late_night_00_04
+216,2088,870,2.4,South Ozone Park,Queens,40.67615,-73.81946,late_night_00_04
+152,2034,870,2.337931,Manhattanville,Manhattan,40.81798,-73.95378,late_night_00_04
+179,1767,870,2.0310345,Old Astoria,Queens,40.77157,-73.92833,late_night_00_04
+197,1739,870,1.9988506,Richmond Hill,Queens,40.69454,-73.83092,late_night_00_04
+92,1416,870,1.6275862,Flushing,Queens,40.7611,-73.82886,late_night_00_04
+127,1393,870,1.6011494,Inwood,Manhattan,40.86607,-73.91931,late_night_00_04
+83,1176,870,1.3517241,Elmhurst/Maspeth,Queens,40.73832,-73.89217,late_night_00_04
+193,1020,870,1.1724138,Queensbridge/Ravenswood,Queens,40.76031,-73.942,late_night_00_04
+173,824,870,0.94712644,North Corona,Queens,40.75258,-73.86304,late_night_00_04
+28,761,870,0.87471264,Briarwood/Jamaica Hills,Queens,40.7116,-73.80873,late_night_00_04
+10,721,870,0.82873563,Baisley Park,Queens,40.67895,-73.79099,late_night_00_04
+215,692,870,0.7954023,South Jamaica,Queens,40.69443,-73.79096,late_night_00_04
+56,658,870,0.75632184,Corona,Queens,40.74141,-73.85885,late_night_00_04
+258,626,870,0.71954023,Woodhaven,Queens,40.68872,-73.85577,late_night_00_04
+134,571,870,0.65632184,Kew Gardens,Queens,40.70805,-73.82871,late_night_00_04
+219,552,870,0.63448276,Springfield Gardens South,Queens,40.66219,-73.76451,late_night_00_04
+205,533,870,0.61264368,Saint Albans,Queens,40.6912,-73.76315,late_night_00_04
+191,493,870,0.56666667,Queens Village,Queens,40.71545,-73.74153,late_night_00_04
+218,430,870,0.49425287,Springfield Gardens North,Queens,40.67209,-73.77304,late_night_00_04
+196,402,870,0.46206897,Rego Park,Queens,40.72616,-73.86334,late_night_00_04
+121,391,870,0.44942529,Hillcrest/Pomonok,Queens,40.72833,-73.80244,late_night_00_04
+180,381,870,0.43793103,Ozone Park,Queens,40.6756,-73.84704,late_night_00_04
+160,377,870,0.43333333,Middle Village,Queens,40.71834,-73.88005,late_night_00_04
+102,356,870,0.4091954,Glendale,Queens,40.70355,-73.87574,late_night_00_04
+202,338,870,0.38850575,Roosevelt Island,Manhattan,40.7619,-73.94995,late_night_00_04
+124,338,870,0.38850575,Howard Beach,Queens,40.65825,-73.84492,late_night_00_04
+131,327,870,0.37586207,Jamaica Estates,Queens,40.72066,-73.7761,late_night_00_04
+86,323,870,0.37126437,Far Rockaway,Queens,40.60243,-73.75524,late_night_00_04
+16,322,870,0.37011494,Bayside,Queens,40.76274,-73.77342,late_night_00_04
+93,302,870,0.34712644,Flushing Meadows-Corona Park,Queens,40.74067,-73.84087,late_night_00_04
+171,293,870,0.33678161,Murray Hill-Queens,Queens,40.76835,-73.80955,late_night_00_04
+135,268,870,0.30804598,Kew Gardens Hills,Queens,40.72838,-73.82119,late_night_00_04
+203,254,870,0.29195402,Rosedale,Queens,40.65785,-73.73947,late_night_00_04
+101,253,870,0.2908046,Glen Oaks,Queens,40.74599,-73.71103,late_night_00_04
+117,253,870,0.2908046,Hammels/Arverne,Queens,40.59406,-73.78962,late_night_00_04
+53,248,870,0.28505747,College Point,Queens,40.78091,-73.84281,late_night_00_04
+122,221,870,0.25402299,Hollis,Queens,40.71064,-73.76114,late_night_00_04
+139,218,870,0.25057471,Laurelton,Queens,40.6771,-73.74423,late_night_00_04
+19,208,870,0.23908046,Bellerose,Queens,40.73549,-73.72666,late_night_00_04
+192,200,870,0.22988506,Queensboro Hill,Queens,40.74375,-73.81523,late_night_00_04
+38,177,870,0.20344828,Cambria Heights,Queens,40.69434,-73.73555,late_night_00_04
+252,163,870,0.18735632,Whitestone,Queens,40.78819,-73.81566,late_night_00_04
+98,135,870,0.15517241,Fresh Meadows,Queens,40.73446,-73.77725,late_night_00_04
+73,118,870,0.13563218,East Flushing,Queens,40.75411,-73.80729,late_night_00_04
+153,103,870,0.1183908,Marble Hill,Manhattan,40.87597,-73.91038,late_night_00_04
+175,99,870,0.1137931,Oakland Gardens,Queens,40.74267,-73.75462,late_night_00_04
+12,98,870,0.11264368,Battery Park,Manhattan,40.70295,-74.01556,late_night_00_04
+64,91,870,0.1045977,Douglaston,Queens,40.76061,-73.73934,late_night_00_04
+201,90,870,0.10344828,Rockaway Park,Queens,40.57798,-73.84345,late_night_00_04
+9,89,870,0.10229885,Auburndale,Queens,40.75103,-73.78795,late_night_00_04
+57,87,870,0.1,Corona,Queens,40.75182,-73.85358,late_night_00_04
+8,74,870,0.085057471,Astoria Park,Queens,40.77856,-73.92309,late_night_00_04
+15,57,870,0.065517241,Bay Terrace/Fort Totten,Queens,40.78333,-73.78597,late_night_00_04
+194,53,870,0.06091954,Randalls Island,Manhattan,40.791,-73.9246,late_night_00_04
+207,52,870,0.059770115,Saint Michaels Cemetery/Woodside,Queens,40.76399,-73.89935,late_night_00_04
+120,50,870,0.057471264,Highbridge Park,Manhattan,40.84667,-73.93018,late_night_00_04
+96,44,870,0.050574713,Forest Park/Highland Park,Queens,40.697,-73.87156,late_night_00_04
+128,39,870,0.044827586,Inwood Hill Park,Manhattan,40.87238,-73.92437,late_night_00_04
+30,20,870,0.022988506,Broad Channel,Queens,40.60369,-73.82193,late_night_00_04
+2,6,870,0.0068965517,Jamaica Bay,Queens,40.61675,-73.8313,late_night_00_04
+27,6,870,0.0068965517,Breezy Point/Fort Tilden/Riis Beach,Queens,40.55913,-73.90691,late_night_00_04
+253,5,870,0.0057471264,Willets Point,Queens,40.76063,-73.84124,late_night_00_04
+105,1,870,0.0011494253,Governor's Island/Ellis Island/Liberty Island,Manhattan,40.68878,-74.01907,late_night_00_04
+103,0,870,0,Governor's Island/Ellis Island/Liberty Island,Manhattan,40.68986,-74.04529,late_night_00_04
+104,0,870,0,Governor's Island/Ellis Island/Liberty Island,Manhattan,40.69877,-74.04077,late_night_00_04
+79,202706,445,455.5191,East Village,Manhattan,40.72762,-73.98594,weekend_night_Fri_Sat_20_04
+249,142775,445,320.8427,West Village,Manhattan,40.73458,-74.00288,weekend_night_Fri_Sat_20_04
+148,114138,445,256.48989,Lower East Side,Manhattan,40.71894,-73.9909,weekend_night_Fri_Sat_20_04
+114,106784,445,239.96404,Greenwich Village South,Manhattan,40.72834,-73.99738,weekend_night_Fri_Sat_20_04
+48,84939,445,190.87416,Clinton East,Manhattan,40.76225,-73.98984,weekend_night_Fri_Sat_20_04
+234,81853,445,183.93933,Union Sq,Manhattan,40.74034,-73.99046,weekend_night_Fri_Sat_20_04
+230,76521,445,171.9573,Times Sq/Theatre District,Manhattan,40.75982,-73.9842,weekend_night_Fri_Sat_20_04
+142,75791,445,170.31685,Lincoln Square East,Manhattan,40.77363,-73.98153,weekend_night_Fri_Sat_20_04
+132,74611,445,167.66517,JFK Airport,Queens,40.64699,-73.78653,weekend_night_Fri_Sat_20_04
+107,70758,445,159.00674,Gramercy,Manhattan,40.73682,-73.98405,weekend_night_Fri_Sat_20_04
+68,67263,445,151.15281,East Chelsea,Manhattan,40.74843,-73.99992,weekend_night_Fri_Sat_20_04
+237,65236,445,146.59775,Upper East Side South,Manhattan,40.76862,-73.96563,weekend_night_Fri_Sat_20_04
+144,64422,445,144.76854,Little Italy/NoLiTa,Manhattan,40.72089,-73.99692,weekend_night_Fri_Sat_20_04
+164,64111,445,144.06966,Midtown South,Manhattan,40.74857,-73.98516,weekend_night_Fri_Sat_20_04
+161,63802,445,143.37528,Midtown Center,Manhattan,40.75803,-73.9777,weekend_night_Fri_Sat_20_04
+186,60288,445,135.47865,Penn Station/Madison Sq West,Manhattan,40.7485,-73.99244,weekend_night_Fri_Sat_20_04
+90,58003,445,130.34382,Flatiron,Manhattan,40.74228,-73.99697,weekend_night_Fri_Sat_20_04
+113,54652,445,122.81348,Greenwich Village North,Manhattan,40.73258,-73.9943,weekend_night_Fri_Sat_20_04
+170,53955,445,121.24719,Murray Hill,Manhattan,40.74775,-73.97849,weekend_night_Fri_Sat_20_04
+158,52407,445,117.76854,Meatpacking/West Village West,Manhattan,40.73504,-74.00898,weekend_night_Fri_Sat_20_04
+231,47965,445,107.78652,TriBeCa/Civic Center,Manhattan,40.71777,-74.00788,weekend_night_Fri_Sat_20_04
+239,47889,445,107.61573,Upper West Side South,Manhattan,40.78396,-73.97863,weekend_night_Fri_Sat_20_04
+163,47038,445,105.70337,Midtown North,Manhattan,40.76442,-73.97757,weekend_night_Fri_Sat_20_04
+246,46642,445,104.81348,West Chelsea/Hudson Yards,Manhattan,40.75331,-74.00402,weekend_night_Fri_Sat_20_04
+263,46191,445,103.8,Yorkville West,Manhattan,40.77877,-73.95101,weekend_night_Fri_Sat_20_04
+141,45466,445,102.17079,Lenox Hill West,Manhattan,40.76695,-73.95964,weekend_night_Fri_Sat_20_04
+162,41795,445,93.921348,Midtown East,Manhattan,40.75669,-73.97236,weekend_night_Fri_Sat_20_04
+236,41779,445,93.885393,Upper East Side North,Manhattan,40.78044,-73.95701,weekend_night_Fri_Sat_20_04
+137,36097,445,81.116854,Kips Bay,Manhattan,40.74044,-73.97649,weekend_night_Fri_Sat_20_04
+229,35300,445,79.325843,Sutton Place/Turtle Bay North,Manhattan,40.75673,-73.96515,weekend_night_Fri_Sat_20_04
+211,34039,445,76.492135,SoHo,Manhattan,40.72389,-74.00154,weekend_night_Fri_Sat_20_04
+87,32295,445,72.573034,Financial District North,Manhattan,40.70681,-74.0075,weekend_night_Fri_Sat_20_04
+138,31891,445,71.665169,LaGuardia Airport,Queens,40.77438,-73.87363,weekend_night_Fri_Sat_20_04
+100,30525,445,68.595506,Garment District,Manhattan,40.75351,-73.98879,weekend_night_Fri_Sat_20_04
+4,27530,445,61.865169,Alphabet City,Manhattan,40.72375,-73.97697,weekend_night_Fri_Sat_20_04
+238,24855,445,55.853933,Upper West Side North,Manhattan,40.7917,-73.97305,weekend_night_Fri_Sat_20_04
+140,22092,445,49.644944,Lenox Hill East,Manhattan,40.76548,-73.95474,weekend_night_Fri_Sat_20_04
+233,20611,445,46.316854,UN/Turtle Bay South,Manhattan,40.74991,-73.97044,weekend_night_Fri_Sat_20_04
+50,19028,445,42.759551,Clinton West,Manhattan,40.76624,-73.99514,weekend_night_Fri_Sat_20_04
+125,16345,445,36.730337,Hudson Sq,Manhattan,40.72629,-74.00749,weekend_night_Fri_Sat_20_04
+43,15851,445,35.620225,Central Park,Manhattan,40.78248,-73.96556,weekend_night_Fri_Sat_20_04
+143,15612,445,35.083146,Lincoln Square West,Manhattan,40.77597,-73.98765,weekend_night_Fri_Sat_20_04
+262,14823,445,33.310112,Yorkville East,Manhattan,40.77593,-73.94651,weekend_night_Fri_Sat_20_04
+88,14021,445,31.507865,Financial District South,Manhattan,40.70336,-74.01152,weekend_night_Fri_Sat_20_04
+232,12840,445,28.853933,Two Bridges/Seward Park,Manhattan,40.71473,-73.98302,weekend_night_Fri_Sat_20_04
+75,12536,445,28.170787,East Harlem South,Manhattan,40.79001,-73.94575,weekend_night_Fri_Sat_20_04
+166,12510,445,28.11236,Morningside Heights,Manhattan,40.80946,-73.96176,weekend_night_Fri_Sat_20_04
+209,11334,445,25.469663,Seaport,Manhattan,40.70907,-74.00366,weekend_night_Fri_Sat_20_04
+151,11183,445,25.130337,Manhattan Valley,Manhattan,40.79796,-73.96817,weekend_night_Fri_Sat_20_04
+74,10855,445,24.393258,East Harlem North,Manhattan,40.80117,-73.93735,weekend_night_Fri_Sat_20_04
+41,10652,445,23.937079,Central Harlem,Manhattan,40.80433,-73.95129,weekend_night_Fri_Sat_20_04
+261,9195,445,20.662921,World Trade Center,Manhattan,40.70914,-74.01302,weekend_night_Fri_Sat_20_04
+45,8877,445,19.948315,Chinatown,Manhattan,40.71246,-73.99815,weekend_night_Fri_Sat_20_04
+145,8509,445,19.121348,Long Island City/Hunters Point,Queens,40.74538,-73.94889,weekend_night_Fri_Sat_20_04
+224,7948,445,17.860674,Stuy Town/Peter Cooper Village,Manhattan,40.73182,-73.9766,weekend_night_Fri_Sat_20_04
+7,7932,445,17.824719,Astoria,Queens,40.76149,-73.91969,weekend_night_Fri_Sat_20_04
+42,7575,445,17.022472,Central Harlem North,Manhattan,40.81826,-73.94077,weekend_night_Fri_Sat_20_04
+13,7318,445,16.444944,Battery Park City,Manhattan,40.71204,-74.01608,weekend_night_Fri_Sat_20_04
+24,6052,445,13.6,Bloomingdale,Manhattan,40.80197,-73.96548,weekend_night_Fri_Sat_20_04
+244,5723,445,12.860674,Washington Heights South,Manhattan,40.84171,-73.9414,weekend_night_Fri_Sat_20_04
+116,5531,445,12.429213,Hamilton Heights,Manhattan,40.82701,-73.94852,weekend_night_Fri_Sat_20_04
+226,4699,445,10.559551,Sunnyside,Queens,40.7377,-73.92467,weekend_night_Fri_Sat_20_04
+129,3832,445,8.611236,Jackson Heights,Queens,40.75731,-73.88532,weekend_night_Fri_Sat_20_04
+157,3701,445,8.3168539,Maspeth,Queens,40.72399,-73.90233,weekend_night_Fri_Sat_20_04
+70,3315,445,7.4494382,East Elmhurst,Queens,40.76335,-73.8684,weekend_night_Fri_Sat_20_04
+130,3261,445,7.3280899,Jamaica,Queens,40.70437,-73.79398,weekend_night_Fri_Sat_20_04
+146,2931,445,6.5865169,Long Island City/Queens Plaza,Queens,40.75424,-73.93483,weekend_night_Fri_Sat_20_04
+82,2916,445,6.552809,Elmhurst,Queens,40.7395,-73.87712,weekend_night_Fri_Sat_20_04
+95,2886,445,6.4853933,Forest Hills,Queens,40.72143,-73.84767,weekend_night_Fri_Sat_20_04
+152,2797,445,6.2853933,Manhattanville,Manhattan,40.81798,-73.95378,weekend_night_Fri_Sat_20_04
+243,2731,445,6.1370787,Washington Heights North,Manhattan,40.85711,-73.93283,weekend_night_Fri_Sat_20_04
+223,2422,445,5.4426966,Steinway,Queens,40.77743,-73.90541,weekend_night_Fri_Sat_20_04
+198,2408,445,5.411236,Ridgewood,Queens,40.70653,-73.90171,weekend_night_Fri_Sat_20_04
+260,2346,445,5.2719101,Woodside,Queens,40.74423,-73.90631,weekend_night_Fri_Sat_20_04
+179,1954,445,4.3910112,Old Astoria,Queens,40.77157,-73.92833,weekend_night_Fri_Sat_20_04
+216,1548,445,3.4786517,South Ozone Park,Queens,40.67615,-73.81946,weekend_night_Fri_Sat_20_04
+127,1514,445,3.4022472,Inwood,Manhattan,40.86607,-73.91931,weekend_night_Fri_Sat_20_04
+92,1495,445,3.3595506,Flushing,Queens,40.7611,-73.82886,weekend_night_Fri_Sat_20_04
+197,1177,445,2.6449438,Richmond Hill,Queens,40.69454,-73.83092,weekend_night_Fri_Sat_20_04
+193,985,445,2.2134831,Queensbridge/Ravenswood,Queens,40.76031,-73.942,weekend_night_Fri_Sat_20_04
+83,930,445,2.0898876,Elmhurst/Maspeth,Queens,40.73832,-73.89217,weekend_night_Fri_Sat_20_04
+10,688,445,1.5460674,Baisley Park,Queens,40.67895,-73.79099,weekend_night_Fri_Sat_20_04
+56,590,445,1.3258427,Corona,Queens,40.74141,-73.85885,weekend_night_Fri_Sat_20_04
+173,562,445,1.2629213,North Corona,Queens,40.75258,-73.86304,weekend_night_Fri_Sat_20_04
+134,551,445,1.2382022,Kew Gardens,Queens,40.70805,-73.82871,weekend_night_Fri_Sat_20_04
+215,543,445,1.2202247,South Jamaica,Queens,40.69443,-73.79096,weekend_night_Fri_Sat_20_04
+28,511,445,1.1483146,Briarwood/Jamaica Hills,Queens,40.7116,-73.80873,weekend_night_Fri_Sat_20_04
+196,509,445,1.1438202,Rego Park,Queens,40.72616,-73.86334,weekend_night_Fri_Sat_20_04
+93,485,445,1.0898876,Flushing Meadows-Corona Park,Queens,40.74067,-73.84087,weekend_night_Fri_Sat_20_04
+258,481,445,1.0808989,Woodhaven,Queens,40.68872,-73.85577,weekend_night_Fri_Sat_20_04
+191,452,445,1.0157303,Queens Village,Queens,40.71545,-73.74153,weekend_night_Fri_Sat_20_04
+202,408,445,0.91685393,Roosevelt Island,Manhattan,40.7619,-73.94995,weekend_night_Fri_Sat_20_04
+160,405,445,0.91011236,Middle Village,Queens,40.71834,-73.88005,weekend_night_Fri_Sat_20_04
+205,391,445,0.87865169,Saint Albans,Queens,40.6912,-73.76315,weekend_night_Fri_Sat_20_04
+102,366,445,0.82247191,Glendale,Queens,40.70355,-73.87574,weekend_night_Fri_Sat_20_04
+219,330,445,0.74157303,Springfield Gardens South,Queens,40.66219,-73.76451,weekend_night_Fri_Sat_20_04
+124,317,445,0.71235955,Howard Beach,Queens,40.65825,-73.84492,weekend_night_Fri_Sat_20_04
+16,296,445,0.66516854,Bayside,Queens,40.76274,-73.77342,weekend_night_Fri_Sat_20_04
+180,294,445,0.66067416,Ozone Park,Queens,40.6756,-73.84704,weekend_night_Fri_Sat_20_04
+53,261,445,0.58651685,College Point,Queens,40.78091,-73.84281,weekend_night_Fri_Sat_20_04
+218,256,445,0.5752809,Springfield Gardens North,Queens,40.67209,-73.77304,weekend_night_Fri_Sat_20_04
+121,240,445,0.53932584,Hillcrest/Pomonok,Queens,40.72833,-73.80244,weekend_night_Fri_Sat_20_04
+171,222,445,0.4988764,Murray Hill-Queens,Queens,40.76835,-73.80955,weekend_night_Fri_Sat_20_04
+131,207,445,0.46516854,Jamaica Estates,Queens,40.72066,-73.7761,weekend_night_Fri_Sat_20_04
+252,202,445,0.45393258,Whitestone,Queens,40.78819,-73.81566,weekend_night_Fri_Sat_20_04
+135,202,445,0.45393258,Kew Gardens Hills,Queens,40.72838,-73.82119,weekend_night_Fri_Sat_20_04
+192,173,445,0.38876404,Queensboro Hill,Queens,40.74375,-73.81523,weekend_night_Fri_Sat_20_04
+19,171,445,0.38426966,Bellerose,Queens,40.73549,-73.72666,weekend_night_Fri_Sat_20_04
+86,170,445,0.38202247,Far Rockaway,Queens,40.60243,-73.75524,weekend_night_Fri_Sat_20_04
+12,164,445,0.36853933,Battery Park,Manhattan,40.70295,-74.01556,weekend_night_Fri_Sat_20_04
+203,163,445,0.36629213,Rosedale,Queens,40.65785,-73.73947,weekend_night_Fri_Sat_20_04
+139,157,445,0.35280899,Laurelton,Queens,40.6771,-73.74423,weekend_night_Fri_Sat_20_04
+117,154,445,0.34606742,Hammels/Arverne,Queens,40.59406,-73.78962,weekend_night_Fri_Sat_20_04
+101,136,445,0.30561798,Glen Oaks,Queens,40.74599,-73.71103,weekend_night_Fri_Sat_20_04
+194,110,445,0.24719101,Randalls Island,Manhattan,40.791,-73.9246,weekend_night_Fri_Sat_20_04
+153,108,445,0.24269663,Marble Hill,Manhattan,40.87597,-73.91038,weekend_night_Fri_Sat_20_04
+98,107,445,0.24044944,Fresh Meadows,Queens,40.73446,-73.77725,weekend_night_Fri_Sat_20_04
+64,97,445,0.21797753,Douglaston,Queens,40.76061,-73.73934,weekend_night_Fri_Sat_20_04
+201,96,445,0.21573034,Rockaway Park,Queens,40.57798,-73.84345,weekend_night_Fri_Sat_20_04
+38,95,445,0.21348315,Cambria Heights,Queens,40.69434,-73.73555,weekend_night_Fri_Sat_20_04
+122,90,445,0.20224719,Hollis,Queens,40.71064,-73.76114,weekend_night_Fri_Sat_20_04
+73,89,445,0.2,East Flushing,Queens,40.75411,-73.80729,weekend_night_Fri_Sat_20_04
+128,87,445,0.19550562,Inwood Hill Park,Manhattan,40.87238,-73.92437,weekend_night_Fri_Sat_20_04
+15,77,445,0.17303371,Bay Terrace/Fort Totten,Queens,40.78333,-73.78597,weekend_night_Fri_Sat_20_04
+9,68,445,0.15280899,Auburndale,Queens,40.75103,-73.78795,weekend_night_Fri_Sat_20_04
+57,60,445,0.13483146,Corona,Queens,40.75182,-73.85358,weekend_night_Fri_Sat_20_04
+120,58,445,0.13033708,Highbridge Park,Manhattan,40.84667,-73.93018,weekend_night_Fri_Sat_20_04
+175,55,445,0.12359551,Oakland Gardens,Queens,40.74267,-73.75462,weekend_night_Fri_Sat_20_04
+207,53,445,0.11910112,Saint Michaels Cemetery/Woodside,Queens,40.76399,-73.89935,weekend_night_Fri_Sat_20_04
+96,50,445,0.11235955,Forest Park/Highland Park,Queens,40.697,-73.87156,weekend_night_Fri_Sat_20_04
+8,45,445,0.1011236,Astoria Park,Queens,40.77856,-73.92309,weekend_night_Fri_Sat_20_04
+30,13,445,0.029213483,Broad Channel,Queens,40.60369,-73.82193,weekend_night_Fri_Sat_20_04
+253,13,445,0.029213483,Willets Point,Queens,40.76063,-73.84124,weekend_night_Fri_Sat_20_04
+27,10,445,0.02247191,Breezy Point/Fort Tilden/Riis Beach,Queens,40.55913,-73.90691,weekend_night_Fri_Sat_20_04
+2,3,445,0.006741573,Jamaica Bay,Queens,40.61675,-73.8313,weekend_night_Fri_Sat_20_04
+105,1,445,0.002247191,Governor's Island/Ellis Island/Liberty Island,Manhattan,40.68878,-74.01907,weekend_night_Fri_Sat_20_04
+103,0,445,0,Governor's Island/Ellis Island/Liberty Island,Manhattan,40.68986,-74.04529,weekend_night_Fri_Sat_20_04
+104,0,445,0,Governor's Island/Ellis Island/Liberty Island,Manhattan,40.69877,-74.04077,weekend_night_Fri_Sat_20_04

@@ -1,0 +1,3 @@
+comparison,actual_trips,normal_mean_trips,pct_change
+All recorded labels,137453,120919,13.673616
+Omit 01:00 in event and every control,128287,114500.33,12.040722

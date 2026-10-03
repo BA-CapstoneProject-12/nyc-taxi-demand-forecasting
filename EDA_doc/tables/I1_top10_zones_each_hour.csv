@@ -1,0 +1,241 @@
+hour,rank,PULocationID,Zone,mean_pickups_per_hour
+0,1,79,East Village,272.74138
+0,2,249,West Village,213.06897
+0,3,132,JFK Airport,201.55747
+0,4,114,Greenwich Village South,169.1092
+0,5,148,Lower East Side,153.58046
+0,6,48,Clinton East,131.6954
+0,7,234,Union Sq,122.98851
+0,8,230,Times Sq/Theatre District,122.24713
+0,9,138,LaGuardia Airport,113.31609
+0,10,164,Midtown South,101.75287
+1,1,79,East Village,255.89655
+1,2,249,West Village,177.87931
+1,3,114,Greenwich Village South,152.6954
+1,4,148,Lower East Side,152.2931
+1,5,48,Clinton East,88.252874
+1,6,132,JFK Airport,87.885057
+1,7,144,Little Italy/NoLiTa,75.833333
+1,8,234,Union Sq,75.511494
+1,9,164,Midtown South,69.321839
+1,10,158,Meatpacking/West Village West,68.798851
+2,1,79,East Village,192.87931
+2,2,148,Lower East Side,131.94828
+2,3,249,West Village,120.95402
+2,4,114,Greenwich Village South,108.08621
+2,5,144,Little Italy/NoLiTa,68.304598
+2,6,48,Clinton East,63.83908
+2,7,158,Meatpacking/West Village West,48.925287
+2,8,164,Midtown South,44.890805
+2,9,234,Union Sq,44.293103
+2,10,90,Flatiron,42.994253
+3,1,79,East Village,128.01149
+3,2,148,Lower East Side,95.298851
+3,3,249,West Village,74.005747
+3,4,114,Greenwich Village South,58.304598
+3,5,48,Clinton East,50.08046
+3,6,144,Little Italy/NoLiTa,48.844828
+3,7,246,West Chelsea/Hudson Yards,41.798851
+3,8,68,East Chelsea,32.465517
+3,9,164,Midtown South,30.488506
+3,10,90,Flatiron,28.591954
+4,1,79,East Village,68.086207
+4,2,148,Lower East Side,50.931034
+4,3,48,Clinton East,45.310345
+4,4,249,West Village,32.488506
+4,5,144,Little Italy/NoLiTa,28.385057
+4,6,230,Times Sq/Theatre District,25.097701
+4,7,164,Midtown South,25.045977
+4,8,68,East Chelsea,22.568966
+4,9,90,Flatiron,22.017241
+4,10,107,Gramercy,20.568966
+5,1,132,JFK Airport,70.477011
+5,2,186,Penn Station/Madison Sq West,45.942529
+5,3,48,Clinton East,44.431034
+5,4,100,Garment District,35.632184
+5,5,79,East Village,27.557471
+5,6,263,Yorkville West,25.563218
+5,7,230,Times Sq/Theatre District,24.954023
+5,8,107,Gramercy,21.775862
+5,9,262,Yorkville East,21.413793
+5,10,68,East Chelsea,20.206897
+6,1,132,JFK Airport,126.34483
+6,2,186,Penn Station/Madison Sq West,95.16092
+6,3,236,Upper East Side North,70.224138
+6,4,48,Clinton East,68.356322
+6,5,263,Yorkville West,62.902299
+6,6,262,Yorkville East,62.045977
+6,7,100,Garment District,58.247126
+6,8,162,Midtown East,54.103448
+6,9,238,Upper West Side North,49.264368
+6,10,239,Upper West Side South,48.885057
+7,1,236,Upper East Side North,211.52874
+7,2,237,Upper East Side South,152.21264
+7,3,186,Penn Station/Madison Sq West,141.81034
+7,4,132,JFK Airport,133.66667
+7,5,262,Yorkville East,119.2931
+7,6,141,Lenox Hill West,115.44253
+7,7,239,Upper West Side South,107.99425
+7,8,263,Yorkville West,106.16092
+7,9,140,Lenox Hill East,103.71839
+7,10,238,Upper West Side North,102.3046
+8,1,236,Upper East Side North,293.62069
+8,2,237,Upper East Side South,225.45402
+8,3,186,Penn Station/Madison Sq West,171.12069
+8,4,239,Upper West Side South,150.83908
+8,5,140,Lenox Hill East,149.33908
+8,6,141,Lenox Hill West,145.47126
+8,7,238,Upper West Side North,144.18391
+8,8,162,Midtown East,140.28736
+8,9,142,Lincoln Square East,135.72989
+8,10,262,Yorkville East,131.94828
+9,1,236,Upper East Side North,302.2069
+9,2,237,Upper East Side South,257.39655
+9,3,186,Penn Station/Madison Sq West,198.86782
+9,4,162,Midtown East,167.97126
+9,5,239,Upper West Side South,165.17816
+9,6,161,Midtown Center,157.89655
+9,7,170,Murray Hill,154.58046
+9,8,238,Upper West Side North,150.79885
+9,9,141,Lenox Hill West,147.83333
+9,10,138,LaGuardia Airport,145.70115
+10,1,236,Upper East Side North,308.56322
+10,2,237,Upper East Side South,288.33908
+10,3,186,Penn Station/Madison Sq West,208.97126
+10,4,161,Midtown Center,198.04023
+10,5,138,LaGuardia Airport,188.59195
+10,6,239,Upper West Side South,181.87931
+10,7,162,Midtown East,180.25287
+10,8,170,Murray Hill,168.81034
+10,9,142,Lincoln Square East,164.11494
+10,10,230,Times Sq/Theatre District,154.52299
+11,1,236,Upper East Side North,337.03448
+11,2,237,Upper East Side South,335.70115
+11,3,161,Midtown Center,246.55172
+11,4,186,Penn Station/Madison Sq West,226.88506
+11,5,162,Midtown East,197.66667
+11,6,239,Upper West Side South,190.25862
+11,7,170,Murray Hill,182.1092
+11,8,142,Lincoln Square East,180.41379
+11,9,230,Times Sq/Theatre District,165.24138
+11,10,138,LaGuardia Airport,162.85057
+12,1,237,Upper East Side South,381.57471
+12,2,236,Upper East Side North,370.95977
+12,3,161,Midtown Center,272.58621
+12,4,186,Penn Station/Madison Sq West,212.45402
+12,5,239,Upper West Side South,210.01724
+12,6,162,Midtown East,206.51724
+12,7,142,Lincoln Square East,198.70115
+12,8,170,Murray Hill,189.2069
+12,9,138,LaGuardia Airport,176.5
+12,10,132,JFK Airport,175.24138
+13,1,237,Upper East Side South,391.91379
+13,2,236,Upper East Side North,355.91379
+13,3,161,Midtown Center,295.18391
+13,4,186,Penn Station/Madison Sq West,239.2931
+13,5,132,JFK Airport,220.09195
+13,6,239,Upper West Side South,217.36782
+13,7,162,Midtown East,210.23563
+13,8,142,Lincoln Square East,205.34483
+13,9,170,Murray Hill,189.28736
+13,10,163,Midtown North,185.44253
+14,1,237,Upper East Side South,441.72989
+14,2,236,Upper East Side North,377.48276
+14,3,161,Midtown Center,327.14943
+14,4,132,JFK Airport,290.68391
+14,5,138,LaGuardia Airport,258.64943
+14,6,239,Upper West Side South,222.64943
+14,7,162,Midtown East,221.09195
+14,8,142,Lincoln Square East,218.48276
+14,9,186,Penn Station/Madison Sq West,213.76437
+14,10,163,Midtown North,199
+15,1,237,Upper East Side South,449.35632
+15,2,236,Upper East Side North,438.15517
+15,3,161,Midtown Center,344.13793
+15,4,132,JFK Airport,336.82759
+15,5,138,LaGuardia Airport,237.56897
+15,6,142,Lincoln Square East,227.34483
+15,7,162,Midtown East,225.29885
+15,8,239,Upper West Side South,224.51724
+15,9,186,Penn Station/Madison Sq West,210.43678
+15,10,163,Midtown North,201.53448
+16,1,237,Upper East Side South,435.71839
+16,2,236,Upper East Side North,399.02874
+16,3,161,Midtown Center,382.37356
+16,4,132,JFK Airport,380.85057
+16,5,162,Midtown East,256.98276
+16,6,142,Lincoln Square East,234.60345
+16,7,230,Times Sq/Theatre District,228.96552
+16,8,239,Upper West Side South,223.15517
+16,9,138,LaGuardia Airport,217.13793
+16,10,234,Union Sq,216.88506
+17,1,237,Upper East Side South,455.04023
+17,2,161,Midtown Center,435.64943
+17,3,236,Upper East Side North,422.5
+17,4,162,Midtown East,326.24138
+17,5,132,JFK Airport,324.58046
+17,6,142,Lincoln Square East,266.82184
+17,7,239,Upper West Side South,251.86782
+17,8,186,Penn Station/Madison Sq West,251.17241
+17,9,230,Times Sq/Theatre District,251.05172
+17,10,234,Union Sq,250.28736
+18,1,161,Midtown Center,451.90805
+18,2,237,Upper East Side South,445.86207
+18,3,236,Upper East Side North,412.12644
+18,4,162,Midtown East,354.31034
+18,5,132,JFK Airport,306.67816
+18,6,142,Lincoln Square East,289.01149
+18,7,163,Midtown North,275.20115
+18,8,234,Union Sq,273.71839
+18,9,170,Murray Hill,260.00575
+18,10,230,Times Sq/Theatre District,257.02299
+19,1,161,Midtown Center,413.65517
+19,2,237,Upper East Side South,363.94828
+19,3,132,JFK Airport,344.94253
+19,4,162,Midtown East,301.17241
+19,5,236,Upper East Side North,300.56897
+19,6,234,Union Sq,260.38506
+19,7,170,Murray Hill,246.81034
+19,8,186,Penn Station/Madison Sq West,238.9023
+19,9,142,Lincoln Square East,237.88506
+19,10,68,East Chelsea,232.82184
+20,1,161,Midtown Center,424.14943
+20,2,132,JFK Airport,357.37356
+20,3,237,Upper East Side South,320.22414
+20,4,162,Midtown East,285.77011
+20,5,230,Times Sq/Theatre District,253.04598
+20,6,234,Union Sq,250.83908
+20,7,236,Upper East Side North,230.1092
+20,8,142,Lincoln Square East,228.09195
+20,9,68,East Chelsea,218.97701
+20,10,186,Penn Station/Madison Sq West,217.21839
+21,1,161,Midtown Center,408.24138
+21,2,230,Times Sq/Theatre District,345.3046
+21,3,132,JFK Airport,325.64943
+21,4,237,Upper East Side South,323.71839
+21,5,142,Lincoln Square East,312.86207
+21,6,234,Union Sq,266.65517
+21,7,162,Midtown East,254.45977
+21,8,79,East Village,248.2931
+21,9,249,West Village,232.25287
+21,10,163,Midtown North,228.8046
+22,1,161,Midtown Center,331.08046
+22,2,132,JFK Airport,329.73563
+22,3,230,Times Sq/Theatre District,325.02874
+22,4,142,Lincoln Square East,308.05172
+22,5,79,East Village,272.45977
+22,6,249,West Village,248.35057
+22,7,237,Upper East Side South,247.82184
+22,8,234,Union Sq,237.76437
+22,9,186,Penn Station/Madison Sq West,228.52299
+22,10,48,Clinton East,225.21839
+23,1,132,JFK Airport,284.2069
+23,2,79,East Village,276.93678
+23,3,249,West Village,247.96552
+23,4,230,Times Sq/Theatre District,209.59195
+23,5,142,Lincoln Square East,201.51724
+23,6,161,Midtown Center,201.2931
+23,7,138,LaGuardia Airport,190.24713
+23,8,234,Union Sq,179.68391
+23,9,114,Greenwich Village South,178.63218
+23,10,48,Clinton East,167.92529
