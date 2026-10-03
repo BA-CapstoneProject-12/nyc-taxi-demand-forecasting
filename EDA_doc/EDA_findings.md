@@ -166,3 +166,40 @@ Method: **demand ratio** = actual trips / average trips of dry hours for the sam
 **[I7] Weather effect summary**
 - **Finding:** Snow, especially heavy snow, is by far the strongest weather effect (-30% to -70%). Rain adds +5% to +20% in the morning and rush hours. Very cold dry hours are close to normal.
 - **Evidence:** `I7_weather_effect_summary.png`, `tables/weather_effects.csv`
+
+---
+
+## Feature relationships and correlations (#62)
+
+**[A4] Validation of lag and rolling features**
+- **Finding:** All 5 lag and rolling features match values recomputed from `trip_count` exactly (0 mismatches). A rolling mean that wrongly included the current hour would differ in 436 k rows.
+- **Implication:** The engineered features are correct and have no data leakage.
+
+**[G1] Correlation with `trip_count`**
+- **Finding:** Lags have the strongest link with demand (r = 0.91–0.96). Hour has r = 0.20 (0.30 in Manhattan). Weather and the other calendar features are close to 0 as straight-line correlations, because their effects are relative changes hidden by the large size differences between zones.
+- **Evidence:** `G1_feature_correlations.png`
+
+**[G2] Lag relationships**
+- **Finding:** On a log scale the relationship is roughly linear for busy zone-hours and noisy for small counts. `lag_1h` is the tightest and `roll_24h` the loosest.
+- **Evidence:** `G2_lag_hexbin.png`
+- **Implication:** A log transform of the target suits linear models.
+
+**[G3] Lag correlation by zone tier**
+- **Finding:** Median correlation with `lag_1h` is 0.90 for High zones, 0.79 for Medium, 0.44 for Low and 0.15 for Near-empty zones.
+- **Evidence:** `G3_zone_lag_correlation.png`
+- **Implication:** Lags work for busy zones only. Quiet zones need other inputs or grouping.
+
+**[G4] Multicollinearity**
+- **Finding:** `lag_1h` (VIF 28) and `roll_3h` (VIF 20) overlap strongly (r = 0.97). With only the 3 lags, every VIF is below 8.
+- **Evidence:** `G4_multicollinearity.png`
+- **Implication:** Linear models should drop `roll_3h`. Tree models can keep all features.
+
+**[G5] Variance explained by categorical features**
+- **Finding:** The zone alone explains 55% of the variance, and zone × hour explains 84%. Hour alone explains 6%. Weekday, month, weekend and holiday each explain under 1% on their own.
+- **Evidence:** `G5_eta_squared.png`
+- **Implication:** Zone identity (or zone tier / cluster) is essential. Calendar effects matter as interactions with zone and hour.
+
+**[G6] Mutual information ranking**
+- **Finding:** Ranking: lag_168h, lag_1h, lag_24h, roll_3h, zone ID, roll_24h, then hour. Weather and calendar features carry little information on their own.
+- **Evidence:** `G6_mutual_information.png`
+- **Implication:** Weather and calendar features adjust demand rather than set its level. Judge their value by model performance with and without them.
