@@ -62,3 +62,42 @@ Implication:  what this means for modelling, the dashboard or fleet planning
 - **Finding:** Weekday daytime is the most predictable (CV of about 0.08–0.10 for Tuesday–Friday, 10:00–18:00). Late nights are the least predictable, especially early Friday and Saturday (CV up to 0.4). Mondays and Sundays vary more than mid-week days. Queens varies more than Manhattan (average slot CV of 0.25 vs 0.21).
 - **Evidence:** `H6_predictability_heatmap.png`
 - **Implication:** Report forecast accuracy by time band. Late-night and Queens forecasts will be less reliable.
+
+---
+
+## Demand over time and anomalies (#60)
+
+**[D1] Hourly demand over the whole period**
+- **Finding:** 5,203 trips per hour on average. The busiest hour was Friday 12 Dec at 18:00 (12,648 trips). The quietest was 23 Feb at 04:00 (87 trips), during a snowstorm. Every day follows the same strong daily cycle, and Queens is spikier than Manhattan because of the airports.
+- **Evidence:** `D1_hourly_demand.png`
+- **Implication:** Hour of day is the strongest calendar signal. Borough-level series behave differently.
+
+**[D2] Daily demand, trend and calendar view**
+- **Finding:** Demand falls by about 1,270 trips per day each week. The last 4 weeks are 15% below the first 4 (112.8 k vs 132.7 k trips per day). The deepest dips are Thanksgiving, Christmas to New Year and the snowstorms on 25 Jan and 23 Feb. The peak is mid-December (150–170 k per day). Thursday to Saturday are the busiest days.
+- **Evidence:** `D2_daily_demand_trend.png`, `D2_calendar_heatmap.png`
+- **Implication:** A random train/test split would mix seasons. A time-based split should expect lower winter levels in the test period.
+
+**[D7] Hour x weekday heatmap**
+- **Finding:** The busiest slot is Thursday 18:00 (10,770 trips per hour) and the quietest is Tuesday 03:00 (280). Between 00:00 and 03:00, Saturday and Sunday average 5,521 trips per hour vs 1,175 on Monday to Thursday (4.7 times as many). Queens peaks on Friday at 16:00.
+- **Evidence:** `D7_hour_weekday_heatmap.png`
+- **Implication:** The model needs the hour × weekday interaction, not hour and weekday separately.
+
+**[E5] Anomaly days**
+- **Finding:** 18 of 174 days are anomalies, and all are explained. The 13 low days are holidays and the days around them (Thanksgiving weekend, 24 Dec to 3 Jan) and snowstorms. The biggest drops are 23 Feb (-78%, 14 cm of snow), 25 Jan (-62%, 19 cm of snow) and Christmas Day (-58%). The 5 high days are in the pre-Christmas busy period (10–19 Dec, 26–32% above normal).
+- **Evidence:** `E5_anomaly_days.png`
+- **Implication:** Add flags for the holiday periods (not just the federal holiday dates) and for snow days.
+
+**[E6] Zone-level spikes**
+- **Finding:** 738 zone-hours in 73 zones are spikes (at least 3 times normal and at least 30 extra trips). They cluster on New Year's night (219 spike hours), Halloween night (89 on 1 Nov) and Thanksgiving, mostly between 00:00 and 03:00. The airports have 15% of spikes (LaGuardia 70). Event venues such as Penn Station / Madison Sq West and Lincoln Square East spike repeatedly.
+- **Evidence:** `E6_zone_spikes.png`
+- **Implication:** These surges cannot be predicted from current features. An event calendar or special-night flags would help.
+
+**[E7] The daylight saving (DST) hour**
+- **Finding:** The DST hour (2 Nov, 01:00) has 9,166 trips, 51% more than a normal Sunday 01:00 (6,084). For the median zone it is 1.71 times normal. The same value is copied into `trip_count_lag_24h` on 3 Nov 01:00 and `trip_count_lag_168h` on 9 Nov 01:00.
+- **Evidence:** `E7_dst_hour.png`
+- **Implication:** Flag this hour, or replace it and its two lag copies with a normal value, before modelling.
+
+**[B6] The 50 busiest zone-hours**
+- **Finding:** 44 of the top 50 are East Village on Saturday and Sunday nights at 00:00–01:00 (up to 1,122 trips), and 6 are Midtown Center on weekday evenings at 20:00–21:00. They repeat week after week, so they are real demand, not data errors.
+- **Evidence:** `B6_top50_zone_hours.png`
+- **Implication:** No outlier removal is needed. The extreme values are real nightlife peaks.
