@@ -101,3 +101,68 @@ Implication:  what this means for modelling, the dashboard or fleet planning
 - **Finding:** 44 of the top 50 are East Village on Saturday and Sunday nights at 00:00–01:00 (up to 1,122 trips), and 6 are Midtown Center on weekday evenings at 20:00–21:00. They repeat week after week, so they are real demand, not data errors.
 - **Evidence:** `B6_top50_zone_hours.png`
 - **Implication:** No outlier removal is needed. The extreme values are real nightlife peaks.
+
+---
+
+## Weather impact on demand (#61)
+
+Method: **demand ratio** = actual trips / average trips of dry hours for the same zone, hour, weekday/weekend and month (holidays, the DST hour and near-empty zones are left out).
+
+**[F1] Weather overview**
+- **Finding:** Rain in 5.3% and snow in 2.5% of zone-hours. Feels-like temperature ranges from -25 to 32 °C, and snow only falls from December to February.
+- **Evidence:** `F1_weather_overview.png`
+
+**[F2] Rain and snow events**
+- **Finding:** 68 wet events (59 rain, 9 snow). The biggest snowstorms were 22–23 Feb (23 cm) and 25 Jan (19 cm). The heaviest rain event was 19 Dec (32 mm).
+- **Evidence:** `F2_weather_timeline.png`
+
+**[F3] Weather correlation and forecast reliability**
+- **Finding:** The forecast is well calibrated: at 71–100% it rains or snows in 95% of hours, and at 0–10% in 0.2%. Snowfall and forecast probability are correlated (r = 0.57).
+- **Evidence:** `F3_weather_correlation_reliability.png`
+- **Implication:** Forecast probability is a usable input for forecasts made a day ahead.
+
+**[F4] Weather spread across zones**
+- **Finding:** In 57% of rainy hours some zones stay dry. Temperature differs by about 2 °C across zones in the same hour.
+- **Evidence:** `F4_weather_spread.png`
+- **Implication:** Keep per-zone weather rather than one citywide value.
+
+**[F5] Rain effect**
+- **Finding:** Rain raises demand by about 5% (light) to 14% (> 5 mm per hour). The difference is significant (Mann–Whitney p < 0.001), but the effect size is small (0.14).
+- **Evidence:** `F5_rain_effect.png`
+- **Implication:** Keep `rain`. An intensity band feature may help.
+
+**[F6] Snow effect**
+- **Finding:** Light snow (≤ 0.2 cm per hour) has no effect. Heavier snow cuts pickups by 25% to 75%, and demand returns to normal 1–2 days after a big storm. Part of the drop is likely fewer taxis on the road, not only fewer riders.
+- **Evidence:** `F6_snow_effect.png`
+- **Implication:** `snowfall` is the most important weather feature. Add a snow-day / day-after-snow flag.
+
+**[F7] Temperature effect**
+- **Finding:** Almost no effect once hour, weekday and month are taken into account (all bands within ±3%).
+- **Evidence:** `F7_temperature_effect.png`
+- **Implication:** Temperature adds little beyond the calendar features.
+
+**[F8] Forecast effect**
+- **Finding:** Weak and mixed. Dry hours with a 51–70% forecast are 9% busier, and the other bands show no clear pattern.
+- **Evidence:** `F8_forecast_effect.png`
+
+**[F9] Weather by time of day**
+- **Finding:** Rain matters most in the morning (early morning +19%, AM rush +15%) and slightly lowers evening demand (-5%). Snow hits evenings hardest (-57%).
+- **Evidence:** `F9_weather_by_time.png`
+- **Implication:** Weather × hour interactions matter. Tree-based models can capture them.
+
+**[F10] Weather by place**
+- **Finding:** In rain, residential Queens zones (Astoria, Sunnyside, Long Island City, about +25%) and Times Square rise most, the airports barely change (+1%), and Seaport and the Financial District fall. In snow, the airports drop most (-60%).
+- **Evidence:** `F10_rain_sensitivity_by_zone.png`
+
+**[F11] Before, during and after rain**
+- **Finding:** Demand rises 1 hour before rain (+5%), peaks in the first rain hour (+7%) and returns to normal about 3 hours after the rain stops.
+- **Evidence:** `F11_rain_timing.png`
+- **Implication:** A "rain in the last 1–2 hours" feature may help.
+
+**[F12] Extreme weather days**
+- **Finding:** The heaviest rain day (30 Oct) was close to normal. The biggest snow day (25 Jan) was 62–68% below normal. The coldest day (8 Feb) was 10% above normal, with evening peaks that likely match Super Bowl Sunday.
+- **Evidence:** `F12_extreme_weather_days.png`
+
+**[I7] Weather effect summary**
+- **Finding:** Snow, especially heavy snow, is by far the strongest weather effect (-30% to -70%). Rain adds +5% to +20% in the morning and rush hours. Very cold dry hours are close to normal.
+- **Evidence:** `I7_weather_effect_summary.png`, `tables/weather_effects.csv`
