@@ -124,15 +124,11 @@ The models use the same train/test split and the same core feature groups:
 Model 3 uses Poisson loss and explicitly marks the ordinal-encoded categorical
 features as categorical features.
 
-### 6. Compare models and test weather contribution
+### 6. Compare models
 
 Run [models/model_comparison_error_analysis.ipynb](models/model_comparison_error_analysis.ipynb)
 for the final comparison, train/test gaps, hourly errors, zone errors, residuals,
 and largest individual errors.
-
-Run [models/weather_ablation_histgradientboosting.ipynb](models/weather_ablation_histgradientboosting.ipynb)
-to compare identical HistGradientBoosting models with and without weather
-features. This measures predictive contribution, not causality.
 
 ## Current modeling results
 
@@ -183,10 +179,6 @@ model_2_feature_importance.csv
 model_3_predictions.csv
 model_3_metrics.csv
 model_3_permutation_importance.csv
-weather_ablation_results.csv
-weather_ablation_test_comparison.csv
-weather_ablation_by_hour.csv
-weather_ablation_by_zone.csv
 model_comparison_final.csv
 model_improvement_vs_baseline.csv
 model_train_test_comparison.csv
@@ -217,7 +209,6 @@ models/
   model_2_random_forest.ipynb
   model_3_hist_gradient_boosting.ipynb
   model_comparison_error_analysis.ipynb
-  weather_ablation_histgradientboosting.ipynb
 scripts/
   data_collection.ipynb
   data_processing_engineering.ipynb
@@ -231,7 +222,6 @@ requirements.txt
 
 - The models are first-pass, untuned baselines; no hyperparameter search is
   included yet.
-- The weather ablation is predictive, not causal.
 - The large raw trip CSV is external to GitHub.
 - Association-rule mining and an interactive dashboard are not implemented in
   the current repository.
