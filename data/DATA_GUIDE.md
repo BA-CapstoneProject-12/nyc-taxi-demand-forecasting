@@ -9,14 +9,19 @@ data/
 ├── DATA_GUIDE.md                             this file
 ├── dataset-documents/                        documentation of the dataset
 │   ├── data_collection.md                      how the data was collected (sources, APIs, steps)
-│   └── data_dictionary.md                      every field, its purpose and why it was chosen
+│   ├── data_dictionary.md                      every field, its purpose and why it was chosen
+│   ├── data_processing.md                      cleaning and the ML feature table
+│   └── time_series_preparation.md              the time-series dataset: steps, files and fields
 ├── raw/                                      everything collected in the data collection stage
 │   ├── NYC-taxi-demand-Manhattan-Queens.csv    full dataset (3.2 GB, NOT in git, on Kaggle)
 │   ├── taxi_zones_manhattan_queens.csv         the 138 taxi zones with latitude/longitude
 │   ├── weather_hourly_by_zone.csv              hourly weather for every zone
 │   ├── taxi_collection_summary.csv             audit of the 12 downloaded TLC files
 │   └── tlc_downloads/                          cache of the original TLC files (NOT in git)
-└── processed/                                empty, for the next stages (cleaning, features, models)
+└── processed/                                cleaned and prepared data
+    ├── features.csv (+ _manhattan, _queens)    zone-hour feature table for the ML models
+    ├── cleaning_report.md                      rows removed by each cleaning rule
+    └── time_series/                            analysis-ready series for the time-series stage
 ```
 
 **Rule of thumb:** `raw/` holds data exactly as collected. Don't edit these files. Anything cleaned, aggregated or engineered goes in `processed/`.
@@ -74,6 +79,12 @@ The data-quality counts are for the **data preparation** step. Those trips are s
 ### 2.5 `tlc_downloads/`
 
 The original monthly Parquet files from TLC (~425 MB), plus the TLC zone lookup and zone boundary files. The collection notebook keeps them so that a rerun does not download everything again. They are not in git, and you don't need them to use the dataset.
+
+### 2.6 `data/processed/time_series/`: the time-series dataset
+
+Prepared for the time-series analysis stage by `scripts/time_series_data_preparation.ipynb`. It holds regular hourly and daily demand series from 1 Sep 2025 at four levels (all zones, borough, service area, zone), a calendar and event table, splits that reuse the ML test period, rolling-origin folds, zone profiles and readiness checks. All files are in git (the largest, `ts_zone_hourly.csv`, is about 31 MB).
+
+Start with `ts_aggregate_hourly.csv` or `ts_aggregate_daily.csv`: each row already carries every calendar regressor. Files, fields and decisions: [dataset-documents/time_series_preparation.md](dataset-documents/time_series_preparation.md).
 
 ## 3. How to get the data
 
