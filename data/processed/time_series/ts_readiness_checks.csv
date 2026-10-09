@@ -1,0 +1,31 @@
+check,passed,detail
+Cleaning matches cleaning_report.md,True,"removed {'Rule 1': 276749, 'Rule 2': 329654, 'Rule 3': 6826, 'Rule 4': 125957}"
+"Grid is 138 zones x 4,344 hours",True,"599,472 rows, 4,344 hours"
+Every clean trip is counted once,True,"22,579,793 trips"
+Hourly index is regular (no gaps or repeats),True,every step within each zone is exactly 1 hour
+Counts match features.csv,True,"576,288 zone-hours compared, 0 mismatches"
+DST adjustment only touches the merged hour,True,adjusted hour: 2025-11-02 01:00:00
+Week index starts on a Monday,True,2025-09-01 is a Monday
+8 federal holidays in the window,True,"Labor Day, Columbus Day, Veterans Day, Thanksgiving Day, Christmas Day, New Year's Day, Martin Luther King Jr. Day, Washington's Birthday"
+Holiday flag matches features.csv,True,"4,176 hours compared"
+Test period ends at the end of the data,True,2026-01-25 04:00:00 -> 2026-02-28 23:00:00
+Test hours match the ML models,True,836 hours
+CV folds stay before the test period,True,6 folds
+city series add up to all clean trips,True,"1 series, 22,579,793 trips"
+borough series add up to all clean trips,True,"2 series, 22,579,793 trips"
+service_area series add up to all clean trips,True,"3 series, 22,579,793 trips"
+Daily totals equal hourly totals,True,181 days x 6 series
+Zone daily covers 138 zones x 181 days,True,"24,978 rows"
+Zone profiles use training hours only,True,last hour used: 2026-01-11 03:00:00
+Every zone has a profile and a weather cell,True,50 weather cells
+Strongest seasonal autocorrelation is at the weekly lag,True,"ACF(24)=0.878, ACF(168)=0.891"
+No missing values in ts_calendar_hourly.csv,True,"4,344 rows x 45 columns"
+No missing values in ts_aggregate_hourly.csv,True,"26,064 rows x 58 columns"
+No missing values in ts_aggregate_daily.csv,True,"1,086 rows x 45 columns"
+No missing values in ts_zone_hourly.csv,True,"599,472 rows x 10 columns"
+No missing values in ts_zone_daily.csv,True,"24,978 rows x 16 columns"
+Yellow + green = total in ts_aggregate_hourly.csv,True,
+Yellow + green = total in ts_aggregate_daily.csv,True,
+Yellow + green = total in ts_zone_hourly.csv,True,
+Yellow + green = total in ts_zone_daily.csv,True,
+Zone weather matches the source table,True,"599,472 rows"
