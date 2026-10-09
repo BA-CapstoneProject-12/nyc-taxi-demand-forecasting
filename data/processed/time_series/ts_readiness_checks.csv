@@ -29,3 +29,10 @@ Yellow + green = total in ts_aggregate_daily.csv,True,
 Yellow + green = total in ts_zone_hourly.csv,True,
 Yellow + green = total in ts_zone_daily.csv,True,
 Zone weather matches the source table,True,"599,472 rows"
+ts_calendar_hourly.csv reads back with no missing values,True,"4,344 rows re-read"
+ts_aggregate_hourly.csv reads back with no missing values,True,"26,064 rows re-read"
+ts_aggregate_daily.csv reads back with no missing values,True,"1,086 rows re-read"
+ts_zone_hourly.csv reads back with no missing values,True,"599,472 rows re-read"
+ts_zone_daily.csv reads back with no missing values,True,"24,978 rows re-read"
+ts_cv_folds.csv reads back with no missing values,True,6 rows re-read
+ts_zone_profile.csv: only adi/cv2 of zero-demand zones are empty,True,"undefined for zones [103, 104]"
