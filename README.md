@@ -133,9 +133,9 @@ and largest individual errors.
 ### 7. Prepare the time-series dataset (Review 2)
 
 Run [scripts/time_series_data_preparation.ipynb](scripts/time_series_data_preparation.ipynb).
-It rebuilds the demand series from the raw trips with the same cleaning rules
-(and checks they match `features.csv` exactly), keeps the full history from
-1 Sep 2025, and writes analysis-ready series to `data/processed/time_series/`:
+It builds on `data/processed/features.csv`, recovers the dropped warm-up week
+(1-7 Sep) exactly from its 168-hour lag column so the series cover the full
+history, and writes analysis-ready series to `data/processed/time_series/`:
 
 - hourly and daily series for all zones, each borough and each service area
 - the zone-hour and zone-day panels
@@ -147,7 +147,7 @@ It rebuilds the demand series from the raw trips with the same cleaning rules
 
 Every step, file and field is documented in
 [data/dataset-documents/time_series_preparation.md](data/dataset-documents/time_series_preparation.md).
-This step needs the raw trip CSV from Kaggle.
+All inputs are in the repository, so this step does not need the Kaggle data.
 
 ## Current modeling results
 

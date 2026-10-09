@@ -1,8 +1,8 @@
 # Time Series Data Preparation
 
-This document covers the data preparation for the time series analysis stage (Review 2). It explains why a separate time series dataset was built, every step and decision, every output file and field, the checks that were run, and what the readiness diagnostics suggest for the analysis.
+This document covers the data preparation for the time series analysis stage (Review 2). The dataset is **built on `data/processed/features.csv`**, the cleaned zone-hour table from the processing stage. The document explains what was added to it and why, every step and decision, every output file and field, the checks that were run, and what the readiness diagnostics suggest for the analysis.
 
-- Code: [`scripts/time_series_data_preparation.ipynb`](../../scripts/time_series_data_preparation.ipynb). Run all cells, about 3 minutes.
+- Code: [`scripts/time_series_data_preparation.ipynb`](../../scripts/time_series_data_preparation.ipynb). Run all cells, about 2 minutes. Everything it needs is in the repository (no Kaggle download).
 - Outputs: [`data/processed/time_series/`](../processed/time_series/)
 - Related: [data_collection.md](data_collection.md) (how the raw data was collected), [data_processing.md](data_processing.md) (cleaning and the ML feature table), [EDA findings](../../EDA_doc/EDA_findings.md)
 
@@ -16,40 +16,39 @@ The next stage forecasts and analyses taxi demand as **time series**: decomposit
 4. **Known-in-advance regressors.** Calendar, holidays, events and seasonal terms that are available at forecast time.
 5. **A time-based evaluation design.** Fixed train/validation/test periods and rolling-origin folds.
 
-The ML feature table `data/processed/features.csv` was built for the regression models and does not meet these needs:
+`data/processed/features.csv` is the cleaned zone-hour demand table and the base of this dataset. It was built for the regression models, so on its own it does not meet these needs:
 
 | Requirement | `features.csv` | Time series dataset |
 |---|---|---|
-| Full history | Starts 8 Sep: the first week was dropped as warm-up for the 168 h lag | Starts 1 Sep, all 4,344 hours. Time series models don't need a warm-up week dropped |
+| Full history | Starts 8 Sep: the first week was dropped as warm-up for the 168 h lag | Starts 1 Sep, all 4,344 hours. The first week is recovered exactly from `features.csv`'s own `trip_count_lag_168h` |
 | Levels | Zone-hour only | City, borough, service area and zone; hourly and daily |
 | Daylight-saving double hour | Described in docs only | Flagged, plus an adjusted target and flags for the affected lags |
 | Calendar effects | One `is_holiday` flag | Holiday names, holiday periods, days to/from holidays, special days, cross-midnight night events, weekend nights, heavy-snow days |
 | Seasonality | Raw `hour`, `day_of_week` | Daily and weekly Fourier terms, `hour_of_week`, time bands, trend index |
-| Taxi type | Combined | Yellow and green kept as separate columns |
 | Evaluation design | Split later in the modelling notebook | Train/validation/test built in, with the **same test period as the ML models**, plus 6 rolling-origin folds |
 | Per-zone behaviour | None | Volume tier and demand pattern per zone, computed on training data only |
 
-The time series dataset is not a replacement for `features.csv`. Both describe **exactly the same demand**: the rebuilt counts match `features.csv` on all 576,288 zone-hours they share (section 6).
+The time series dataset doesn't replace `features.csv`; it extends it. From 8 Sep onwards the demand values are taken from `features.csv` unchanged, so both files describe **exactly the same demand**. The ML models and the time series models therefore work from one source.
 
 ## 2. Inputs
 
 | File | Used for |
 |---|---|
-| `data/raw/NYC-taxi-demand-Manhattan-Queens.csv` | Trip records (3.2 GB, from the private Kaggle dataset) |
-| `data/raw/weather_hourly_by_zone.csv` | The 138 × 4,344 hour grid, zone weather and weather grid cells |
+| `data/processed/features.csv` | **The base:** cleaned zone-hour demand (8 Sep onwards), its 168 h lag (to recover 1-7 Sep), and the holiday flag (cross-check) |
+| `data/raw/weather_hourly_by_zone.csv` | The 138 × 4,344 hour grid, zone weather for all hours, and weather grid cells |
 | `data/raw/taxi_zones_manhattan_queens.csv` | Borough, service area and coordinates of each zone |
-| `data/processed/cleaning_report.md` | Cross-check: removals per cleaning rule |
-| `data/processed/features.csv` | Cross-check: counts and holiday flag |
+| `data/processed/cleaning_report.md` | Cross-check: total number of clean trips |
 | `models/modeling/split_summary.csv` | The ML models' test period, reused so results can be compared |
+
+All inputs are in the repository. The 3.2 GB raw trip file is **not** needed, because the cleaning was already done by the processing stage.
 
 ## 3. Preparation steps
 
 ```
-raw trips (23,318,979)
-   │  Step 1  same 4 cleaning rules as the processing stage  → 22,579,793 clean trips
+features.csv (138 zones × 4,176 hours, from 8 Sep)
+   │  Step 1  recover 1-7 Sep exactly from trip_count_lag_168h  → full history from 1 Sep
    ▼
-zone-hour counts (yellow, green)
-   │  Step 2  full 138 × 4,344 grid, zero-fill, DST adjustment, zone weather
+   │  Step 2  full 138 × 4,344 grid, DST adjustment, zone weather
    ▼
 zone hourly panel (599,472 rows) ──────────────┐
    │  Step 3  calendar, events, Fourier terms,   │  Step 5  zone daily series,
@@ -60,25 +59,24 @@ zone hourly panel (599,472 rows) ──────────────┐
    Step 6  readiness checks and diagnostics → data/processed/time_series/
 ```
 
-### Step 1: Clean the trips
+### Step 1: Load `features.csv` and recover the first week
 
-The series are rebuilt from the raw trips because `features.csv` lacks the first week and the yellow/green split. To describe the same demand as the rest of the project, the **same four rules** as `scripts/data_processing_engineering.ipynb` are applied in the same order:
+`features.csv` already contains the cleaned demand: the four cleaning rules (duplicates, dropoff at or before pickup, trips over 6 hours, unknown dropoff zone) were applied by the processing stage, leaving 22,579,793 clean trips, and zero-demand hours were filled in. This dataset uses it as its base and does **not** clean the data again.
 
-| Rule | Removed |
-|---|---:|
-| 1. Exact duplicate rows | 276,749 |
-| 2. Dropoff at or before pickup | 329,654 |
-| 3. Trip longer than 6 hours | 6,826 |
-| 4. Dropoff zone 264 or 265 (unknown or outside NYC) | 125,957 |
-| **Clean trips** | **22,579,793** |
+The processing stage dropped **1-7 Sep** (168 hours × 138 zones = 23,184 zone-hours) as warm-up for its 168-hour lag. Time series models don't need that warm-up, and the week contains Labor Day, so it is recovered.
 
-The notebook reads the expected numbers from `cleaning_report.md` and stops if any differs. All four match exactly.
+The recovery is exact. The processing stage computed `trip_count_lag_168h` on the complete zero-filled grid, sorted by time within each zone, *before* it dropped the warm-up rows. For every row from 8-14 Sep, `trip_count_lag_168h` is therefore the zone's count exactly one week earlier, on 1-7 Sep. The EDA used the same fact in its trip reconciliation (A7). Three checks prove it holds:
+
+| Check | Result |
+|---|---|
+| On every row where both are in the file (15 Sep onwards), `trip_count_lag_168h` equals `trip_count` 168 hours earlier | 553,104 zone-hours, all equal |
+| The recovered 7 Sep counts agree with two other lag columns: `trip_count_lag_24h` of each 8 Sep hour, and `trip_count_lag_1h` of 8 Sep 00:00 | 3,312 + 138 values, all equal |
+| The total of the full panel equals the clean trips in `cleaning_report.md` | 22,579,793, equal |
 
 ### Step 2: Zone-hour panel
 
-- Each trip is assigned to the hour it started in (07:42 → 07:00), and trips are counted per zone and hour, separately for yellow and green.
-- The full grid of **138 zones × 4,344 hours = 599,472 rows** comes from the weather table. Hours with no pickups get **0**: they are real observations of zero demand, and a time series can't have holes.
-- The zone's own hourly weather is attached (apparent temperature, rain, snowfall, precipitation probability).
+- The recovered week and `features.csv` are stacked into one grid of **138 zones × 4,344 hours = 599,472 rows**, checked against the weather table. Zero-demand hours stay **0**, as in `features.csv`: they are real observations, and a time series can't have holes.
+- Weather comes from `weather_hourly_by_zone.csv` for all hours, because `features.csv` has no rows for the first week. From 8 Sep it is identical to the weather columns of `features.csv` (checked on all 576,288 zone-hours).
 
 **Daylight saving time.** TLC timestamps are local wall-clock times with no offset. On 2 Nov 2025 the clocks went back at 02:00, so 01:00-01:59 happened twice, and both physical hours are recorded under one `01:00` label. Two options were considered:
 
@@ -119,7 +117,7 @@ Six series at three levels are built by summing the zone panel:
 | service_area | Boro Zone | 81 | 1,639,075 | 377.3 | 1,172 |
 | service_area | Airports | 2 | 1,468,045 | 337.9 | 1,058 |
 
-Each series and hour has the observed and adjusted counts, yellow and green, $\log(1+y)$ of the adjusted count, the number of zones and of zones with at least one pickup, the **mean weather across its zones**, and all calendar columns.
+Each series and hour has the observed and adjusted counts, $\log(1+y)$ of the adjusted count, the number of zones and of zones with at least one pickup, the **mean weather across its zones**, and all calendar columns.
 
 - **Why a plain mean for weather.** Weighting by each zone's pickups in that hour would put the target inside a regressor.
 - **Why $\log(1+y)$.** The EDA found demand strongly right-skewed and overdispersed. A log evens out the variance (ARIMA and ETS assume roughly constant variance), and $\log(1+y)$ keeps zero hours valid. Forecasts made on the log scale need back-transforming with $e^{\hat{y}}-1$, which estimates the median rather than the mean. Check this on the validation period.
@@ -175,16 +173,18 @@ For hourly data, a high CV² in busy zones mostly reflects the strong daily cycl
 
 ## 6. Checks
 
-Every check is recorded in [`ts_readiness_checks.csv`](../processed/time_series/ts_readiness_checks.csv). **All 37 passed.** The main ones:
+Every check is recorded in [`ts_readiness_checks.csv`](../processed/time_series/ts_readiness_checks.csv). **All 36 passed.** The main ones:
 
 | Check | Result |
 |---|---|
-| Cleaning matches `cleaning_report.md` | All four rule counts identical |
-| Counts match `features.csv` | 576,288 zone-hours compared, **0 mismatches** |
+| `trip_count_lag_168h` is exact wherever testable | 553,104 zone-hours, all equal |
+| First week recovered and consistent with the 24 h and 1 h lags | 23,184 zone-hours recovered; 3,450 cross-checked values equal |
+| Total equals `cleaning_report.md` | 22,579,793 clean trips |
+| Weather equals `features.csv`'s weather columns | 576,288 zone-hours, identical |
 | Holiday flag matches `features.csv` | 4,176 hours compared, identical |
 | Complete, regular grid | 138 × 4,344 rows; every step within a zone is exactly 1 hour |
 | Every clean trip counted once | 22,579,793 in the zone panel, in every level's total, and in the daily totals |
-| Yellow + green = total | True in all four count tables |
+| Same values as an earlier build from the raw trip file | All counts identical (the series were first built from the raw trips with the same cleaning, then rebuilt on `features.csv`) |
 | No missing values | In all five data tables, checked again after re-reading every saved CSV the way a user would |
 | Zone weather equals the source table | 599,472 rows identical |
 | Test period equals the ML models' | 836 hours, 25 Jan 04:00 - 28 Feb 23:00 |
@@ -240,16 +240,16 @@ All files are in `data/processed/time_series/`, as CSV, with timestamps as `YYYY
 
 | File | Rows × columns | Size | Contents |
 |---|---|---:|---|
-| `ts_aggregate_hourly.csv` | 26,064 × 58 | 9.2 MB | 6 series × 4,344 hours, with all calendar fields |
-| `ts_aggregate_daily.csv` | 1,086 × 45 | 0.3 MB | 6 series × 181 days |
-| `ts_zone_hourly.csv` | 599,472 × 10 | 30.7 MB | 138 zones × 4,344 hours (join the calendar on `ds`) |
-| `ts_zone_daily.csv` | 24,978 × 16 | 2.1 MB | 138 zones × 181 days |
-| `ts_calendar_hourly.csv` | 4,344 × 45 | 1.2 MB | Calendar, events, Fourier terms, DST flags, splits |
+| `ts_aggregate_hourly.csv` | 26,064 × 56 | 9.4 MB | 6 series × 4,344 hours, with all calendar fields |
+| `ts_aggregate_daily.csv` | 1,086 × 43 | 0.3 MB | 6 series × 181 days |
+| `ts_zone_hourly.csv` | 599,472 × 8 | 28.0 MB | 138 zones × 4,344 hours (join the calendar on `ds`) |
+| `ts_zone_daily.csv` | 24,978 × 14 | 1.9 MB | 138 zones × 181 days |
+| `ts_calendar_hourly.csv` | 4,344 × 45 | 1.3 MB | Calendar, events, Fourier terms, DST flags, splits |
 | `ts_zone_profile.csv` | 138 × 20 | < 0.1 MB | Zone profiles (training period) |
 | `ts_cv_folds.csv` | 6 × 7 | < 0.1 MB | Rolling-origin folds |
 | `ts_stationarity_tests.csv` | 6 × 6 | < 0.1 MB | ADF/KPSS results |
 | `ts_acf_key_lags.csv` | 11 × 2 | < 0.1 MB | Autocorrelation at key lags |
-| `ts_readiness_checks.csv` | 37 × 3 | < 0.1 MB | Every check and its result |
+| `ts_readiness_checks.csv` | 36 × 3 | < 0.1 MB | Every check and its result |
 
 ### 9.1 Count and weather fields (aggregate, zone and daily tables)
 
@@ -260,9 +260,8 @@ All files are in `data/processed/time_series/`, as CSV, with timestamps as `YYYY
 | `PULocationID` | int | TLC pickup zone (zone tables) | Identifies one zone series |
 | `ds` | datetime | Start of the hour, local time (hourly tables) | Time index, the usual name in forecasting libraries |
 | `date` | date | Calendar day (daily tables, calendar) | Daily time index |
-| `trip_count` | int | Clean pickups in the hour or day | Observed demand |
+| `trip_count` | int | Clean pickups in the hour or day (from `features.csv`; 1-7 Sep recovered from its 168 h lag) | Observed demand |
 | `trip_count_adj` | float | `trip_count` with the DST merged hour halved | **Target for fitting**: pickups per physical hour |
-| `trip_count_yellow`, `trip_count_green` | int | Pickups by taxi type, adding up to `trip_count` | Fleet-level analysis; green is about 1% overall but 12% in Boro Zones |
 | `log1p_trip_count_adj` | float | $\log(1 + \text{trip\_count\_adj})$ (aggregate tables) | Variance-stabilised target |
 | `n_zones` | int | Zones in the series | Scale and normalising |
 | `active_zones` | int | Zones with at least one pickup that hour (aggregate hourly) | How widespread demand is |
@@ -352,4 +351,5 @@ regular_zones = profile.loc[profile["suggested_approach"] == "individual series 
 - **Six months of data.** Daily and weekly seasonality are well supported. Yearly seasonality and long-term trends can't be estimated.
 - **Zone weather comes from 50 grid cells.** Zones sharing a cell have the same or very similar weather.
 - **Observed pickups measure completed trips, not unmet demand.**
-- **Reproduce:** get `NYC-taxi-demand-Manhattan-Queens.csv` from Kaggle into `data/raw/` (see [DATA_GUIDE.md](../DATA_GUIDE.md)), install `requirements.txt`, and run the notebook. All outputs are overwritten and every check is re-run.
+- **Reproduce:** install `requirements.txt` and run the notebook. All its inputs are in the repository, so no Kaggle download is needed. All outputs are overwritten and every check is re-run.
+- **Yellow and green are combined**, as in `features.csv`. A per-fleet split would need the raw trip file.
