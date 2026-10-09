@@ -175,7 +175,7 @@ For hourly data, a high CV² in busy zones mostly reflects the strong daily cycl
 
 ## 6. Checks
 
-Every check is recorded in [`ts_readiness_checks.csv`](../processed/time_series/ts_readiness_checks.csv). **All 30 passed.** The main ones:
+Every check is recorded in [`ts_readiness_checks.csv`](../processed/time_series/ts_readiness_checks.csv). **All 37 passed.** The main ones:
 
 | Check | Result |
 |---|---|
@@ -185,7 +185,7 @@ Every check is recorded in [`ts_readiness_checks.csv`](../processed/time_series/
 | Complete, regular grid | 138 × 4,344 rows; every step within a zone is exactly 1 hour |
 | Every clean trip counted once | 22,579,793 in the zone panel, in every level's total, and in the daily totals |
 | Yellow + green = total | True in all four count tables |
-| No missing values | In all five data tables |
+| No missing values | In all five data tables, checked again after re-reading every saved CSV the way a user would |
 | Zone weather equals the source table | 599,472 rows identical |
 | Test period equals the ML models' | 836 hours, 25 Jan 04:00 - 28 Feb 23:00 |
 | Zone profiles use training data only | Last hour used: 2026-01-11 03:00 |
@@ -236,7 +236,7 @@ These are starting points from the diagnostics, not results. Order selection and
 
 ## 9. Output files and fields
 
-All files are in `data/processed/time_series/`, as CSV, with timestamps as `YYYY-MM-DD HH:MM:SS` in naive local New York time. Booleans are `True`/`False`.
+All files are in `data/processed/time_series/`, as CSV, with timestamps as `YYYY-MM-DD HH:MM:SS` in naive local New York time. Booleans are `True`/`False`. On ordinary days the event-name columns (`holiday_name`, `holiday_period`, `special_day_name`, `night_event_name`) hold the value `none`, not a blank, so they don't load as missing values. The only empty cells in the whole dataset are `adi` and `cv2` for the two zones with no demand (103, 104), where they are undefined.
 
 | File | Rows × columns | Size | Contents |
 |---|---|---:|---|
@@ -249,7 +249,7 @@ All files are in `data/processed/time_series/`, as CSV, with timestamps as `YYYY
 | `ts_cv_folds.csv` | 6 × 7 | < 0.1 MB | Rolling-origin folds |
 | `ts_stationarity_tests.csv` | 6 × 6 | < 0.1 MB | ADF/KPSS results |
 | `ts_acf_key_lags.csv` | 11 × 2 | < 0.1 MB | Autocorrelation at key lags |
-| `ts_readiness_checks.csv` | 30 × 3 | < 0.1 MB | Every check and its result |
+| `ts_readiness_checks.csv` | 37 × 3 | < 0.1 MB | Every check and its result |
 
 ### 9.1 Count and weather fields (aggregate, zone and daily tables)
 
@@ -310,7 +310,7 @@ All files are in `data/processed/time_series/`, as CSV, with timestamps as `YYYY
 | `train_hours`, `train_total_trips` | Hours and pickups in the training period |
 | `train_mean`, `train_median`, `train_std`, `train_p95`, `train_max` | Hourly demand statistics, training period |
 | `train_zero_share` | Share of training hours with no pickups |
-| `adi`, `cv2` | Average demand interval and squared coefficient of variation of non-zero demand |
+| `adi`, `cv2` | Average demand interval and squared coefficient of variation of non-zero demand. Empty (undefined) for zones 103 and 104, which have no pickups |
 | `volume_tier` | High, Medium, Low, Sparse or Zero |
 | `demand_pattern` | smooth, erratic, intermittent, lumpy or no demand |
 | `suggested_approach` | individual series model, intermittent-demand method or pool to aggregate, or aggregate level only |
