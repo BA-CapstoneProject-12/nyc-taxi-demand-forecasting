@@ -130,6 +130,25 @@ Run [models/model_comparison_error_analysis.ipynb](models/model_comparison_error
 for the final comparison, train/test gaps, hourly errors, zone errors, residuals,
 and largest individual errors.
 
+### 7. Prepare the time-series dataset (Review 2)
+
+Run [scripts/time_series_data_preparation.ipynb](scripts/time_series_data_preparation.ipynb).
+It rebuilds the demand series from the raw trips with the same cleaning rules
+(and checks they match `features.csv` exactly), keeps the full history from
+1 Sep 2025, and writes analysis-ready series to `data/processed/time_series/`:
+
+- hourly and daily series for all zones, each borough and each service area
+- the zone-hour and zone-day panels
+- a calendar and event table (holiday names, holiday periods, special days and
+  nights, DST flags, heavy-snow days, daily and weekly Fourier terms)
+- train/validation/test splits that reuse the ML test period, plus rolling-origin
+  folds
+- per-zone demand profiles and readiness diagnostics
+
+Every step, file and field is documented in
+[data/dataset-documents/time_series_preparation.md](data/dataset-documents/time_series_preparation.md).
+This step needs the raw trip CSV from Kaggle.
+
 ## Current modeling results
 
 The official test period is chronological:
@@ -195,9 +214,10 @@ file is excluded from GitHub because it exceeds GitHub's 100 MB file limit.
 ```text
 data/
   DATA_GUIDE.md
-  dataset-documents/       collection method and data dictionary
+  dataset-documents/       collection, processing and time-series preparation docs
   raw/                     zones, weather, collection summary, large local data
   processed/               cleaned and feature-engineered datasets
+    time_series/           analysis-ready series for the time-series stage
 EDA_doc/
   EDA_findings.md
   README.md
@@ -212,6 +232,7 @@ models/
 scripts/
   data_collection.ipynb
   data_processing_engineering.ipynb
+  time_series_data_preparation.ipynb
   EDA_Arun.ipynb
   eda_arun.py
   validate_eda_arun.py
