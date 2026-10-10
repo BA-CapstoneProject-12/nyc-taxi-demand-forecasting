@@ -7,3 +7,5 @@ notebook>=7.0
 holidays>=0.55
 numpy>=1.26
 matplotlib>=3.9
+scipy>=1.11
+scikit-learn>=1.4
