@@ -22,9 +22,14 @@ Zone daily covers 138 zones x 181 days,True,"24,978 rows"
 Zone profiles use training hours only,True,last hour used: 2026-01-11 03:00:00
 Every zone has a profile and a weather cell,True,50 weather cells
 Strongest seasonal autocorrelation is at the weekly lag,True,"ACF(24)=0.878, ACF(168)=0.891"
-No missing values in ts_calendar_hourly.csv,True,"4,344 rows x 45 columns"
-No missing values in ts_aggregate_hourly.csv,True,"26,064 rows x 56 columns"
-No missing values in ts_aggregate_daily.csv,True,"1,086 rows x 43 columns"
+Every column has a role in the feature catalogue,True,"65 distinct columns; missing [], unused []"
+Known-in-advance regressors carry no demand information,True,28 hourly / 16 daily regressors identical across all 6 series at every timestamp
+Known-in-advance regressors stay inside their training range,True,none outside
+Known-in-advance regressors are not exactly collinear,True,27 numeric regressors + intercept: rank 28 of 28
+Fourier terms are not collinear,True,"rank 13 of 13, condition number 1.4"
+No missing values in ts_calendar_hourly.csv,True,"4,344 rows x 44 columns"
+No missing values in ts_aggregate_hourly.csv,True,"26,064 rows x 54 columns"
+No missing values in ts_aggregate_daily.csv,True,"1,086 rows x 42 columns"
 No missing values in ts_zone_hourly.csv,True,"599,472 rows x 8 columns"
 No missing values in ts_zone_daily.csv,True,"24,978 rows x 14 columns"
 Zone weather matches the source table,True,"599,472 rows"
