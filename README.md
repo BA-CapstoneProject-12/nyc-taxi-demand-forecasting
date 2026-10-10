@@ -144,6 +144,9 @@ history, and writes analysis-ready series to `data/processed/time_series/`:
 - train/validation/test splits that reuse the ML test period, plus rolling-origin
   folds
 - per-zone demand profiles and readiness diagnostics
+- a feature catalogue giving every column's role (target, known-in-advance
+  regressor, weather regressor, trend or descriptive), checked for leakage,
+  extrapolation and collinearity
 
 Every step, file and field is documented in
 [data/dataset-documents/time_series_preparation.md](data/dataset-documents/time_series_preparation.md).

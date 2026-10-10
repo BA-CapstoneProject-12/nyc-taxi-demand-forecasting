@@ -24,9 +24,10 @@ The next stage forecasts and analyses taxi demand as **time series**: decomposit
 | Levels | Zone-hour only | City, borough, service area and zone; hourly and daily |
 | Daylight-saving double hour | Described in docs only | Flagged, plus an adjusted target and flags for the affected lags |
 | Calendar effects | One `is_holiday` flag | Holiday names, holiday periods, days to/from holidays, special days, cross-midnight night events, weekend nights, heavy-snow days |
-| Seasonality | Raw `hour`, `day_of_week` | Daily and weekly Fourier terms, `hour_of_week`, time bands, trend index |
+| Seasonality | Raw `hour`, `day_of_week` | Daily and weekly Fourier terms, time bands, trend index |
 | Evaluation design | Split later in the modelling notebook | Train/validation/test built in, with the **same test period as the ML models**, plus 6 rolling-origin folds |
 | Per-zone behaviour | None | Volume tier and demand pattern per zone, computed on training data only |
+| Safe use of columns | Not specified | Every column has a role (target, known-in-advance regressor, needs-forecast regressor, trend, descriptive), checked for leakage, extrapolation and collinearity (section 6) |
 
 The time series dataset doesn't replace `features.csv`; it extends it. From 8 Sep onwards the demand values are taken from `features.csv` unchanged, so both files describe **exactly the same demand**. The ML models and the time series models therefore work from one source.
 
@@ -92,10 +93,10 @@ City-wide, the merged hour has 9,166 trips against 8,735 at 00:00 and 3,423 at 0
 
 One row per hour holds every time-related regressor (`ts_calendar_hourly.csv`). Everything except `is_heavy_snow_day` is **known in advance** (calendar, published holidays, scheduled events), so it can be used when forecasting without leakage. The event definitions are the same ones the EDA used (`scripts/eda_arun.py`), so both stages talk about the same events.
 
-- **Trend and position.** `t` (hours since start), `day_index`, `week_index` (1 Sep 2025 is a Monday, so weeks run Monday to Sunday), `hour_of_week` (0-167).
-- **Calendar.** Hour, weekday, weekend, month, day of month, ISO week, and the EDA's six time bands.
+- **Trend and position.** `t` (hours since start), `day_index`, `week_index` (1 Sep 2025 is a Monday, so weeks run Monday to Sunday), and `hour_of_week` (0-167), a grouping key for weekly profiles.
+- **Calendar.** Hour, weekday, weekend, month, day of month, and the EDA's six time bands.
 - **Weekend nights.** Friday and Saturday 20:00-04:59. The hours after midnight belong to the evening before, as in the EDA.
-- **Federal holidays with names.** The EDA found holidays differ a lot: Christmas −58%, Thanksgiving −45%, Columbus Day −8% and MLK Day about 0%, each against comparable normal days. One shared flag can't capture that. All 8 holidays in the window are kept, including Labor Day, which `features.csv` lost with its warm-up week. Days to the next and since the previous holiday are counted across holidays outside the window too (4 July 2025, Memorial Day 2026), so the edge values are correct.
+- **Federal holidays with names.** The EDA found holidays differ a lot: Christmas −58%, Thanksgiving −45%, Columbus Day −8% and MLK Day about 0%, each against comparable normal days. One shared flag can't capture that. All 8 holidays in the window are kept, including Labor Day, which `features.csv` lost with its warm-up week. Days to the next and since the previous holiday are counted across holidays outside the window too (4 July 2025, Memorial Day 2026), so the edge values are correct. Both are capped at 14 days (see section 6).
 - **Holiday periods.** Thanksgiving week (24-30 Nov) and Christmas-New Year (20 Dec - 4 Jan). The EDA measured −24% and −27%.
 - **Special days.** Halloween, NYC Marathon (2 Nov, also the DST day), Black Friday, Christmas Eve, New Year's Eve.
 - **Night events.** Halloween night and New Year's Eve night, 20:00-04:59 across midnight. A calendar-day flag would cut these in two. The EDA measured +62% for New Year's Eve night.
@@ -117,7 +118,7 @@ Six series at three levels are built by summing the zone panel:
 | service_area | Boro Zone | 81 | 1,639,075 | 377.3 | 1,172 |
 | service_area | Airports | 2 | 1,468,045 | 337.9 | 1,058 |
 
-Each series and hour has the observed and adjusted counts, $\log(1+y)$ of the adjusted count, the number of zones and of zones with at least one pickup, the **mean weather across its zones**, and all calendar columns.
+Each series and hour has the observed and adjusted counts, $\log(1+y)$ of the adjusted count, the number of zones, the **mean weather across its zones**, and all calendar columns.
 
 - **Why a plain mean for weather.** Weighting by each zone's pickups in that hour would put the target inside a regressor.
 - **Why $\log(1+y)$.** The EDA found demand strongly right-skewed and overdispersed. A log evens out the variance (ARIMA and ETS assume roughly constant variance), and $\log(1+y)$ keeps zero hours valid. Forecasts made on the log scale need back-transforming with $e^{\hat{y}}-1$, which estimates the median rather than the mean. Check this on the validation period.
@@ -171,9 +172,11 @@ For hourly data, a high CV² in busy zones mostly reflects the strong daily cycl
 
 **Watch out:** the test period starts with the biggest snowstorm in the data (25 Jan) and contains two more heavy-snow days (22-23 Feb). Demand on those days drops far below normal (see figure 1). Report test errors for the whole period and also without those days, so a single storm doesn't dominate the comparison.
 
-## 6. Checks
+## 6. Checks and feature review
 
-Every check is recorded in [`ts_readiness_checks.csv`](../processed/time_series/ts_readiness_checks.csv). **All 36 passed.** The main ones:
+### 6.1 Data checks
+
+Every check is recorded in [`ts_readiness_checks.csv`](../processed/time_series/ts_readiness_checks.csv). **All 41 passed.** The main ones:
 
 | Check | Result |
 |---|---|
@@ -189,6 +192,59 @@ Every check is recorded in [`ts_readiness_checks.csv`](../processed/time_series/
 | Zone weather equals the source table | 599,472 rows identical |
 | Test period equals the ML models' | 836 hours, 25 Jan 04:00 - 28 Feb 23:00 |
 | Zone profiles use training data only | Last hour used: 2026-01-11 03:00 |
+
+Separately from the notebook, an independent script recomputed the tables from the saved files: the city, borough and service-area series rebuilt from the zone panel, the daily sums, the Fourier terms, the holidays against the official calendar, the splits and the zone profiles. All 37 of its checks passed.
+
+### 6.2 Is every feature safe and suitable for time series analysis?
+
+A feature can be correct and still be wrong to use in a forecast. Every column was reviewed against four questions:
+1. Does it hide the answer?
+2. Is it known at forecast time?
+3. Does the test period take values that training never saw?
+4. Is it an exact copy of other columns?
+
+The review found five problems, all fixed before release:
+
+| Feature | Problem | Fix |
+|---|---|---|
+| `active_zones` (zones with a pickup in the hour) | Built from the **same hour's demand** (correlation 0.47 with the target). As an input it would leak the answer | Removed |
+| `days_to_next_holiday` | Reached **97 days** in the test period but never above 41 in training, so models would extrapolate | Capped at 14 days, along with `days_since_prev_holiday` |
+| `iso_week` | Jumps from 52 back to 1 at New Year (misleading as a number) and duplicates `week_index` | Removed |
+| `hour_of_week` | Exactly `24 × day_of_week + hour`, so the three together are **perfectly collinear** and break regression and ARIMA-with-regressors fits | Kept as a grouping key, role `descriptive` |
+| `month`, `holiday_name` | February, MLK Day and Washington's Birthday appear **only in validation/test**, so a model can never learn them | Kept for analysis, role `descriptive`; model holidays with `is_holiday` |
+
+To make correct use easy, every column has a **role** in [`ts_feature_catalog.csv`](../processed/time_series/ts_feature_catalog.csv), and the roles are repeated in the field tables in section 9:
+
+| Role | Columns | Use |
+|---|---:|---|
+| `target` | 1 | `trip_count_adj`, the value to fit and forecast |
+| `target_observed` | 1 | `trip_count`, the observed count, for evaluation. Never an input |
+| `target_transform` | 1 | `log1p_trip_count_adj`. Never an input |
+| `regressor_known_in_advance` | 29 | Calendar, holiday, event, DST and Fourier inputs. Safe to use when forecasting |
+| `regressor_needs_forecast` | 14 | Weather inputs. Using observed weather assumes a perfect weather forecast |
+| `trend` | 3 | `t`, `day_index`, `week_index`. Extrapolate by design; use with care over six months |
+| `descriptive` | 9 | Grouping and plots only, not model inputs |
+| `identifier`, `split` | 7 | Keys and split labels |
+
+The notebook enforces these rules with five checks:
+
+| Rule | Result |
+|---|---|
+| Every column has exactly one role | 65 columns, none missing |
+| Known-in-advance regressors carry no demand information: identical across all 6 series at every timestamp | 28 hourly and 16 daily regressors pass |
+| Known-in-advance regressors stay within their training range in validation and test; no unseen categories | None outside |
+| Known-in-advance regressors are not exactly collinear | 27 numeric regressors + intercept: rank 28 of 28 |
+| Fourier terms are not collinear | Rank 13 of 13, condition number 1.4 |
+
+**Model test.** To confirm the files work with standard tools, the following were fitted on the training data and forecast over validation and test. All loaded with a regular frequency (`asfreq`) and ran without errors, and every forecast was finite:
+- a daily SARIMA(1,0,1)(0,1,1)₇ with holiday regressors
+- an hourly ARIMA with Fourier and calendar regressors
+- an MSTL decomposition with periods 24 and 168
+- the zone panel joined to the calendar (599,472 rows, no missing values)
+
+This only checks that the data is usable. Choosing and comparing models is the analysis stage's work.
+
+**Weather is the one input that goes beyond its training range.** The test period is colder than anything in training: the lowest feels-like temperature is −23.8 °C, against −14.2 °C in training. It also contains the biggest snowstorm in the data. That is real weather, not a data error. Models that use weather will be extrapolating there, which is another reason to report results with and without the storm days.
 
 ## 7. Readiness diagnostics and starting points for the analysis
 
@@ -240,66 +296,73 @@ All files are in `data/processed/time_series/`, as CSV, with timestamps as `YYYY
 
 | File | Rows × columns | Size | Contents |
 |---|---|---:|---|
-| `ts_aggregate_hourly.csv` | 26,064 × 56 | 9.4 MB | 6 series × 4,344 hours, with all calendar fields |
-| `ts_aggregate_daily.csv` | 1,086 × 43 | 0.3 MB | 6 series × 181 days |
+| `ts_aggregate_hourly.csv` | 26,064 × 54 | 9.3 MB | 6 series × 4,344 hours, with all calendar fields |
+| `ts_aggregate_daily.csv` | 1,086 × 42 | 0.3 MB | 6 series × 181 days |
 | `ts_zone_hourly.csv` | 599,472 × 8 | 28.0 MB | 138 zones × 4,344 hours (join the calendar on `ds`) |
 | `ts_zone_daily.csv` | 24,978 × 14 | 1.9 MB | 138 zones × 181 days |
-| `ts_calendar_hourly.csv` | 4,344 × 45 | 1.3 MB | Calendar, events, Fourier terms, DST flags, splits |
+| `ts_calendar_hourly.csv` | 4,344 × 44 | 1.3 MB | Calendar, events, Fourier terms, DST flags, splits |
 | `ts_zone_profile.csv` | 138 × 20 | < 0.1 MB | Zone profiles (training period) |
 | `ts_cv_folds.csv` | 6 × 7 | < 0.1 MB | Rolling-origin folds |
 | `ts_stationarity_tests.csv` | 6 × 6 | < 0.1 MB | ADF/KPSS results |
 | `ts_acf_key_lags.csv` | 11 × 2 | < 0.1 MB | Autocorrelation at key lags |
-| `ts_readiness_checks.csv` | 36 × 3 | < 0.1 MB | Every check and its result |
+| `ts_feature_catalog.csv` | 65 × 4 | < 0.1 MB | Role and description of every column |
+| `ts_readiness_checks.csv` | 41 × 3 | < 0.1 MB | Every check and its result |
 
 ### 9.1 Count and weather fields (aggregate, zone and daily tables)
 
-| Field | Type | Description | Purpose |
-|---|---|---|---|
-| `series_level` | text | `city`, `borough` or `service_area` (aggregate tables) | Pick a level |
-| `series_id` | text | `All zones`, `Manhattan`, `Queens`, `Yellow Zone`, `Boro Zone`, `Airports` | Identifies one series |
-| `PULocationID` | int | TLC pickup zone (zone tables) | Identifies one zone series |
-| `ds` | datetime | Start of the hour, local time (hourly tables) | Time index, the usual name in forecasting libraries |
-| `date` | date | Calendar day (daily tables, calendar) | Daily time index |
-| `trip_count` | int | Clean pickups in the hour or day (from `features.csv`; 1-7 Sep recovered from its 168 h lag) | Observed demand |
-| `trip_count_adj` | float | `trip_count` with the DST merged hour halved | **Target for fitting**: pickups per physical hour |
-| `log1p_trip_count_adj` | float | $\log(1 + \text{trip\_count\_adj})$ (aggregate tables) | Variance-stabilised target |
-| `n_zones` | int | Zones in the series | Scale and normalising |
-| `active_zones` | int | Zones with at least one pickup that hour (aggregate hourly) | How widespread demand is |
-| `apparent_temperature` | float | Feels-like temperature at the start of the hour, °C (series: mean over zones) | Weather regressor |
-| `rain` | float | Rain during the hour, mm (series: mean over zones) | Weather regressor |
-| `snowfall` | float | Snowfall during the hour, cm (series: mean over zones) | Weather regressor |
-| `precipitation_probability` | float/int | Chance of precipitation in the hour, % (series: mean over zones) | Weather regressor |
-| `apparent_temperature_mean`, `_min`, `_max` | float | Daily mean, minimum and maximum of hourly apparent temperature, °C | Daily weather regressors |
-| `rain_total`, `snowfall_total` | float | Daily rain (mm) and snow (cm) totals | Daily weather regressors |
-| `precipitation_probability_mean`, `_max` | float | Daily mean and maximum precipitation probability, % | Daily weather regressors |
-| `rain_hours`, `snow_hours` | int | Hours in the day with rain or snow above 0 | How long the bad weather lasted |
-| `split` | text | `train`, `validation` or `test` | Evaluation design (section 5) |
+| Field | Type | Role | Description | Purpose |
+|---|---|---|---|---|
+| `series_level` | text | identifier | `city`, `borough` or `service_area` (aggregate tables) | Pick a level |
+| `series_id` | text | identifier | `All zones`, `Manhattan`, `Queens`, `Yellow Zone`, `Boro Zone`, `Airports` | Identifies one series |
+| `PULocationID` | int | identifier | TLC pickup zone (zone tables) | Identifies one zone series |
+| `ds` | datetime | identifier | Start of the hour, local time (hourly tables) | Time index, the usual name in forecasting libraries |
+| `date` | date | identifier | Calendar day (daily tables, calendar) | Daily time index |
+| `trip_count_adj` | float | **target** | `trip_count` with the DST merged hour halved | **Fit and forecast this**: pickups per physical hour |
+| `trip_count` | int | target_observed | Clean pickups in the hour or day (from `features.csv`; 1-7 Sep recovered from its 168 h lag) | Observed demand; for evaluation, never an input |
+| `log1p_trip_count_adj` | float | target_transform | $\log(1 + \text{trip\_count\_adj})$ (aggregate tables) | Variance-stabilised target; never an input |
+| `n_zones` | int | descriptive | Zones in the series (constant per series) | Scale and normalising |
+| `apparent_temperature` | float | needs forecast | Feels-like temperature at the start of the hour, °C (series: mean over zones) | Weather regressor |
+| `rain` | float | needs forecast | Rain during the hour, mm (series: mean over zones) | Weather regressor |
+| `snowfall` | float | needs forecast | Snowfall during the hour, cm (series: mean over zones) | Weather regressor |
+| `precipitation_probability` | float/int | needs forecast | Chance of precipitation in the hour, % (series: mean over zones) | Weather regressor |
+| `apparent_temperature_mean`, `_min`, `_max` | float | needs forecast | Daily mean, minimum and maximum of hourly apparent temperature, °C | Daily weather regressors |
+| `rain_total`, `snowfall_total` | float | needs forecast | Daily rain (mm) and snow (cm) totals | Daily weather regressors |
+| `precipitation_probability_mean`, `_max` | float | needs forecast | Daily mean and maximum precipitation probability, % | Daily weather regressors |
+| `rain_hours`, `snow_hours` | int | needs forecast | Hours in the day with rain or snow above 0 | How long the bad weather lasted |
+| `split` | text | split | `train`, `validation` or `test` | Evaluation design (section 5) |
 
 ### 9.2 Calendar and event fields (`ts_calendar_hourly.csv`; also in the aggregate tables)
 
-| Field | Type | Description | Purpose |
-|---|---|---|---|
-| `t` | int | Hours since 1 Sep 2025 00:00 (0-4,343) | Trend term |
-| `day_index`, `week_index` | int | Days and Monday-start weeks since 1 Sep 2025 | Trend and grouping |
-| `hour`, `day_of_week`, `day_name` | int, int, text | Hour (0-23), weekday (0 = Monday), weekday name | Daily and weekly cycles |
-| `is_weekend` | bool | Saturday or Sunday | Weekday vs weekend demand |
-| `month`, `day_of_month`, `iso_week` | int | Calendar position | Level shifts, grouping |
-| `hour_of_week` | int | `day_of_week × 24 + hour` (0-167) | Position in the weekly cycle; key for weekly profiles |
-| `time_band` | text | EDA bands: Late night 00-04, Early morning 05-06, AM 07-09, Midday 10-15, PM 16-19, Evening 20-23 | Grouped time-of-day effects |
-| `is_weekend_night` | bool | Friday or Saturday 20:00-04:59 | Nightlife demand (EDA I5) |
-| `is_holiday`, `holiday_name` | bool, text | US federal holiday and its name | Holiday-specific effects (EDA E1) |
-| `is_day_before_holiday`, `is_day_after_holiday` | bool | Day before or after a federal holiday | Lead and lag effects |
-| `days_to_next_holiday`, `days_since_prev_holiday` | int | Days to the next and since the last federal holiday (0 on the holiday) | Distance-to-holiday effects |
-| `holiday_period`, `is_holiday_period` | text, bool | Thanksgiving week or Christmas-New Year | Period effects (EDA E2) |
-| `special_day_name`, `is_special_day` | text, bool | Halloween, NYC Marathon, Black Friday, Christmas Eve, New Year's Eve | Event effects (EDA E4) |
-| `night_event_name`, `is_night_event` | text, bool | Halloween night, New Year's Eve night (20:00-04:59) | Cross-midnight events (EDA E3) |
-| `is_dst_merged_hour` | bool | 2025-11-02 01:00, which holds two physical hours | Mark the DST artefact |
-| `is_dst_lag24_affected`, `is_dst_lag168_affected` | bool | Hours whose 24 h and 168 h lags read the merged hour | Mark affected lags (EDA A8) |
-| `is_heavy_snow_day` | bool | Zone-median daily snowfall ≥ 5 cm (derived from weather) | Storm effects |
-| `fourier_daily_sin_k`, `fourier_daily_cos_k` | float | $\sin/\cos(2\pi k\,\text{hour}/24)$, k = 1-3 | Daily seasonality regressors |
-| `fourier_weekly_sin_k`, `fourier_weekly_cos_k` | float | Hourly tables: $\sin/\cos(2\pi k\,\text{hour\_of\_week}/168)$. Daily tables: $\sin/\cos(2\pi k\,\text{day\_of\_week}/7)$. k = 1-3 | Weekly seasonality regressors |
-| `split`, `split_daily` | text | Hourly split, and the split of the calendar day (daily tables have this as `split`) | Evaluation design |
-| `contains_dst_merged_hour` | bool | 2 Nov 2025, whose `trip_count` includes the extra hour (daily tables) | Mark the DST day |
+"Known" means the role `regressor_known_in_advance`.
+
+| Field | Type | Role | Description | Purpose |
+|---|---|---|---|---|
+| `t` | int | trend | Hours since 1 Sep 2025 00:00 (0-4,343) | Trend term; extrapolates by design |
+| `day_index`, `week_index` | int | trend | Days and Monday-start weeks since 1 Sep 2025 | Trend and grouping |
+| `hour`, `day_of_week` | int | known | Hour (0-23), weekday (0 = Monday) | Daily and weekly cycles; best used as categories or through the Fourier terms |
+| `day_name` | text | descriptive | Weekday name | Readable label for `day_of_week` |
+| `is_weekend` | bool | known | Saturday or Sunday | Weekday vs weekend demand |
+| `month`, `day_of_month` | int | descriptive | Calendar position | Grouping; February occurs only in the test period, so `month` is not an input |
+| `hour_of_week` | int | descriptive | `day_of_week × 24 + hour` (0-167) | Key for weekly profiles and seasonal-naive forecasts; exactly collinear with `hour` and `day_of_week` |
+| `time_band` | text | known | EDA bands: Late night 00-04, Early morning 05-06, AM 07-09, Midday 10-15, PM 16-19, Evening 20-23 | Grouped time-of-day effects (as categories) |
+| `is_weekend_night` | bool | known | Friday or Saturday 20:00-04:59 | Nightlife demand (EDA I5) |
+| `is_holiday` | bool | known | US federal holiday | Holiday effect (EDA E1) |
+| `holiday_name` | text | descriptive | Holiday name, `none` otherwise | Analyse individual holidays; MLK Day and Washington's Birthday occur only in validation/test |
+| `is_day_before_holiday`, `is_day_after_holiday` | bool | known | Day before or after a federal holiday | Lead and lag effects |
+| `days_to_next_holiday`, `days_since_prev_holiday` | int | known | Days to the next and since the last federal holiday (0 on the holiday), **capped at 14** | Distance-to-holiday effects without extrapolation |
+| `is_holiday_period` | bool | known | Thanksgiving week or Christmas-New Year | Period effects (EDA E2) |
+| `holiday_period` | text | descriptive | Period name, `none` otherwise | Label for `is_holiday_period` |
+| `is_special_day` | bool | known | Halloween, NYC Marathon, Black Friday, Christmas Eve, New Year's Eve | Event effects (EDA E4) |
+| `special_day_name` | text | descriptive | Special day name, `none` otherwise | Label for `is_special_day` |
+| `is_night_event` | bool | known | Halloween night, New Year's Eve night (20:00-04:59) | Cross-midnight events (EDA E3) |
+| `night_event_name` | text | descriptive | Night event name, `none` otherwise | Label for `is_night_event` |
+| `is_dst_merged_hour` | bool | known | 2025-11-02 01:00, which holds two physical hours | Mark the DST artefact |
+| `is_dst_lag24_affected`, `is_dst_lag168_affected` | bool | known | Hours whose 24 h and 168 h lags read the merged hour | Mark affected lags (EDA A8) |
+| `is_heavy_snow_day` | bool | needs forecast | Zone-median daily snowfall ≥ 5 cm (derived from weather) | Storm effects |
+| `fourier_daily_sin_k`, `fourier_daily_cos_k` | float | known | $\sin/\cos(2\pi k\,\text{hour}/24)$, k = 1-3 | Daily seasonality regressors |
+| `fourier_weekly_sin_k`, `fourier_weekly_cos_k` | float | known | Hourly tables: $\sin/\cos(2\pi k\,\text{hour\_of\_week}/168)$. Daily tables: $\sin/\cos(2\pi k\,\text{day\_of\_week}/7)$. k = 1-3 | Weekly seasonality regressors |
+| `split`, `split_daily` | text | split | Hourly split, and the split of the calendar day (daily tables have this as `split`) | Evaluation design |
+| `contains_dst_merged_hour` | bool | known | 2 Nov 2025, whose `trip_count` includes the extra hour (daily tables) | Mark the DST day |
 
 ### 9.3 Zone profile fields (`ts_zone_profile.csv`)
 
@@ -335,6 +398,11 @@ train = manhattan[manhattan["split"] == "train"]
 zone = pd.read_csv(TS + "ts_zone_hourly.csv", parse_dates=["ds"])
 cal = pd.read_csv(TS + "ts_calendar_hourly.csv", parse_dates=["ds", "date"])
 zone = zone.merge(cal, on="ds", how="left")
+
+# the safe model inputs, straight from the catalogue
+catalog = pd.read_csv(TS + "ts_feature_catalog.csv")
+known_inputs = catalog.loc[catalog["role"] == "regressor_known_in_advance", "column"]
+X_train = train[[c for c in known_inputs if c in train.columns and train[c].dtype != object]]
 
 # zones that can be modelled individually
 profile = pd.read_csv(TS + "ts_zone_profile.csv")

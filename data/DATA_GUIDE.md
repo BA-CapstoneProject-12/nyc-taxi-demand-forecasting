@@ -84,7 +84,7 @@ The original monthly Parquet files from TLC (~425 MB), plus the TLC zone lookup 
 
 Prepared for the time-series analysis stage by `scripts/time_series_data_preparation.ipynb`, built on `features.csv`. It holds regular hourly and daily demand series from 1 Sep 2025 at four levels (all zones, borough, service area, zone), a calendar and event table, splits that reuse the ML test period, rolling-origin folds, zone profiles and readiness checks. The week that `features.csv` dropped (1-7 Sep) is recovered exactly from its 168-hour lag. All files are in git (the largest, `ts_zone_hourly.csv`, is about 28 MB).
 
-Start with `ts_aggregate_hourly.csv` or `ts_aggregate_daily.csv`: each row already carries every calendar regressor. Files, fields and decisions: [dataset-documents/time_series_preparation.md](dataset-documents/time_series_preparation.md).
+Start with `ts_aggregate_hourly.csv` or `ts_aggregate_daily.csv`: each row already carries every calendar regressor. `ts_feature_catalog.csv` says which columns are safe model inputs. Files, fields and decisions: [dataset-documents/time_series_preparation.md](dataset-documents/time_series_preparation.md).
 
 ## 3. How to get the data
 
