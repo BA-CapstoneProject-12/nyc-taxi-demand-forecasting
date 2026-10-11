@@ -1,4 +1,4 @@
-﻿"""Forecast dispatch and classical statistical models."""
+"""Forecast dispatch and classical statistical models."""
 import warnings
 import numpy as np
 from statsmodels.tsa.seasonal import MSTL
@@ -51,4 +51,3 @@ def checked_forecast(call):
     fatal=[w for w in caught if w.category.__name__=="ConvergenceWarning"]
     if fatal: raise ValueError(" | ".join(str(w.message) for w in fatal))
     return prediction," | ".join(dict.fromkeys(str(w.message) for w in caught))
-

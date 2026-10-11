@@ -1,0 +1,19 @@
+series_id,model,eligible,selection_MAE
+All zones,naive_7,True,24991.821428571428
+All zones,ets_weekly,True,21979.28316148523
+All zones,sarima_weekly,True,26846.58443302567
+Manhattan,naive_7,True,23992.571428571428
+Manhattan,ets_weekly,True,21174.443022252985
+Manhattan,sarima_weekly,True,26217.57455736586
+Queens,naive_7,True,2048.3928571428573
+Queens,ets_weekly,True,1484.6712588081184
+Queens,sarima_weekly,True,1748.1425236951097
+Yellow Zone,naive_7,True,23179.14285714286
+Yellow Zone,ets_weekly,True,20320.309615811886
+Yellow Zone,sarima_weekly,True,25469.294135480915
+Boro Zone,naive_7,True,1713.107142857143
+Boro Zone,ets_weekly,True,1435.0379196627903
+Boro Zone,sarima_weekly,True,1371.420608252827
+Airports,naive_7,True,1849.7857142857142
+Airports,ets_weekly,True,1645.7561934623666
+Airports,sarima_weekly,True,1908.9076137338363

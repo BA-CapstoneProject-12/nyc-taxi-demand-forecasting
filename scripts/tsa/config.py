@@ -1,4 +1,4 @@
-﻿"""Fixed protocol. These choices are made before evaluating test outcomes."""
+"""Fixed protocol. These choices are made before evaluating test outcomes."""
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -26,4 +26,3 @@ EVENT_FEATURES = (
 def ensure_output():
     for path in (OUT, TABLES, FIGURES):
         path.mkdir(parents=True, exist_ok=True)
-

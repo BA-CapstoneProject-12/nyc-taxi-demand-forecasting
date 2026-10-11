@@ -1,4 +1,4 @@
-﻿"""Training-only temporal diagnostics. Never decompose test data for fitting."""
+"""Training-only temporal diagnostics. Never decompose test data for fitting."""
 import warnings
 import numpy as np
 import pandas as pd
@@ -97,4 +97,3 @@ def diagnose(hourly):
         fig.colorbar(im,ax=ax,label="Pickups/hour")
     savefig("04_weekly_heatmaps.png")
     print("Training diagnostics and four figures saved",flush=True)
-

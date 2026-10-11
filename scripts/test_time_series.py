@@ -1,4 +1,4 @@
-﻿"""Behavioral tests for information boundaries and forecasting edge cases."""
+"""Behavioral tests for information boundaries and forecasting edge cases."""
 import unittest
 from unittest.mock import patch
 from pathlib import Path
@@ -86,4 +86,3 @@ class ForecastTests(unittest.TestCase):
         self.assertTrue(all(name=="a" for name in selected.values()))
 
 if __name__=="__main__": unittest.main(verbosity=2)
-

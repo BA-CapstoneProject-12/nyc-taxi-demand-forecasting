@@ -1,4 +1,4 @@
-﻿"""Expanding-origin comparisons with selection locked before test evaluation."""
+"""Expanding-origin comparisons with selection locked before test evaluation."""
 import json
 import time
 import numpy as np
@@ -128,4 +128,3 @@ def run_daily(daily,folds):
                             **scores(p.actual,p.prediction,history,season=7)))
     pd.DataFrame(metrics).to_csv(TABLES/"daily_test_metrics.csv",index=False)
     return selected
-

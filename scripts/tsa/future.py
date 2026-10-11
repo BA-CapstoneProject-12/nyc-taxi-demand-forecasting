@@ -1,4 +1,4 @@
-﻿"""Historical next-week forecast issued on 1 March 2026, not a live forecast."""
+"""Historical next-week forecast issued on 1 March 2026, not a live forecast."""
 import json
 import numpy as np
 import pandas as pd
@@ -35,4 +35,3 @@ def next_week(calendar,hourly):
             p["upper_"+suffix]=p.prediction+radius
         parts.append(p)
     pd.concat(parts,ignore_index=True).to_csv(TABLES/"aggregate_forecast_next_week.csv",index=False,float_format="%.7g")
-

@@ -1,0 +1,13 @@
+{
+  "numpy": "2.3.1",
+  "pandas": "2.3.0",
+  "scipy": "1.16.0",
+  "statsmodels": "0.15.0",
+  "scikit-learn": "1.7.0",
+  "matplotlib": "3.10.3",
+  "nbformat": "5.10.4",
+  "nbclient": "0.10.4",
+  "python": "3.13.2",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "source_commit": "c2fb865ab8b1030027d15f9dd91401d9c868cb36"
+}

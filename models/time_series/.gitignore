@@ -1,5 +1,4 @@
-﻿# Rebuilt model state / transient notebook execution files
+# Rebuilt model state / transient notebook execution files
 cache/
 *.joblib
 *.log
-

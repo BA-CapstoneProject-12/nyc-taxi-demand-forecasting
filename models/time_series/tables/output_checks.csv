@@ -1,0 +1,220 @@
+check,passed
+unchanged input data/processed/time_series/ts_acf_key_lags.csv,True
+unchanged input data/processed/time_series/ts_aggregate_daily.csv,True
+unchanged input data/processed/time_series/ts_aggregate_hourly.csv,True
+unchanged input data/processed/time_series/ts_calendar_hourly.csv,True
+unchanged input data/processed/time_series/ts_cv_folds.csv,True
+unchanged input data/processed/time_series/ts_feature_catalog.csv,True
+unchanged input data/processed/time_series/ts_readiness_checks.csv,True
+unchanged input data/processed/time_series/ts_stationarity_tests.csv,True
+unchanged input data/processed/time_series/ts_zone_daily.csv,True
+unchanged input data/processed/time_series/ts_zone_hourly.csv,True
+unchanged input data/processed/time_series/ts_zone_profile.csv,True
+input checks all pass,True
+forecast timestamps respect origins,True
+hourly lead matches issue time,True
+lead is inside issued horizon,True
+predictions finite nonnegative,True
+prediction keys unique,True
+exact test timestamps Airports/adaptive_week/24,True
+test targets match source Airports/adaptive_week/24,True
+independent MAE Airports/adaptive_week/24,True
+independent RMSE Airports/adaptive_week/24,True
+exact test timestamps Airports/adaptive_week/168,True
+test targets match source Airports/adaptive_week/168,True
+independent MAE Airports/adaptive_week/168,True
+independent RMSE Airports/adaptive_week/168,True
+exact test timestamps Airports/naive_168/24,True
+test targets match source Airports/naive_168/24,True
+independent MAE Airports/naive_168/24,True
+independent RMSE Airports/naive_168/24,True
+exact test timestamps Airports/naive_168/168,True
+test targets match source Airports/naive_168/168,True
+independent MAE Airports/naive_168/168,True
+independent RMSE Airports/naive_168/168,True
+exact test timestamps All zones/harmonic_ar_calendar/24,True
+test targets match source All zones/harmonic_ar_calendar/24,True
+independent MAE All zones/harmonic_ar_calendar/24,True
+independent RMSE All zones/harmonic_ar_calendar/24,True
+exact test timestamps All zones/harmonic_ar_calendar/168,True
+test targets match source All zones/harmonic_ar_calendar/168,True
+independent MAE All zones/harmonic_ar_calendar/168,True
+independent RMSE All zones/harmonic_ar_calendar/168,True
+exact test timestamps All zones/naive_168/24,True
+test targets match source All zones/naive_168/24,True
+independent MAE All zones/naive_168/24,True
+independent RMSE All zones/naive_168/24,True
+exact test timestamps All zones/naive_168/168,True
+test targets match source All zones/naive_168/168,True
+independent MAE All zones/naive_168/168,True
+independent RMSE All zones/naive_168/168,True
+exact test timestamps Boro Zone/adaptive_week/24,True
+test targets match source Boro Zone/adaptive_week/24,True
+independent MAE Boro Zone/adaptive_week/24,True
+independent RMSE Boro Zone/adaptive_week/24,True
+exact test timestamps Boro Zone/adaptive_week/168,True
+test targets match source Boro Zone/adaptive_week/168,True
+independent MAE Boro Zone/adaptive_week/168,True
+independent RMSE Boro Zone/adaptive_week/168,True
+exact test timestamps Boro Zone/naive_168/24,True
+test targets match source Boro Zone/naive_168/24,True
+independent MAE Boro Zone/naive_168/24,True
+independent RMSE Boro Zone/naive_168/24,True
+exact test timestamps Boro Zone/naive_168/168,True
+test targets match source Boro Zone/naive_168/168,True
+independent MAE Boro Zone/naive_168/168,True
+independent RMSE Boro Zone/naive_168/168,True
+exact test timestamps Manhattan/harmonic_ar_calendar/24,True
+test targets match source Manhattan/harmonic_ar_calendar/24,True
+independent MAE Manhattan/harmonic_ar_calendar/24,True
+independent RMSE Manhattan/harmonic_ar_calendar/24,True
+exact test timestamps Manhattan/harmonic_ar_calendar/168,True
+test targets match source Manhattan/harmonic_ar_calendar/168,True
+independent MAE Manhattan/harmonic_ar_calendar/168,True
+independent RMSE Manhattan/harmonic_ar_calendar/168,True
+exact test timestamps Manhattan/naive_168/24,True
+test targets match source Manhattan/naive_168/24,True
+independent MAE Manhattan/naive_168/24,True
+independent RMSE Manhattan/naive_168/24,True
+exact test timestamps Manhattan/naive_168/168,True
+test targets match source Manhattan/naive_168/168,True
+independent MAE Manhattan/naive_168/168,True
+independent RMSE Manhattan/naive_168/168,True
+exact test timestamps Queens/harmonic_ar_calendar/24,True
+test targets match source Queens/harmonic_ar_calendar/24,True
+independent MAE Queens/harmonic_ar_calendar/24,True
+independent RMSE Queens/harmonic_ar_calendar/24,True
+exact test timestamps Queens/harmonic_ar_calendar/168,True
+test targets match source Queens/harmonic_ar_calendar/168,True
+independent MAE Queens/harmonic_ar_calendar/168,True
+independent RMSE Queens/harmonic_ar_calendar/168,True
+exact test timestamps Queens/naive_168/24,True
+test targets match source Queens/naive_168/24,True
+independent MAE Queens/naive_168/24,True
+independent RMSE Queens/naive_168/24,True
+exact test timestamps Queens/naive_168/168,True
+test targets match source Queens/naive_168/168,True
+independent MAE Queens/naive_168/168,True
+independent RMSE Queens/naive_168/168,True
+exact test timestamps Yellow Zone/mstl_ets/24,True
+test targets match source Yellow Zone/mstl_ets/24,True
+independent MAE Yellow Zone/mstl_ets/24,True
+independent RMSE Yellow Zone/mstl_ets/24,True
+exact test timestamps Yellow Zone/mstl_ets/168,True
+test targets match source Yellow Zone/mstl_ets/168,True
+independent MAE Yellow Zone/mstl_ets/168,True
+independent RMSE Yellow Zone/mstl_ets/168,True
+exact test timestamps Yellow Zone/naive_168/24,True
+test targets match source Yellow Zone/naive_168/24,True
+independent MAE Yellow Zone/naive_168/24,True
+independent RMSE Yellow Zone/naive_168/24,True
+exact test timestamps Yellow Zone/naive_168/168,True
+test targets match source Yellow Zone/naive_168/168,True
+independent MAE Yellow Zone/naive_168/168,True
+independent RMSE Yellow Zone/naive_168/168,True
+selection follows CV All zones,True
+selection follows CV Manhattan,True
+selection follows CV Queens,True
+selection follows CV Yellow Zone,True
+selection follows CV Boro Zone,True
+selection follows CV Airports,True
+all calibration before test,True
+two weekly calibration origins,True
+one interval per selected test timestamp,True
+ordered bounds 80,True
+nonnegative lower bound 80,True
+ordered bounds 95,True
+nonnegative lower bound 95,True
+nested intervals,True
+independent interval coverage Airports/24/80,True
+independent interval coverage Airports/168/80,True
+independent interval coverage All zones/24/80,True
+independent interval coverage All zones/168/80,True
+independent interval coverage Boro Zone/24/80,True
+independent interval coverage Boro Zone/168/80,True
+independent interval coverage Manhattan/24/80,True
+independent interval coverage Manhattan/168/80,True
+independent interval coverage Queens/24/80,True
+independent interval coverage Queens/168/80,True
+independent interval coverage Yellow Zone/24/80,True
+independent interval coverage Yellow Zone/168/80,True
+independent interval coverage Airports/24/95,True
+independent interval coverage Airports/168/95,True
+independent interval coverage All zones/24/95,True
+independent interval coverage All zones/168/95,True
+independent interval coverage Boro Zone/24/95,True
+independent interval coverage Boro Zone/168/95,True
+independent interval coverage Manhattan/24/95,True
+independent interval coverage Manhattan/168/95,True
+independent interval coverage Queens/24/95,True
+independent interval coverage Queens/168/95,True
+independent interval coverage Yellow Zone/24/95,True
+independent interval coverage Yellow Zone/168/95,True
+complete zone predictions,True
+unique zone forecast keys,True
+zone origin boundaries,True
+zone forecasts nonnegative,True
+independent zone MAE 24/selected_zone_models,True
+independent zone MAE 24/naive_168,True
+independent zone MAE 168/selected_zone_models,True
+independent zone MAE 168/naive_168,True
+borough coherence 24,True
+service coherence 24,True
+borough coherence 168,True
+service coherence 168,True
+daily forecasts are issued before outcomes,True
+"daily holdout ('Airports', 'ets_weekly')",True
+"daily holdout ('Airports', 'naive_7')",True
+"daily holdout ('All zones', 'ets_weekly')",True
+"daily holdout ('All zones', 'naive_7')",True
+"daily holdout ('Boro Zone', 'naive_7')",True
+"daily holdout ('Boro Zone', 'sarima_weekly')",True
+"daily holdout ('Manhattan', 'ets_weekly')",True
+"daily holdout ('Manhattan', 'naive_7')",True
+"daily holdout ('Queens', 'ets_weekly')",True
+"daily holdout ('Queens', 'naive_7')",True
+"daily holdout ('Yellow Zone', 'ets_weekly')",True
+"daily holdout ('Yellow Zone', 'naive_7')",True
+next week coverage,True
+future outputs no fabricated actuals,True
+coherent calibration precedes test,True
+coherent interval coverage grid,True
+coherent intervals nested,True
+coherent interval coverage Airports/24/80,True
+coherent interval coverage Airports/168/80,True
+coherent interval coverage All zones/24/80,True
+coherent interval coverage All zones/168/80,True
+coherent interval coverage Boro Zone/24/80,True
+coherent interval coverage Boro Zone/168/80,True
+coherent interval coverage Manhattan/24/80,True
+coherent interval coverage Manhattan/168/80,True
+coherent interval coverage Queens/24/80,True
+coherent interval coverage Queens/168/80,True
+coherent interval coverage Yellow Zone/24/80,True
+coherent interval coverage Yellow Zone/168/80,True
+coherent interval coverage Airports/24/95,True
+coherent interval coverage Airports/168/95,True
+coherent interval coverage All zones/24/95,True
+coherent interval coverage All zones/168/95,True
+coherent interval coverage Boro Zone/24/95,True
+coherent interval coverage Boro Zone/168/95,True
+coherent interval coverage Manhattan/24/95,True
+coherent interval coverage Manhattan/168/95,True
+coherent interval coverage Queens/24/95,True
+coherent interval coverage Queens/168/95,True
+coherent interval coverage Yellow Zone/24/95,True
+coherent interval coverage Yellow Zone/168/95,True
+readable figure 01_series_overview.png,True
+readable figure 02_mstl_decomposition.png,True
+readable figure 03_dependence_spectrum.png,True
+readable figure 04_weekly_heatmaps.png,True
+readable figure 05_rolling_validation.png,True
+readable figure 06_holdout_improvement.png,True
+readable figure 07_forecast_intervals.png,True
+readable figure 08_residual_diagnostics.png,True
+readable figure 09_interval_coverage.png,True
+readable figure 10_zone_errors.png,True
+readable figure 11_event_stress_test.png,True
+readable figure 12_next_week_forecast.png,True
+readable figure 13_bottom_up_improvement.png,True
+thirteen review figures,True

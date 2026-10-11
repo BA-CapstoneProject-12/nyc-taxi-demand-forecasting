@@ -1,4 +1,4 @@
-﻿"""Input reconciliation, reproducibility manifests, and repository inventory."""
+"""Input reconciliation, reproducibility manifests, and repository inventory."""
 import hashlib
 import importlib.metadata
 import json
@@ -91,4 +91,3 @@ def audit():
     pd.DataFrame(inventory).to_csv(TABLES/"repository_inventory.csv",index=False)
     print(f"Input audit: {len(checks)} checks passed",flush=True)
     return calendar,hourly,daily,zones,profile,folds
-

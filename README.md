@@ -152,7 +152,39 @@ Every step, file and field is documented in
 [data/dataset-documents/time_series_preparation.md](data/dataset-documents/time_series_preparation.md).
 All inputs are in the repository, so this step does not need the Kaggle data.
 
-## Current modeling results
+### 8. Run time-series analysis and forecasting (Review 2)
+
+The completed Review 2 workflow is separate from the Review 1 regression models.
+Start with the [executed analysis notebook](models/time_series_analysis.ipynb),
+[visual report](models/time_series/review_2_results.html), or
+[results and reproduction guide](models/time_series/README.md).
+
+```bash
+pip install -r requirements.txt -r requirements-time-series.txt
+python scripts/test_time_series.py
+python scripts/run_time_series.py
+python scripts/validate_time_series.py
+python scripts/build_time_series_notebook.py
+python scripts/catalog_time_series.py
+```
+
+It includes daily/weekly MSTL decomposition, stationarity and dependence analysis,
+chronological model comparisons, 24-hour and 168-hour forecasts, uncertainty
+calibration, all 138 zones, coherent aggregate totals, event/error analysis, and
+a historical next-week forecast. Model selection uses four weekly folds;
+two later weeks calibrate uncertainty before the official test window.
+
+The zone approach reduces day-ahead MAE from **9.3074 to 7.8200** (16.0%).
+Its summed demand forecast reduces combined-hourly MAE from **777.71 to 649.37**
+(16.5%). Daily ETS reduces combined daily MAE by **13.9%**. Results are mixed:
+the independently selected combined-demand and Manhattan harmonic models do
+worse than weekly naive on test. All successes and failures are retained.
+
+Review 1 uses observed recent-demand features; these Review 2 forecasts hide
+every outcome inside the issued day/week. The scores answer different
+forecasting questions and are not an equal-information model ranking.
+
+## Review 1 modeling results
 
 The official test period is chronological:
 
@@ -244,8 +276,9 @@ requirements.txt
 
 ## Limitations and project status
 
-- The models are first-pass, untuned baselines; no hyperparameter search is
-  included yet.
+- Review 1 models are first-pass baselines. Review 2 compares fixed statistical
+  candidates through rolling-origin validation; it does not claim exhaustive
+  hyperparameter search or universal superiority over seasonal naive forecasts.
 - The large raw trip CSV is external to GitHub.
 - Association-rule mining and an interactive dashboard are not implemented in
   the current repository.

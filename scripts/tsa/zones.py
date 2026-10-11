@@ -1,4 +1,4 @@
-﻿"""Individual zone selection, intermittent demand, and coherent bottom-up totals."""
+"""Individual zone selection, intermittent demand, and coherent bottom-up totals."""
 import numpy as np
 import pandas as pd
 from .config import TABLES,TARGET,ZONE_MODELS,SELECTION_FOLDS
@@ -69,6 +69,31 @@ def run_zones(calendar,zones,profile,folds):
     for (sid,schedule),g in coherent.groupby(["series_id","schedule"]):
         rows.append(dict(series_id=sid,schedule=schedule,**scores(g.actual,g.prediction)))
     pd.DataFrame(rows).to_csv(TABLES/"bottom_up_metrics.csv",index=False)
+    # Calibrate the coherent aggregate forecasts on the same held-out weeks.
+    # Model choices are already locked by folds 1-4; no test residuals are used.
+    from .intervals import calibrate
+    calibration=[]
+    start=folds.loc[folds.fold.eq(5),"forecast_start"].iloc[0]
+    end=folds.loc[folds.fold.eq(6),"forecast_end"].iloc[0]
+    group_ids={"All zones":list(panel.columns)}
+    for attr in ("Borough","service_zone"):
+        group_ids.update({str(label):list(g.index) for label,g in profile.groupby(attr)})
+    for schedule in (24,168):
+        for origin in pd.date_range(start,end,freq=f"{schedule}h"):
+            future=panel.loc[origin:min(origin+pd.Timedelta(hours=schedule-1),end)]
+            history=panel.loc[panel.index<origin].to_numpy()
+            preds={name:forecast_panel(name,history,len(future)) for name in ZONE_MODELS}
+            chosen=np.column_stack([preds[name][:,j] for j,name in enumerate(selected.model)])
+            forecasts=pd.DataFrame(chosen,index=future.index,columns=panel.columns)
+            for sid,ids in group_ids.items():
+                calibration.append(pd.DataFrame(dict(ds=future.index,actual=future[ids].sum(axis=1).to_numpy(),
+                    prediction=forecasts[ids].sum(axis=1).to_numpy(),series_id=sid,model="bottom_up",
+                    origin=origin,phase="calibration",schedule=schedule,lead=np.arange(1,len(future)+1))))
+    cal=pd.concat(calibration,ignore_index=True)
+    cal.to_csv(TABLES/"bottom_up_calibration_predictions.csv.gz",index=False,float_format="%.8g")
+    evaluated=coherent.copy()
+    evaluated["phase"]="test";evaluated["model"]="bottom_up"
+    calibrate(pd.concat([cal,evaluated],ignore_index=True),dict.fromkeys(group_ids,"bottom_up"),prefix="bottom_up_")
     # Historical deployment example issued just after the final observed hour.
     index=pd.date_range(panel.index[-1]+pd.Timedelta(hours=1),periods=168,freq="h")
     preds={name:forecast_panel(name,panel.to_numpy(),168) for name in ZONE_MODELS}
@@ -76,4 +101,3 @@ def run_zones(calendar,zones,profile,folds):
     pd.DataFrame(future,index=index,columns=panel.columns).rename_axis("ds").to_csv(TABLES/"zone_forecast_next_week.csv",float_format="%.5f")
     print("Zone forecasts complete: 138 zones, daily and weekly origins",flush=True)
     return result
-

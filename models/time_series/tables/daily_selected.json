@@ -1,0 +1,8 @@
+{
+  "All zones": "ets_weekly",
+  "Manhattan": "ets_weekly",
+  "Queens": "ets_weekly",
+  "Yellow Zone": "ets_weekly",
+  "Boro Zone": "sarima_weekly",
+  "Airports": "ets_weekly"
+}

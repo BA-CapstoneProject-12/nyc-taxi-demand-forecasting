@@ -1,4 +1,4 @@
-﻿"""Run from any directory: python scripts/run_time_series.py --stage all."""
+"""Run from any directory: python scripts/run_time_series.py --stage all."""
 import argparse
 import os
 # Small matrix fits are faster and reproducible with bounded BLAS parallelism.
@@ -38,4 +38,3 @@ def main():
 
 if __name__=="__main__":
     main()
-

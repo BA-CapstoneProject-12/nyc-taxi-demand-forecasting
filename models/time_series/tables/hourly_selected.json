@@ -1,0 +1,8 @@
+{
+  "All zones": "harmonic_ar_calendar",
+  "Manhattan": "harmonic_ar_calendar",
+  "Queens": "harmonic_ar_calendar",
+  "Yellow Zone": "mstl_ets",
+  "Boro Zone": "adaptive_week",
+  "Airports": "adaptive_week"
+}

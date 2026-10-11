@@ -1,4 +1,4 @@
-﻿"""Count-scale scores; zero-demand denominators remain explicitly undefined."""
+"""Count-scale scores; zero-demand denominators remain explicitly undefined."""
 import numpy as np
 
 def scores(actual,prediction,history=None,season=168):
@@ -23,4 +23,3 @@ def interval_scores(y,lo,hi,alpha):
     penalty=2/alpha*((lo-y)*(y<lo)+(y-hi)*(y>hi))
     return dict(coverage=float(np.mean((y>=lo)&(y<=hi))),mean_width=float(width.mean()),
                 interval_score=float(np.mean(width+penalty)))
-

@@ -1,4 +1,4 @@
-﻿"""Seasonal forecasts built exclusively from observations before the origin."""
+"""Seasonal forecasts built exclusively from observations before the origin."""
 import numpy as np
 
 def seasonal_naive(history,horizon,period):
@@ -36,4 +36,3 @@ def tsb(history,horizon,alpha=.1,beta=.05):
         probability+=beta*(occurrence-probability)
         size=np.where(occurrence,size+alpha*(value-size),size)
     return np.repeat((probability*size)[None,:],horizon,axis=0)
-

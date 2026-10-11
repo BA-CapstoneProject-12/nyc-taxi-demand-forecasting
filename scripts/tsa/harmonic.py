@@ -1,4 +1,4 @@
-﻿"""Two-stage dynamic harmonic regression, with short-memory AR(2) errors.
+"""Two-stage dynamic harmonic regression, with short-memory AR(2) errors.
 
 This is explicitly a ridge regression followed by an AR error fit, not joint
 maximum-likelihood SARIMAX. Calendar terms are the only future regressors.
@@ -37,5 +37,3 @@ def harmonic_forecast(history,train_calendar,future_calendar,events=True):
     if not np.isfinite(prediction).all():
         raise ValueError("Harmonic model produced invalid forecasts")
     return prediction
-
-

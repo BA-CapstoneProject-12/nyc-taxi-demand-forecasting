@@ -1,4 +1,4 @@
-﻿"""Pre-test residual calibration; dependent observations imply empirical bands.
+"""Pre-test residual calibration; dependent observations imply empirical bands.
 
 These are horizon-binned marginal prediction intervals. They are not simultaneous
 paths and do not have an exchangeability-based coverage guarantee for this series.
@@ -19,7 +19,7 @@ def corrected_quantile(values,coverage):
     rank=min(len(values),math.ceil((len(values)+1)*coverage))
     return float(values[rank-1])
 
-def calibrate(predictions,selected):
+def calibrate(predictions,selected,prefix=""):
     selected_rows=predictions[predictions.apply(lambda r:r.model==selected[r.series_id],axis=1)].copy()
     selected_rows["bucket"]=""
     for schedule in (24,168):
@@ -33,7 +33,7 @@ def calibrate(predictions,selected):
             rows.append(dict(series_id=sid,schedule=schedule,bucket=bucket,coverage=coverage,
                              radius=corrected_quantile(error,coverage),calibration_n=len(p),
                              calibration_origins=p.origin.nunique(),calibration_end=p.ds.max()))
-    radii=pd.DataFrame(rows);radii.to_csv(TABLES/"interval_calibration.csv",index=False)
+    radii=pd.DataFrame(rows);radii.to_csv(TABLES/(prefix+"interval_calibration.csv"),index=False)
     test=selected_rows[selected_rows.phase.eq("test")].copy()
     metrics=[]
     for coverage in (.8,.95):
@@ -46,8 +46,8 @@ def calibrate(predictions,selected):
         for (sid,schedule),p in test.groupby(["series_id","schedule"]):
             metrics.append(dict(series_id=sid,schedule=schedule,nominal_coverage=coverage,
                                 **interval_scores(p.actual,p["lower_"+suffix],p["upper_"+suffix],1-coverage)))
-    test.to_csv(TABLES/"hourly_intervals.csv.gz",index=False,float_format="%.8g")
-    pd.DataFrame(metrics).to_csv(TABLES/"interval_metrics.csv",index=False)
+    test.to_csv(TABLES/(prefix+"hourly_intervals.csv.gz"),index=False,float_format="%.8g")
+    pd.DataFrame(metrics).to_csv(TABLES/(prefix+"interval_metrics.csv"),index=False)
     return test
 
 def block_bootstrap_comparison(predictions,selected,repetitions=2000):
@@ -66,6 +66,5 @@ def block_bootstrap_comparison(predictions,selected,repetitions=2000):
             samples=blocks["sum"].to_numpy()[indices].sum(axis=1)/blocks["count"].to_numpy()[indices].sum(axis=1)
             rows.append(dict(series_id=sid,schedule=schedule,MAE_improvement=chosen.improvement.mean(),
                              lower_95=np.quantile(samples,.025),upper_95=np.quantile(samples,.975),
-                             independent_blocks=len(blocks),note="Exploratory; adjacent origins can remain dependent"))
+                             origin_blocks=len(blocks),note="Exploratory; adjacent origins can remain dependent"))
     pd.DataFrame(rows).to_csv(TABLES/"paired_block_bootstrap.csv",index=False)
-
