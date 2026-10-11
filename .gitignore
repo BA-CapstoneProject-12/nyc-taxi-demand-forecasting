@@ -19,3 +19,5 @@ Thumbs.db
 # Review 2 reports are local reference files
 review_2_results.pdf
 review_2_results.html
+
+timeSeries/dataset/*
