@@ -1,0 +1,26 @@
+split,PULocationID,model,status
+validation,13,DHR,fit not converged
+validation,43,DHR,fit not converged
+validation,75,DHR,fit not converged
+validation,88,DHR,fit not converged
+validation,103,DHR,fit not converged
+validation,104,DHR,fit not converged
+validation,137,DHR,fit not converged
+validation,170,DHR,fit not converged
+validation,226,DHR,fit not converged
+validation,229,DHR,fit not converged
+validation,230,DHR,fit not converged
+validation,237,DHR,fit not converged
+test,7,DHR,fit not converged
+test,43,DHR,fit not converged
+test,70,DHR,fit not converged
+test,75,DHR,fit not converged
+test,90,DHR,fit not converged
+test,103,DHR,fit not converged
+test,104,DHR,fit not converged
+test,141,DHR,fit not converged
+test,151,DHR,fit not converged
+test,224,DHR,fit not converged
+test,229,DHR,fit not converged
+test,233,DHR,fit not converged
+test,244,DHR,fit not converged
