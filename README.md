@@ -187,6 +187,28 @@ every outcome inside the issued day/week. The scores answer different
 forecasting questions and are not an equal-information model ranking.
 
 ## Review 1 modeling results
+## Association-rule data preparation
+
+The Review 2 transaction preparation is available separately from the modelling
+workflow. It uses the same chronological split and fits demand/temperature bins
+and zone clusters on training data only.
+
+```bash
+python scripts/association_rule_data_preparation.py
+python scripts/association_rule_data_preparation.py --validate-only
+python -m unittest discover -s tests -v
+```
+
+See [ARM_doc/README.md](ARM_doc/README.md) and
+[data/dataset-documents/association_rule_preparation.md](data/dataset-documents/association_rule_preparation.md)
+for category definitions, audit/exclusion details, sparse Boolean outputs and the
+mining handoff. The executed
+[scripts/association_rule_data_preparation.ipynb](scripts/association_rule_data_preparation.ipynb)
+shows the preparation and readiness charts. Outputs go to
+`data/processed/association_rules/`. Frequent-itemset mining and rule evaluation
+remain the next stages.
+
+## Current modeling results
 
 The official test period is chronological:
 
@@ -283,7 +305,8 @@ requirements.txt
   hyperparameter search or universal superiority over seasonal naive forecasts.
 - The large raw trip CSV is external to GitHub.
 - Association-rule mining and an interactive dashboard are not implemented in
-  the current repository.
+  the current repository. Association-rule data preparation is ready for the
+  mining stage.
 - [scripts/EDA_visuallization.ipynb](scripts/EDA_visuallization.ipynb) is a legacy
   visualization notebook and may contain stale dataset paths; use the Arun EDA
   implementation for the reproducible current analysis.

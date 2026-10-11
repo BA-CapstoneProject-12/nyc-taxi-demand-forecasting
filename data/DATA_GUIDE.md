@@ -200,6 +200,17 @@ nov = trips[trips["pickup_datetime"].dt.strftime("%Y-%m") == "2025-11"]
 queens = trips[trips["pickup_borough"] == "Queens"]
 ```
 
+## Association-rule preparation outputs
+
+The cleaned `data/processed/features.csv` also feeds the Review 2 association-rule
+preparation. Its output folder is `data/processed/association_rules/`, containing a
+complete categorical audit, eligible train/test metadata, compressed Boolean
+one-hot matrices, frozen bin/cluster parameters and validation tables.
+
+Read [dataset-documents/association_rule_preparation.md](dataset-documents/association_rule_preparation.md)
+for the exact item definitions, chronology, sparse-zone/DST exclusions and loader
+instructions. No raw-trip or Kaggle download is required for this stage.
+
 ## 5. Things to keep in mind
 
 - **The data is not cleaned.** Collection only filtered by borough and date. About 1.4% of trips have a dropoff at or before the pickup, about 1.2% look like duplicates, and a few last over 6 hours. The counts per file are in `taxi_collection_summary.csv`. Decide on cleaning rules in the data preparation step.
