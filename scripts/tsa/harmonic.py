@@ -31,10 +31,11 @@ def harmonic_forecast(history,train_calendar,future_calendar,events=True):
     weight=np.power(.5,np.arange(len(y)-1,-1,-1)/1008)
     regression=Ridge(alpha=3).fit(x,y,sample_weight=weight)
     residual=y-regression.predict(x)
-    ar=AutoReg(residual,lags=2,trend="n",old_names=False).fit()
+    ar=AutoReg(residual,lags=2,trend="n").fit()
     correction=ar.predict(start=len(y),end=len(y)+len(xf)-1)
     prediction=np.maximum(np.expm1(regression.predict(xf)+correction),0)
     if not np.isfinite(prediction).all():
         raise ValueError("Harmonic model produced invalid forecasts")
     return prediction
+
 
