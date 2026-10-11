@@ -154,31 +154,33 @@ All inputs are in the repository, so this step does not need the Kaggle data.
 
 ### 8. Run time-series analysis and forecasting (Review 2)
 
+Review 2 **Model 1** is grouped in `models/time_series/model_1/`.
 The completed Review 2 workflow is separate from the Review 1 regression models.
-Start with the [executed analysis notebook](models/time_series_analysis.ipynb),
-[visual report](models/time_series/review_2_results.html), or
-[results and reproduction guide](models/time_series/README.md).
+Start with the [executed analysis notebook](models/time_series/model_1/time_series_analysis1.ipynb),
+[results and reproduction guide](models/time_series/model_1/README.md).
 
 ```bash
 pip install -r requirements.txt -r requirements-time-series.txt
-python scripts/test_time_series.py
-python scripts/run_time_series.py
-python scripts/validate_time_series.py
-python scripts/build_time_series_notebook.py
-python scripts/catalog_time_series.py
+python models/time_series/model_1/test_time_series.py
+python models/time_series/model_1/run_time_series.py
+python models/time_series/model_1/validate_time_series.py
 ```
 
-It includes daily/weekly MSTL decomposition, stationarity and dependence analysis,
-chronological model comparisons, 24-hour and 168-hour forecasts, uncertainty
-calibration, all 138 zones, coherent aggregate totals, event/error analysis, and
-a historical next-week forecast. Model selection uses four weekly folds;
-two later weeks calibrate uncertainty before the official test window.
+This contribution uses adaptive seasonal profiles, TSB intermittent-demand forecasting,
+and coherent bottom-up aggregation. It includes training-only median-profile decomposition,
+stationarity and dependence analysis, 24-hour and 168-hour forecasts, interval calibration,
+event/error analysis, and an unscored historical next-week forecast.
+
+The teammate's Dynamic Harmonic Regression (ARIMA + Fourier) and MSTL + ETS models
+are excluded from this branch's current implementation. Standalone ETS and ARIMA
+comparisons are also removed.
 
 The zone approach reduces day-ahead MAE from **9.3074 to 7.8200** (16.0%).
-Its summed demand forecast reduces combined-hourly MAE from **777.71 to 649.37**
-(16.5%). Daily ETS reduces combined daily MAE by **13.9%**. Results are mixed:
-the independently selected combined-demand and Manhattan harmonic models do
-worse than weekly naive on test. All successes and failures are retained.
+Its summed forecast reduces combined-hourly MAE from **777.71 to 649.37** (16.5%).
+Daily adaptive forecasting reduces combined-daily MAE by **10.5%**.
+Four pre-test folds select models; two later weeks calibrate intervals.
+This ownership-driven revision reuses an already examined historical holdout;
+a fresh evaluation period is needed for a new blind confirmation.
 
 Review 1 uses observed recent-demand features; these Review 2 forecasts hide
 every outcome inside the issued day/week. The scores answer different

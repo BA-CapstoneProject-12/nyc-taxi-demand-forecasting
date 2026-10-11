@@ -1,8 +1,5 @@
 # Install on top of requirements.txt.
 scipy>=1.13,<2
-scikit-learn>=1.5,<2
 statsmodels>=0.14.4,<0.16
-nbformat>=5.10,<6
-nbclient>=0.10,<1
 ipykernel>=6.29,<8
 threadpoolctl>=3.5,<4

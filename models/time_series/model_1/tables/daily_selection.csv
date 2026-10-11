@@ -1,0 +1,19 @@
+series_id,model,eligible,selection_MAE
+All zones,naive_7,True,24991.821428571428
+All zones,mean_4weeks_daily,True,29752.964285714286
+All zones,adaptive_week_daily,True,23815.094976076623
+Manhattan,naive_7,True,23992.571428571428
+Manhattan,mean_4weeks_daily,True,28788.241071428572
+Manhattan,adaptive_week_daily,True,23014.842255817668
+Queens,naive_7,True,2048.3928571428573
+Queens,mean_4weeks_daily,True,1405.419642857143
+Queens,adaptive_week_daily,True,1393.7500757576604
+Yellow Zone,naive_7,True,23179.14285714286
+Yellow Zone,mean_4weeks_daily,True,27598.071428571428
+Yellow Zone,adaptive_week_daily,True,22113.622503300856
+Boro Zone,naive_7,True,1713.107142857143
+Boro Zone,mean_4weeks_daily,True,1813.875
+Boro Zone,adaptive_week_daily,True,1430.5370497180545
+Airports,naive_7,True,1849.7857142857142
+Airports,mean_4weeks_daily,True,1399.732142857143
+Airports,adaptive_week_daily,True,1276.9811152381849

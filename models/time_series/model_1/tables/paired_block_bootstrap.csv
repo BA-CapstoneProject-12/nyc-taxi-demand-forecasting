@@ -1,0 +1,13 @@
+series_id,schedule,MAE_improvement,lower_95,upper_95,origin_blocks,note
+All zones,24,99.50611971727143,-56.81308725809499,294.3515549063505,35,Exploratory; adjacent origins can remain dependent
+All zones,168,99.10459182124352,-118.51044213344898,349.2647291819619,5,Exploratory; adjacent origins can remain dependent
+Manhattan,24,93.83361608821563,-44.20861962330942,260.036535102383,35,Exploratory; adjacent origins can remain dependent
+Manhattan,168,79.96557785254977,-136.31427090544642,312.5269702272977,5,Exploratory; adjacent origins can remain dependent
+Queens,24,24.86706881138429,3.6192868935565454,47.26145127849348,35,Exploratory; adjacent origins can remain dependent
+Queens,168,24.956868560725407,-1.3727352099008667,54.81015858919329,5,Exploratory; adjacent origins can remain dependent
+Yellow Zone,24,91.86140439277968,-47.57416731234737,251.10649780461748,35,Exploratory; adjacent origins can remain dependent
+Yellow Zone,168,76.85982183640228,-114.90465926916548,275.6108658146684,5,Exploratory; adjacent origins can remain dependent
+Boro Zone,24,18.675762293903464,5.488720430459807,32.09593113902173,35,Exploratory; adjacent origins can remain dependent
+Boro Zone,168,15.837772059007893,-5.381836125574162,38.594868698987135,5,Exploratory; adjacent origins can remain dependent
+Airports,24,18.36872945745305,2.668313617399166,38.150654006521755,35,Exploratory; adjacent origins can remain dependent
+Airports,168,16.84913677257874,0.7822260202893847,34.56201287419051,5,Exploratory; adjacent origins can remain dependent

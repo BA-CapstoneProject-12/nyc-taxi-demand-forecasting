@@ -1,0 +1,145 @@
+series_id,fold,model,status,warnings,seconds
+All zones,1,naive_24,ok,,0.0015939999975671526
+All zones,1,naive_168,ok,,0.001222099999722559
+All zones,1,mean_4weeks,ok,,0.001083199997083284
+All zones,1,adaptive_week,ok,,0.0010096999976667576
+All zones,2,naive_24,ok,,0.0010127000023203436
+All zones,2,naive_168,ok,,0.0009514000012131874
+All zones,2,mean_4weeks,ok,,0.000976200000877725
+All zones,2,adaptive_week,ok,,0.0010486999999557156
+All zones,3,naive_24,ok,,0.001005599999189144
+All zones,3,naive_168,ok,,0.0009811000018089544
+All zones,3,mean_4weeks,ok,,0.0010695999990275595
+All zones,3,adaptive_week,ok,,0.0010207000013906509
+All zones,4,naive_24,ok,,0.0010287999975844286
+All zones,4,naive_168,ok,,0.0011219000007258728
+All zones,4,mean_4weeks,ok,,0.0009695000007923227
+All zones,4,adaptive_week,ok,,0.00111770000148681
+All zones,5,naive_24,ok,,0.0010129000002052635
+All zones,5,naive_168,ok,,0.0010075999998662155
+All zones,5,mean_4weeks,ok,,0.0010197999981755856
+All zones,5,adaptive_week,ok,,0.0010522000011405908
+All zones,6,naive_24,ok,,0.001052800002071308
+All zones,6,naive_168,ok,,0.001110299999709241
+All zones,6,mean_4weeks,ok,,0.0010340999979234766
+All zones,6,adaptive_week,ok,,0.0010685000015655532
+Manhattan,1,naive_24,ok,,0.0011092999993707053
+Manhattan,1,naive_168,ok,,0.000985999999102205
+Manhattan,1,mean_4weeks,ok,,0.0011554000011528842
+Manhattan,1,adaptive_week,ok,,0.0010558000030869152
+Manhattan,2,naive_24,ok,,0.0009637999974074773
+Manhattan,2,naive_168,ok,,0.001068099998519756
+Manhattan,2,mean_4weeks,ok,,0.0011400000003050081
+Manhattan,2,adaptive_week,ok,,0.0013618999983009417
+Manhattan,3,naive_24,ok,,0.001228199998877244
+Manhattan,3,naive_168,ok,,0.0009834000011323951
+Manhattan,3,mean_4weeks,ok,,0.0012870999998995103
+Manhattan,3,adaptive_week,ok,,0.0012709000002359971
+Manhattan,4,naive_24,ok,,0.001032100000884384
+Manhattan,4,naive_168,ok,,0.001041100000293227
+Manhattan,4,mean_4weeks,ok,,0.0009809000002860557
+Manhattan,4,adaptive_week,ok,,0.0011015000018232968
+Manhattan,5,naive_24,ok,,0.0010117999991052784
+Manhattan,5,naive_168,ok,,0.0009857000004558358
+Manhattan,5,mean_4weeks,ok,,0.0010062000001198612
+Manhattan,5,adaptive_week,ok,,0.0010837000008905306
+Manhattan,6,naive_24,ok,,0.001070800000888994
+Manhattan,6,naive_168,ok,,0.0010437000019010156
+Manhattan,6,mean_4weeks,ok,,0.0010129000002052635
+Manhattan,6,adaptive_week,ok,,0.0010388999980932567
+Queens,1,naive_24,ok,,0.001414500002283603
+Queens,1,naive_168,ok,,0.0010978999998769723
+Queens,1,mean_4weeks,ok,,0.0009948000006261282
+Queens,1,adaptive_week,ok,,0.0011501999979373068
+Queens,2,naive_24,ok,,0.0010198000018135644
+Queens,2,naive_168,ok,,0.0012707999994745478
+Queens,2,mean_4weeks,ok,,0.0011396999980206601
+Queens,2,adaptive_week,ok,,0.0011064999998779967
+Queens,3,naive_24,ok,,0.001005599999189144
+Queens,3,naive_168,ok,,0.0009336000002804212
+Queens,3,mean_4weeks,ok,,0.0011639999975159299
+Queens,3,adaptive_week,ok,,0.001350900001853006
+Queens,4,naive_24,ok,,0.00213630000143894
+Queens,4,naive_168,ok,,0.0010013999999500811
+Queens,4,mean_4weeks,ok,,0.0010081000000354834
+Queens,4,adaptive_week,ok,,0.0012165999978606123
+Queens,5,naive_24,ok,,0.0010342000023229048
+Queens,5,naive_168,ok,,0.0009702999996079598
+Queens,5,mean_4weeks,ok,,0.000998500003333902
+Queens,5,adaptive_week,ok,,0.00102100000003702
+Queens,6,naive_24,ok,,0.0010514999994484242
+Queens,6,naive_168,ok,,0.0010370999989390839
+Queens,6,mean_4weeks,ok,,0.0010231999985990115
+Queens,6,adaptive_week,ok,,0.0010177000003750436
+Yellow Zone,1,naive_24,ok,,0.001072099999873899
+Yellow Zone,1,naive_168,ok,,0.0009795000005397014
+Yellow Zone,1,mean_4weeks,ok,,0.0009161999987554736
+Yellow Zone,1,adaptive_week,ok,,0.0009759999993548263
+Yellow Zone,2,naive_24,ok,,0.0009430000027350616
+Yellow Zone,2,naive_168,ok,,0.0009357000017189421
+Yellow Zone,2,mean_4weeks,ok,,0.0009520999992673751
+Yellow Zone,2,adaptive_week,ok,,0.000973600002907915
+Yellow Zone,3,naive_24,ok,,0.0009429000019736122
+Yellow Zone,3,naive_168,ok,,0.00105009999970207
+Yellow Zone,3,mean_4weeks,ok,,0.0009518000006210059
+Yellow Zone,3,adaptive_week,ok,,0.0010000000002037268
+Yellow Zone,4,naive_24,ok,,0.0010540000002947636
+Yellow Zone,4,naive_168,ok,,0.0010562999996182043
+Yellow Zone,4,mean_4weeks,ok,,0.0009635999995225575
+Yellow Zone,4,adaptive_week,ok,,0.0010192000008828472
+Yellow Zone,5,naive_24,ok,,0.0010115000004589092
+Yellow Zone,5,naive_168,ok,,0.000990999997156905
+Yellow Zone,5,mean_4weeks,ok,,0.0015155000000959262
+Yellow Zone,5,adaptive_week,ok,,0.0010733999988588039
+Yellow Zone,6,naive_24,ok,,0.0011225999987800606
+Yellow Zone,6,naive_168,ok,,0.0010341000015614554
+Yellow Zone,6,mean_4weeks,ok,,0.0010155000018130522
+Yellow Zone,6,adaptive_week,ok,,0.0017079000026569702
+Boro Zone,1,naive_24,ok,,0.0011911999972653575
+Boro Zone,1,naive_168,ok,,0.0013037999997322913
+Boro Zone,1,mean_4weeks,ok,,0.0010875999978452455
+Boro Zone,1,adaptive_week,ok,,0.0010016000014729798
+Boro Zone,2,naive_24,ok,,0.000965600000199629
+Boro Zone,2,naive_168,ok,,0.0009322999976575375
+Boro Zone,2,mean_4weeks,ok,,0.000943299997743452
+Boro Zone,2,adaptive_week,ok,,0.0010159000012208708
+Boro Zone,3,naive_24,ok,,0.000961900001129834
+Boro Zone,3,naive_168,ok,,0.0009510999989288393
+Boro Zone,3,mean_4weeks,ok,,0.0009688999998616055
+Boro Zone,3,adaptive_week,ok,,0.00098230000003241
+Boro Zone,4,naive_24,ok,,0.000993699999526143
+Boro Zone,4,naive_168,ok,,0.0011273999989498407
+Boro Zone,4,mean_4weeks,ok,,0.0010271999999531545
+Boro Zone,4,adaptive_week,ok,,0.0010709999987739138
+Boro Zone,5,naive_24,ok,,0.0010922000001301058
+Boro Zone,5,naive_168,ok,,0.0010045000017271377
+Boro Zone,5,mean_4weeks,ok,,0.0012004999989585485
+Boro Zone,5,adaptive_week,ok,,0.0010991999988618772
+Boro Zone,6,naive_24,ok,,0.0020524999999906868
+Boro Zone,6,naive_168,ok,,0.0010498000010557007
+Boro Zone,6,mean_4weeks,ok,,0.0012358000021777116
+Boro Zone,6,adaptive_week,ok,,0.0012124000022595283
+Airports,1,naive_24,ok,,0.0013653999994858168
+Airports,1,naive_168,ok,,0.001117200001317542
+Airports,1,mean_4weeks,ok,,0.0011040999997931067
+Airports,1,adaptive_week,ok,,0.0011272000010649208
+Airports,2,naive_24,ok,,0.0024840999976731837
+Airports,2,naive_168,ok,,0.0022016000002622604
+Airports,2,mean_4weeks,ok,,0.002565300001151627
+Airports,2,adaptive_week,ok,,0.0025177999996230938
+Airports,3,naive_24,ok,,0.002251900001283502
+Airports,3,naive_168,ok,,0.001852999997936422
+Airports,3,mean_4weeks,ok,,0.0014972999997553416
+Airports,3,adaptive_week,ok,,0.001080900001397822
+Airports,4,naive_24,ok,,0.0010153000002901535
+Airports,4,naive_168,ok,,0.00105249999978696
+Airports,4,mean_4weeks,ok,,0.0011706000004778616
+Airports,4,adaptive_week,ok,,0.0012137000012444332
+Airports,5,naive_24,ok,,0.0011669999985315371
+Airports,5,naive_168,ok,,0.0010784000005514827
+Airports,5,mean_4weeks,ok,,0.0017911000031745061
+Airports,5,adaptive_week,ok,,0.001168299997516442
+Airports,6,naive_24,ok,,0.0010782999997900333
+Airports,6,naive_168,ok,,0.0010683000000426546
+Airports,6,mean_4weeks,ok,,0.0011440999987826217
+Airports,6,adaptive_week,ok,,0.0013875000004190952
