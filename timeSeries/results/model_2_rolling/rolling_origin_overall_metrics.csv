@@ -1,0 +1,2 @@
+model,n_rows,MAE,RMSE,R2,MAPE_pct,mape_excluded_zero_count,mape_excluded_zero_pct
+Dynamic Harmonic Regression,86526,11.605205406381948,27.68472990472265,0.8414433589616032,88.64376097156588,24013,27.752351894228322

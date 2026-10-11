@@ -1,0 +1,8 @@
+{
+  "All zones": "adaptive_week_daily",
+  "Manhattan": "adaptive_week_daily",
+  "Queens": "adaptive_week_daily",
+  "Yellow Zone": "adaptive_week_daily",
+  "Boro Zone": "adaptive_week_daily",
+  "Airports": "adaptive_week_daily"
+}

@@ -130,6 +130,63 @@ Run [models/model_comparison_error_analysis.ipynb](models/model_comparison_error
 for the final comparison, train/test gaps, hourly errors, zone errors, residuals,
 and largest individual errors.
 
+### 7. Prepare the time-series dataset (Review 2)
+
+Run [scripts/time_series_data_preparation.ipynb](scripts/time_series_data_preparation.ipynb).
+It builds on `data/processed/features.csv`, recovers the dropped warm-up week
+(1-7 Sep) exactly from its 168-hour lag column so the series cover the full
+history, and writes analysis-ready series to `data/processed/time_series/`:
+
+- hourly and daily series for all zones, each borough and each service area
+- the zone-hour and zone-day panels
+- a calendar and event table (holiday names, holiday periods, special days and
+  nights, DST flags, heavy-snow days, daily and weekly Fourier terms)
+- train/validation/test splits that reuse the ML test period, plus rolling-origin
+  folds
+- per-zone demand profiles and readiness diagnostics
+- a feature catalogue giving every column's role (target, known-in-advance
+  regressor, weather regressor, trend or descriptive), checked for leakage,
+  extrapolation and collinearity
+
+Every step, file and field is documented in
+[data/dataset-documents/time_series_preparation.md](data/dataset-documents/time_series_preparation.md).
+All inputs are in the repository, so this step does not need the Kaggle data.
+
+### 8. Run time-series analysis and forecasting (Review 2)
+
+Review 2 **Model 1** is grouped in `models/time_series/model_1/`.
+The completed Review 2 workflow is separate from the Review 1 regression models.
+Start with the [executed analysis notebook](models/time_series/model_1/time_series_analysis1.ipynb),
+[results and reproduction guide](models/time_series/model_1/README.md).
+
+```bash
+pip install -r requirements.txt -r requirements-time-series.txt
+python models/time_series/model_1/test_time_series.py
+python models/time_series/model_1/run_time_series.py
+python models/time_series/model_1/validate_time_series.py
+```
+
+This contribution uses adaptive seasonal profiles, TSB intermittent-demand forecasting,
+and coherent bottom-up aggregation. It includes training-only median-profile decomposition,
+stationarity and dependence analysis, 24-hour and 168-hour forecasts, interval calibration,
+event/error analysis, and an unscored historical next-week forecast.
+
+The teammate's Dynamic Harmonic Regression (ARIMA + Fourier) and MSTL + ETS models
+are excluded from this branch's current implementation. Standalone ETS and ARIMA
+comparisons are also removed.
+
+The zone approach reduces day-ahead MAE from **9.3074 to 7.8200** (16.0%).
+Its summed forecast reduces combined-hourly MAE from **777.71 to 649.37** (16.5%).
+Daily adaptive forecasting reduces combined-daily MAE by **10.5%**.
+Four pre-test folds select models; two later weeks calibrate intervals.
+This ownership-driven revision reuses an already examined historical holdout;
+a fresh evaluation period is needed for a new blind confirmation.
+
+Review 1 uses observed recent-demand features; these Review 2 forecasts hide
+every outcome inside the issued day/week. The scores answer different
+forecasting questions and are not an equal-information model ranking.
+
+## Review 1 modeling results
 ## Association-rule data preparation
 
 The Review 2 transaction preparation is available separately from the modelling
@@ -216,9 +273,10 @@ file is excluded from GitHub because it exceeds GitHub's 100 MB file limit.
 ```text
 data/
   DATA_GUIDE.md
-  dataset-documents/       collection method and data dictionary
+  dataset-documents/       collection, processing and time-series preparation docs
   raw/                     zones, weather, collection summary, large local data
   processed/               cleaned and feature-engineered datasets
+    time_series/           analysis-ready series for the time-series stage
 EDA_doc/
   EDA_findings.md
   README.md
@@ -233,6 +291,7 @@ models/
 scripts/
   data_collection.ipynb
   data_processing_engineering.ipynb
+  time_series_data_preparation.ipynb
   EDA_Arun.ipynb
   eda_arun.py
   validate_eda_arun.py
@@ -241,8 +300,9 @@ requirements.txt
 
 ## Limitations and project status
 
-- The models are first-pass, untuned baselines; no hyperparameter search is
-  included yet.
+- Review 1 models are first-pass baselines. Review 2 compares fixed statistical
+  candidates through rolling-origin validation; it does not claim exhaustive
+  hyperparameter search or universal superiority over seasonal naive forecasts.
 - The large raw trip CSV is external to GitHub.
 - Association-rule mining and an interactive dashboard are not implemented in
   the current repository. Association-rule data preparation is ready for the

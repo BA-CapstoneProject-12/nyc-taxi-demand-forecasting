@@ -1,0 +1,139 @@
+PULocationID,model,MAE,Zone,Borough,volume_tier,demand_pattern
+2,tsb,0.007869127968172945,Jamaica Bay,Queens,Sparse,intermittent
+4,adaptive_week,8.306489994336838,Alphabet City,Manhattan,Medium,erratic
+7,adaptive_week,5.800812124437123,Astoria,Queens,Medium,smooth
+8,adaptive_week,0.1259481663384608,Astoria Park,Queens,Sparse,intermittent
+9,mean_4weeks,0.3787202380952381,Auburndale,Queens,Sparse,intermittent
+10,adaptive_week,1.5057844170889938,Baisley Park,Queens,Low,smooth
+12,mean_4weeks,1.0930059523809523,Battery Park,Manhattan,Low,lumpy
+13,adaptive_week,10.782566635647548,Battery Park City,Manhattan,Medium,erratic
+15,mean_4weeks,0.33816964285714285,Bay Terrace/Fort Totten,Queens,Sparse,intermittent
+16,tsb,0.6114584926600942,Bayside,Queens,Sparse,intermittent
+19,mean_4weeks,0.6253720238095237,Bellerose,Queens,Sparse,intermittent
+24,adaptive_week,5.827721932529387,Bloomingdale,Manhattan,Medium,smooth
+27,naive_168,0.03869047619047619,Breezy Point/Fort Tilden/Riis Beach,Queens,Sparse,intermittent
+28,tsb,1.2513272604886625,Briarwood/Jamaica Hills,Queens,Low,intermittent
+30,tsb,0.05028410294149771,Broad Channel,Queens,Sparse,intermittent
+38,adaptive_week,0.6578773140589549,Cambria Heights,Queens,Sparse,intermittent
+41,adaptive_week,9.40644191212802,Central Harlem,Manhattan,Medium,smooth
+42,adaptive_week,7.074849420012737,Central Harlem North,Manhattan,Medium,smooth
+43,naive_168,18.669642857142858,Central Park,Manhattan,High,erratic
+45,adaptive_week,4.469222486696881,Chinatown,Manhattan,Medium,smooth
+48,adaptive_week,29.854495353208925,Clinton East,Manhattan,High,smooth
+50,adaptive_week,12.179795530317591,Clinton West,Manhattan,Medium,smooth
+53,mean_4weeks,0.6536458333333333,College Point,Queens,Sparse,intermittent
+56,mean_4weeks,1.2976190476190477,Corona,Queens,Low,lumpy
+57,mean_4weeks,0.19791666666666666,Corona,Queens,Sparse,intermittent
+64,adaptive_week,0.3405194153645025,Douglaston,Queens,Sparse,intermittent
+68,adaptive_week,34.90565116518331,East Chelsea,Manhattan,High,smooth
+70,mean_4weeks,5.408854166666667,East Elmhurst,Queens,Medium,smooth
+73,tsb,0.3380920107196881,East Flushing,Queens,Sparse,intermittent
+74,adaptive_week,9.714883565963625,East Harlem North,Manhattan,Medium,smooth
+75,adaptive_week,12.614610902934528,East Harlem South,Manhattan,High,smooth
+79,adaptive_week,48.09377001369954,East Village,Manhattan,High,erratic
+82,adaptive_week,3.134599643715214,Elmhurst,Queens,Low,smooth
+83,tsb,1.3792760913545408,Elmhurst/Maspeth,Queens,Low,smooth
+86,adaptive_week,0.9827575635897158,Far Rockaway,Queens,Low,intermittent
+87,adaptive_week,14.38590820964915,Financial District North,Manhattan,Medium,erratic
+88,adaptive_week,7.479849551151178,Financial District South,Manhattan,Medium,erratic
+90,adaptive_week,26.174433572306796,Flatiron,Manhattan,High,smooth
+92,adaptive_week,1.6315006329822839,Flushing,Queens,Low,erratic
+93,adaptive_week,0.7315171027107424,Flushing Meadows-Corona Park,Queens,Low,lumpy
+95,adaptive_week,2.926679077496729,Forest Hills,Queens,Low,erratic
+96,mean_4weeks,0.19122023809523808,Forest Park/Highland Park,Queens,Sparse,intermittent
+98,adaptive_week,0.5004838024768355,Fresh Meadows,Queens,Sparse,intermittent
+100,adaptive_week,18.22225467828307,Garment District,Manhattan,High,smooth
+101,mean_4weeks,0.5569196428571428,Glen Oaks,Queens,Sparse,intermittent
+102,tsb,0.8842504872482603,Glendale,Queens,Sparse,intermittent
+103,naive_168,0.0,Governor's Island/Ellis Island/Liberty Island,Manhattan,Zero,no demand
+104,naive_168,0.0,Governor's Island/Ellis Island/Liberty Island,Manhattan,Zero,no demand
+105,tsb,0.004744558531969292,Governor's Island/Ellis Island/Liberty Island,Manhattan,Sparse,intermittent
+107,adaptive_week,35.082975759964675,Gramercy,Manhattan,High,smooth
+113,adaptive_week,23.759213250032346,Greenwich Village North,Manhattan,High,smooth
+114,adaptive_week,26.690701633543668,Greenwich Village South,Manhattan,High,erratic
+116,adaptive_week,5.436694309699202,Hamilton Heights,Manhattan,Medium,smooth
+117,adaptive_week,1.0413861790074654,Hammels/Arverne,Queens,Low,lumpy
+120,adaptive_week,0.2510651784202337,Highbridge Park,Manhattan,Sparse,intermittent
+121,tsb,0.9626062566093565,Hillcrest/Pomonok,Queens,Low,intermittent
+122,adaptive_week,0.6745187826068143,Hollis,Queens,Sparse,intermittent
+124,adaptive_week,0.8182969911084318,Howard Beach,Queens,Sparse,intermittent
+125,adaptive_week,8.72465672584929,Hudson Sq,Manhattan,Medium,smooth
+127,adaptive_week,1.8722700391699938,Inwood,Manhattan,Low,erratic
+128,mean_4weeks,0.3932291666666667,Inwood Hill Park,Manhattan,Sparse,intermittent
+129,tsb,3.338632219112961,Jackson Heights,Queens,Low,smooth
+130,mean_4weeks,3.0189732142857144,Jamaica,Queens,Low,smooth
+131,tsb,0.954564974594958,Jamaica Estates,Queens,Sparse,intermittent
+132,adaptive_week,43.87215052501273,JFK Airport,Queens,High,smooth
+134,adaptive_week,1.271036140056394,Kew Gardens,Queens,Low,smooth
+135,tsb,0.857431573953243,Kew Gardens Hills,Queens,Sparse,intermittent
+137,adaptive_week,17.325252663881106,Kips Bay,Manhattan,High,smooth
+138,adaptive_week,47.143082599306155,LaGuardia Airport,Queens,High,smooth
+139,adaptive_week,0.747890412294114,Laurelton,Queens,Sparse,intermittent
+140,adaptive_week,27.464348794659323,Lenox Hill East,Manhattan,High,erratic
+141,adaptive_week,31.23773917054853,Lenox Hill West,Manhattan,High,smooth
+142,adaptive_week,44.98830829550742,Lincoln Square East,Manhattan,High,erratic
+143,adaptive_week,19.093514499910338,Lincoln Square West,Manhattan,High,erratic
+144,adaptive_week,18.686513335427783,Little Italy/NoLiTa,Manhattan,High,erratic
+145,adaptive_week,6.164260670366955,Long Island City/Hunters Point,Queens,Medium,smooth
+146,adaptive_week,2.88875413998311,Long Island City/Queens Plaza,Queens,Low,erratic
+148,adaptive_week,22.887768832798052,Lower East Side,Manhattan,High,erratic
+151,adaptive_week,11.535023384093355,Manhattan Valley,Manhattan,Medium,smooth
+152,adaptive_week,3.4098357087069937,Manhattanville,Manhattan,Low,smooth
+153,mean_4weeks,0.49441964285714285,Marble Hill,Manhattan,Sparse,intermittent
+157,adaptive_week,2.021987590629707,Maspeth,Queens,Low,lumpy
+158,adaptive_week,17.810115592162536,Meatpacking/West Village West,Manhattan,High,erratic
+160,adaptive_week,0.9904491565309304,Middle Village,Queens,Sparse,intermittent
+161,naive_168,50.51636904761905,Midtown Center,Manhattan,High,erratic
+162,naive_168,46.086309523809526,Midtown East,Manhattan,High,erratic
+163,naive_168,30.927083333333332,Midtown North,Manhattan,High,erratic
+164,naive_168,31.44345238095238,Midtown South,Manhattan,High,smooth
+166,adaptive_week,13.562325622491803,Morningside Heights,Manhattan,Medium,smooth
+170,adaptive_week,37.3713451918239,Murray Hill,Manhattan,High,smooth
+171,tsb,0.6050778913322197,Murray Hill-Queens,Queens,Sparse,intermittent
+173,tsb,0.9620080519433922,North Corona,Queens,Sparse,lumpy
+175,mean_4weeks,0.39880952380952384,Oakland Gardens,Queens,Sparse,intermittent
+179,adaptive_week,2.654539612371144,Old Astoria,Queens,Low,erratic
+180,mean_4weeks,0.7596726190476191,Ozone Park,Queens,Sparse,intermittent
+186,adaptive_week,44.854762188711604,Penn Station/Madison Sq West,Manhattan,High,smooth
+191,mean_4weeks,1.3664434523809523,Queens Village,Queens,Low,lumpy
+192,adaptive_week,0.5621527555968775,Queensboro Hill,Queens,Sparse,intermittent
+193,adaptive_week,2.265839050579608,Queensbridge/Ravenswood,Queens,Low,erratic
+194,adaptive_week,0.3085450854807496,Randalls Island,Manhattan,Sparse,intermittent
+196,adaptive_week,1.2498711509488538,Rego Park,Queens,Low,intermittent
+197,mean_4weeks,1.9542410714285714,Richmond Hill,Queens,Low,erratic
+198,adaptive_week,1.9917247939247953,Ridgewood,Queens,Low,erratic
+201,mean_4weeks,0.5171130952380952,Rockaway Park,Queens,Sparse,intermittent
+202,tsb,0.8344588080754085,Roosevelt Island,Manhattan,Sparse,intermittent
+203,mean_4weeks,0.7377232142857143,Rosedale,Queens,Sparse,intermittent
+205,adaptive_week,1.4584434766967382,Saint Albans,Queens,Low,lumpy
+207,mean_4weeks,0.45944940476190477,Saint Michaels Cemetery/Woodside,Queens,Sparse,intermittent
+209,adaptive_week,5.064773152139001,Seaport,Manhattan,Medium,erratic
+211,adaptive_week,14.57542984432396,SoHo,Manhattan,Medium,erratic
+215,mean_4weeks,1.3634672619047619,South Jamaica,Queens,Low,erratic
+216,mean_4weeks,2.400297619047619,South Ozone Park,Queens,Low,smooth
+218,mean_4weeks,1.1726190476190477,Springfield Gardens North,Queens,Low,lumpy
+219,tsb,1.0831417116335817,Springfield Gardens South,Queens,Low,intermittent
+223,adaptive_week,2.399953395115565,Steinway,Queens,Low,smooth
+224,adaptive_week,5.653687478918827,Stuy Town/Peter Cooper Village,Manhattan,Medium,smooth
+226,adaptive_week,4.263768170969275,Sunnyside,Queens,Medium,smooth
+229,adaptive_week,22.651752315821575,Sutton Place/Turtle Bay North,Manhattan,High,smooth
+230,adaptive_week,41.34492933915642,Times Sq/Theatre District,Manhattan,High,smooth
+231,adaptive_week,25.893644823138366,TriBeCa/Civic Center,Manhattan,High,erratic
+232,adaptive_week,5.891539866821223,Two Bridges/Seward Park,Manhattan,Medium,smooth
+233,adaptive_week,15.631378453036225,UN/Turtle Bay South,Manhattan,High,smooth
+234,adaptive_week,44.615534520126,Union Sq,Manhattan,High,erratic
+236,adaptive_week,65.810833951705,Upper East Side North,Manhattan,High,erratic
+237,adaptive_week,71.34978509033385,Upper East Side South,Manhattan,High,erratic
+238,adaptive_week,29.626551162275806,Upper West Side North,Manhattan,High,smooth
+239,adaptive_week,35.59748347559018,Upper West Side South,Manhattan,High,smooth
+243,adaptive_week,3.1339919314562303,Washington Heights North,Manhattan,Low,smooth
+244,adaptive_week,5.959910774786671,Washington Heights South,Manhattan,Medium,smooth
+246,adaptive_week,26.76173143086995,West Chelsea/Hudson Yards,Manhattan,High,erratic
+249,adaptive_week,36.086558255073726,West Village,Manhattan,High,erratic
+252,mean_4weeks,0.5416666666666667,Whitestone,Queens,Sparse,intermittent
+253,tsb,0.03405646374707989,Willets Point,Queens,Sparse,intermittent
+258,mean_4weeks,1.2395833333333335,Woodhaven,Queens,Low,lumpy
+260,adaptive_week,2.5365246308384752,Woodside,Queens,Low,smooth
+261,adaptive_week,7.820492538850371,World Trade Center,Manhattan,Medium,erratic
+262,adaptive_week,21.50509283792286,Yorkville East,Manhattan,High,erratic
+263,adaptive_week,28.139306188788087,Yorkville West,Manhattan,High,smooth

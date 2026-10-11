@@ -1,0 +1,5 @@
+# Install on top of requirements.txt.
+scipy>=1.13,<2
+statsmodels>=0.14.4,<0.16
+ipykernel>=6.29,<8
+threadpoolctl>=3.5,<4

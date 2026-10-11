@@ -1,0 +1,44 @@
+check,passed,detail
+complete hourly calendar,True,4344
+fixed study window,True,2026-02-28 23:00:00
+zone keys unique,True,599472
+complete zone grid,True,"(4344, 138)"
+nonnegative finite target,True,trip_count_adj
+all aggregate series,True,['All zones' 'Manhattan' 'Queens' 'Airports' 'Boro Zone' 'Yellow Zone']
+regular Airports,True,4344
+zone reconciliation Airports,True,2
+daily reconciliation Airports,True,181
+regular All zones,True,4344
+zone reconciliation All zones,True,138
+daily reconciliation All zones,True,181
+regular Boro Zone,True,4344
+zone reconciliation Boro Zone,True,81
+daily reconciliation Boro Zone,True,181
+regular Manhattan,True,4344
+zone reconciliation Manhattan,True,69
+daily reconciliation Manhattan,True,181
+regular Queens,True,4344
+zone reconciliation Queens,True,69
+daily reconciliation Queens,True,181
+regular Yellow Zone,True,4344
+zone reconciliation Yellow Zone,True,55
+daily reconciliation Yellow Zone,True,181
+zone daily reconciliation,True,24978
+clean trip total,True,22579793
+DST correction confined to repeated label,True,138
+profile keys,True,138
+split sizes,True,"{'test': 836, 'train': 3172, 'validation': 336}"
+Review 1 test targets match,True,115368
+folds before test,True,2026-01-24 23:00:00
+fold boundaries,True,6
+finite numeric ts_acf_key_lags.csv,True,"(11, 2)"
+finite numeric ts_aggregate_daily.csv,True,"(1086, 42)"
+finite numeric ts_aggregate_hourly.csv,True,"(26064, 54)"
+finite numeric ts_calendar_hourly.csv,True,"(4344, 44)"
+finite numeric ts_cv_folds.csv,True,"(6, 7)"
+finite numeric ts_feature_catalog.csv,True,"(65, 4)"
+finite numeric ts_readiness_checks.csv,True,"(41, 3)"
+finite numeric ts_stationarity_tests.csv,True,"(6, 6)"
+finite numeric ts_zone_daily.csv,True,"(24978, 14)"
+finite numeric ts_zone_hourly.csv,True,"(599472, 8)"
+finite numeric ts_zone_profile.csv,True,"(138, 20)"
