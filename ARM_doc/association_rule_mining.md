@@ -52,7 +52,7 @@ Both algorithms were run on the training data across minimum support values of `
 
 ## 4. Holdout Test Validation
 
-Rules were mined exclusively on the training split (October–December 2024, 320,544 rows). Each rule was then re-evaluated on the unseen holdout test split (January 2025, 80,256 rows).
+Rules were mined exclusively on the training split (September 2025 – January 2026, 320,544 rows). Each rule was then re-evaluated on the unseen holdout test split (late January 2026 – February 2026, 80,256 rows).
 
 ### Stability Filters
 A rule was retained as **Holdout-Stable** if it met three criteria on the test data:
