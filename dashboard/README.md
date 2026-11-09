@@ -107,6 +107,7 @@ dashboard/
   build_data.py     joins saved project outputs into small files in data/
   views/            one file per page (home, ch1-ch6, three live tools)
   data/             files written by build_data.py
+  assets/           extra images shown in the app (teammate Model 2 charts)
   .streamlit/       theme
 ```
 

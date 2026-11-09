@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -8,6 +10,7 @@ from utils import (BLUE, GRAY, INK, ORANGE, REPO, TS_DATA, TS_MODEL, callout,
 
 TABLES = TS_MODEL / "tables"
 FIGS = TS_MODEL / "figures"
+ASSETS = Path(__file__).resolve().parent.parent / "assets"  # images saved with the dashboard
 
 hero(
     "Chapter 4 · Review 2",
@@ -188,6 +191,10 @@ with st.expander("Original analysis figures from the time-series notebook"):
         for col, (file_name, caption) in zip(cols, gallery[i:i + 2]):
             with col:
                 figure(FIGS / file_name, caption)
+
+    # Teammate Model 2 (Dynamic Harmonic Regression), shown full width because the charts are wide.
+    figure(ASSETS / "model_2_dhr_actual_vs_predicted.png", "Model 2 (DHR): actual vs predicted demand, test period")
+    figure(ASSETS / "model_2_dhr_anomaly.png", "Model 2 (DHR): actual vs predicted around the 23 Feb blizzard")
 
 callout("<b>How it helps users:</b> managers can plan driver rosters and maintenance 1–7 days ahead from "
         "the forecast instead of reacting day by day. Generate your own forecast in <b>Forecast planner</b>.", "use")

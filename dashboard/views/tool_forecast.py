@@ -82,14 +82,7 @@ cards = [
     ("Forecast pickups", f"{forecast.sum():,.0f}", f"next {horizon_label}"),
     ("Peak hour", f"{future_hours[peak_index]:%a %H:00}", f"{forecast[peak_index]:,.0f} pickups"),
 ]
-if has_actual:
-    mae = np.abs(forecast - actual.values).mean()
-    mae_base = np.abs(baseline - actual.values).mean()
-    cards += [("Model 1 error (MAE)", f"{mae:,.1f}", "pickups per hour")]
-    reduction = 100 * (1 - mae / mae_base)
-    cards += [("Error vs last-week forecast", f"{abs(reduction):.1f}% {'less' if reduction >= 0 else 'more'}",
-               f"last-week forecast MAE {mae_base:,.1f}")]
-else:
+if not has_actual:
     cards += [("Actual data", "not yet", "this is a true future forecast"),
               ("Method", "Model 1", "selected per zone")]
 kpi_row(cards)

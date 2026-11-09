@@ -1,8 +1,6 @@
 import datetime as dt
 
-import numpy as np
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
@@ -113,43 +111,21 @@ callout(f"<b>Recommended action ({level} demand, {LEVEL_MEANING[level]}):</b> {a
 # ---------------------------------------------------------------------------
 # The whole day for this zone
 # ---------------------------------------------------------------------------
-left, right = st.columns([1.5, 1])
-with left:
-    day = features[(features["PULocationID"] == zone_id) & (features["pickup_hour"].dt.date == date)].copy()
-    day["predicted"] = predict_demand(day)
-    fig = go.Figure()
-    fig.add_scatter(x=day["pickup_hour"].dt.hour, y=day["trip_count"], name="Actual", line=dict(color=INK, width=2))
-    fig.add_scatter(x=day["pickup_hour"].dt.hour, y=day["predicted"], name="Model prediction", line=dict(color=ORANGE, width=2))
-    fig.add_scatter(x=day["pickup_hour"].dt.hour, y=day["trip_count_lag_168h"], name="Last-week baseline",
-                    line=dict(color=GRAY, width=1.5, dash="dot"))
-    fig.add_scatter(x=[hour], y=[predicted], mode="markers", name="Selected hour" + (" (scenario)" if changed else ""),
-                    marker=dict(size=13, color=BLUE, line=dict(color="white", width=2)))
-    fig.update_layout(title=f"{zone['Zone']} on {date:%a %d %b %Y}: hour by hour", hovermode="x unified",
-                      xaxis=dict(title="Hour of day", dtick=2), yaxis_title="Pickups")
-    show_chart(fig, height=380)
-    day_mae = (day["predicted"] - day["trip_count"]).abs().mean()
-    st.caption(f"Model MAE for this zone and day: **{day_mae:.2f}** pickups per hour "
-               f"(last-week baseline: {(day['trip_count_lag_168h'] - day['trip_count']).abs().mean():.2f}).")
-
-with right:
-    variable = st.segmented_control("What-if curve", ["Rain", "Snowfall", "Temperature", "Last hour's demand"], default="Rain", required=True)
-    settings = {
-        "Rain": ("rain", np.linspace(0, 10, 21), "Rain (mm)"),
-        "Snowfall": ("snowfall", np.linspace(0, 4, 17), "Snowfall (cm)"),
-        "Temperature": ("apparent_temperature", np.linspace(-20, 30, 26), "Feels-like temperature (°C)"),
-        "Last hour's demand": ("trip_count_lag_1h", np.linspace(0, max(2 * lag_1, 20), 21), "Pickups 1 hour earlier"),
-    }
-    column, values, axis_title = settings[variable]
-    curve = pd.concat([scenario] * len(values), ignore_index=True)
-    curve[column] = values
-    curve["predicted"] = predict_demand(curve)
-    fig = px.line(curve, x=column, y="predicted", markers=True, labels={column: axis_title, "predicted": "Predicted pickups"},
-                  title=f"Sensitivity to {variable.lower()}")
-    fig.update_traces(line_color=BLUE, line_width=2, marker_size=6)
-    fig.update_yaxes(range=[0, max(curve["predicted"].max() * 1.2, 1)])  # start at 0 so small changes look small
-    show_chart(fig, height=330)
-    st.caption("All other inputs stay as set above. Recent demand moves the prediction much more than weather, "
-               "matching the feature-importance results in Chapter 3.")
+day = features[(features["PULocationID"] == zone_id) & (features["pickup_hour"].dt.date == date)].copy()
+day["predicted"] = predict_demand(day)
+fig = go.Figure()
+fig.add_scatter(x=day["pickup_hour"].dt.hour, y=day["trip_count"], name="Actual", line=dict(color=INK, width=2))
+fig.add_scatter(x=day["pickup_hour"].dt.hour, y=day["predicted"], name="Model prediction", line=dict(color=ORANGE, width=2))
+fig.add_scatter(x=day["pickup_hour"].dt.hour, y=day["trip_count_lag_168h"], name="Last-week baseline",
+                line=dict(color=GRAY, width=1.5, dash="dot"))
+fig.add_scatter(x=[hour], y=[predicted], mode="markers", name="Selected hour" + (" (scenario)" if changed else ""),
+                marker=dict(size=13, color=BLUE, line=dict(color="white", width=2)))
+fig.update_layout(title=f"{zone['Zone']} on {date:%a %d %b %Y}: hour by hour", hovermode="x unified",
+                  xaxis=dict(title="Hour of day", dtick=2), yaxis_title="Pickups")
+show_chart(fig, height=380)
+day_mae = (day["predicted"] - day["trip_count"]).abs().mean()
+st.caption(f"Model MAE for this zone and day: **{day_mae:.2f}** pickups per hour "
+           f"(last-week baseline: {(day['trip_count_lag_168h'] - day['trip_count']).abs().mean():.2f}).")
 
 # ---------------------------------------------------------------------------
 # Citywide view for the same hour
@@ -239,8 +215,10 @@ with left:
     fig.update_layout(margin=dict(l=0, r=0, t=10, b=0), dragmode=False, showlegend=False)
     show_chart(fig, height=440, toolbar=False)
 with right:
+    show_difference = st.toggle("Show difference column", value=False)
+    columns = ["rank", "Zone", "level", "predicted", "normal"] + (["difference"] if show_difference else []) + ["trip_count"]
     st.dataframe(
-        top[["rank", "Zone", "level", "predicted", "normal", "difference", "trip_count"]],
+        top[columns],
         hide_index=True, width="stretch", height=410,
         column_config={"rank": st.column_config.NumberColumn("#", width="small"),
                        "level": st.column_config.TextColumn("Level", width="small"),

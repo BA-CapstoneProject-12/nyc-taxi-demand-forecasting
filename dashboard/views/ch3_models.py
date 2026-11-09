@@ -56,7 +56,7 @@ results = pd.DataFrame({
     "MAE": [9.3074, 7.4861, 6.7993, 5.7841],
     "RMSE": [24.0566, 15.7036, 15.2593, 13.1632],
     "R²": [0.8776, 0.9478, 0.9507, 0.9633],
-    "MAPE (%)": [None, 87.45, 54.52, 44.84],
+    "WAPE (%)": [27.6246, 22.2189, 20.1805, 17.1674],
 })
 results["MAE vs baseline"] = (results["MAE"] / results["MAE"].iloc[0] - 1) * 100
 short_names = {"Naive 168-hour baseline": "Naive<br>baseline", "Linear Regression": "Linear<br>Regression",
@@ -90,12 +90,12 @@ with right:
             "MAE": st.column_config.NumberColumn(format="%.3f"),
             "RMSE": st.column_config.NumberColumn(format="%.3f"),
             "R²": st.column_config.NumberColumn(format="%.4f"),
-            "MAPE (%)": st.column_config.NumberColumn(format="%.1f", help="Only over hours with non-zero demand"),
+            "WAPE (%)": st.column_config.NumberColumn(format="%.1f", help="Total absolute error as a share of total pickups"),
             "MAE vs baseline": st.column_config.NumberColumn(format="%+.1f%%"),
         },
     )
     callout("<b>MAE</b> = average error in pickups. <b>RMSE</b> punishes big misses more. "
-            "<b>R²</b> = share of demand variation explained. MAPE is hard to read when actual demand is 0 or tiny.")
+            "<b>R²</b> = share of demand variation explained. <b>WAPE</b> = total error as a % of total pickups (lower is better).")
 
 # Train vs test check
 gaps = read_csv(MODELING / "model_train_test_comparison.csv")
@@ -162,29 +162,6 @@ show_chart(fig, height=380)
 if len(view) and shown:
     scores = {name: (view[col] - view["actual"]).abs().mean() for col, name in model_names.items() if name in shown}
     st.caption("MAE for this zone and week: " + " · ".join(f"**{n}** {v:.2f}" for n, v in scores.items()))
-
-# ---------------------------------------------------------------------------
-st.header("Does weather improve the prediction?")
-ablation = read_csv(MODELING / "weather_ablation_test_comparison.csv").set_index("metric")
-left, right = st.columns([1, 1.3])
-with left:
-    kpi_row([
-        ("MAE with weather", f"{ablation.loc['MAE', 'with_weather']:.3f}", ""),
-        ("MAE without weather", f"{ablation.loc['MAE', 'without_weather']:.3f}", ""),
-    ])
-with right:
-    callout("We re-trained HistGradientBoosting <b>without</b> the four weather features. Test MAE was "
-            "about the same (slightly better, by 1.9%). Weather changes slowly from hour to hour, so its effect "
-            "is already captured by the recent-demand lags. This answers our research question: <b>weather "
-            "adds little beyond past demand for next-hour prediction</b>, but it still explains big shifts "
-            "(snow −40% to −70%) that matter for planning days ahead.", "warn")
-
-with st.expander("The 10 largest individual errors of the best model"):
-    largest = read_csv(MODELING / "model_3_largest_errors.csv")
-    largest = largest.merge(zones[["PULocationID", "Zone"]], on="PULocationID")
-    st.dataframe(largest[["Zone", "pickup_hour", "trip_count", "naive_168h_baseline_prediction",
-                          "model_3_histgradientboosting_prediction", "absolute_error"]].head(10),
-                 hide_index=True, width="stretch")
 
 callout("<b>How it helps users:</b> with an average error of under 6 pickups per zone-hour, a dispatcher "
         "can see an hour in advance which zones will need cabs. Try it in <b>Demand predictor</b>.", "use")
