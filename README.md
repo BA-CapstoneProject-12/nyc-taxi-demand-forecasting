@@ -1,8 +1,34 @@
-# NYC Taxi Demand Forecasting
+# Weather-Aware Taxi Demand Prediction and Forecasting in New York City
 
-Hourly taxi demand forecasting for 138 Manhattan and Queens pickup zones using
-Yellow and Green Taxi data, calendar features, lagged demand, rolling demand,
-and weather variables.
+How many taxi pickups will each zone see in the next hour, day or week, and what
+should a fleet operator do about it? This project answers that for **138 pickup
+zones in Manhattan and Queens**, using six months of Yellow and Green Taxi trips,
+local weather and calendar data.
+
+| Stage | What we built | Headline result |
+|---|---|---|
+| Data | Clean zone-hour dataset with weather and calendar features | 23.3 M trips → 576,288 zone-hours |
+| EDA | Where, when and why demand changes | 16 of 138 zones carry half of all trips |
+| Review 1 · Regression | Next-hour demand prediction | HistGradientBoosting, **R² = 0.963**, 38% less error than baseline |
+| Review 2 · Time series | Day-ahead and week-ahead forecasts | **16.5% less error** than repeating last week |
+| Review 2 · Association rules | If-then rules linking conditions to demand levels | **152 rules** that hold up on unseen data |
+| Dashboard | Interactive Streamlit app with the models running live | Story of the project + three planning tools |
+
+## Business impact
+
+What a taxi operator can do differently because of this work:
+
+| Action | Evidence |
+|---|---|
+| **Concentrate the fleet** in core Manhattan / Yellow-Zone areas | Manhattan produces 90.6% of pickups; 55 Yellow-Zone areas capture 86.3% of volume |
+| **Stage cabs before airport peaks** (LaGuardia 14:00, JFK 16:00) | Two airport zones produce 6.5% of all pickups |
+| **React to the weather** | Morning rain adds 15–22% demand; heavy snow cuts it by 40–70% |
+| **Plan shifts and maintenance 1–7 days ahead** | Strong daily and weekly cycles; Model 1 forecasts beat "same as last week" by 16.5% |
+| **Pre-position for the weekday morning rush** in commuter zones | Rule confidence 70–73%, 2.6–2.7× more likely than usual |
+| **Follow the nightlife** from 20:00, longer on Friday and Saturday | Rule confidence 58–63%, 2.2–2.3× more likely than usual |
+
+In short: less empty cruising, shorter passenger waits, and planning ahead
+instead of reacting.
 
 ## Project scope
 
@@ -10,303 +36,196 @@ and weather variables.
 - **Taxi types:** Yellow and Green Taxi
 - **Study period:** September 2025 to February 2026
 - **Target:** hourly pickup count per zone (`trip_count`)
-- **Modeling grain:** one row per pickup zone and hour
-- **Evaluation:** chronological train/test split with MAE, RMSE, and R²
+- **Split:** chronological, so the models never see the future
+  - Training: `2025-09-08 00:00` to `2026-01-25 03:00`
+  - Testing: `2026-01-25 04:00` to `2026-02-28 23:00`
 
-The raw trip data contains 23,318,979 trips and is approximately 3.2 GB. It is
-not stored in GitHub. Teammates can obtain it from the private
-[Kaggle dataset](https://www.kaggle.com/datasets/adithyaajay1210/nyc-taxi-demand-manhattan-queens),
+The raw trip data (23,318,979 trips, about 3.2 GB) is not stored in GitHub.
+Get it from the private
+[Kaggle dataset](https://www.kaggle.com/datasets/adithyaajay1210/nyc-taxi-demand-manhattan-queens)
 or rebuild it with the data-collection notebook.
 
 ## Data sources
 
 | Source | Used for |
 |---|---|
-| [NYC TLC Trip Record Data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page) | Trip pickup/dropoff times and taxi zones |
-| [Open-Meteo Historical Forecast API](https://open-meteo.com/en/docs/historical-forecast-api) | Hourly apparent temperature, rain, snowfall, and precipitation probability |
+| [NYC TLC Trip Record Data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page) | Pickup times and taxi zones |
+| [Open-Meteo Historical Forecast API](https://open-meteo.com/en/docs/historical-forecast-api) | Hourly feels-like temperature, rain, snowfall, precipitation probability |
 
-See [data/DATA_GUIDE.md](data/DATA_GUIDE.md) for dataset access, file layouts,
-field descriptions, memory considerations, and known data issues.
+See [data/DATA_GUIDE.md](data/DATA_GUIDE.md) for file layouts, field
+descriptions and known data issues.
 
 ## Setup
 
-Create or activate a Python environment, then install the base dependencies:
-
 ```bash
-pip install -r requirements.txt
+pip install -r requirements.txt                                   # data, EDA, Review 1 models
+pip install -r requirements.txt -r requirements-time-series.txt   # adds Review 2 time series
 ```
 
-The modeling notebooks additionally require scikit-learn and joblib:
+Open the notebooks in VS Code with the Jupyter extension and pick the same
+Python environment as the kernel. Run everything from the repository root.
 
-```bash
-pip install scikit-learn joblib
-```
+## Reproduce the work
 
-Open notebooks in VS Code with the Jupyter extension and select the same Python
-environment as the notebook kernel.
+### Review 1: data, EDA and regression models
 
-## Reproduction workflow
+1. **Collect data** – [scripts/data_collection.ipynb](scripts/data_collection.ipynb)
+   downloads the TLC files and zone-level weather (about 425 MB, needs internet).
+2. **Clean and build features** – [scripts/data_processing_engineering.ipynb](scripts/data_processing_engineering.ipynb)
+   writes `data/processed/features.csv` (plus Manhattan and Queens versions and a cleaning report).
+3. **Explore** – `python scripts/eda_arun.py` then `python scripts/validate_eda_arun.py`
+   (or [scripts/EDA_Arun.ipynb](scripts/EDA_Arun.ipynb)). Findings are in
+   [EDA_doc/EDA_findings.md](EDA_doc/EDA_findings.md).
+4. **Split and baseline** – [models/modeling_preparation_baseline.ipynb](models/modeling_preparation_baseline.ipynb)
+   creates the 80/20 time split and the "same hour last week" baseline.
+5. **Train the models** –
+   [Linear Regression](models/model_1_linear_regression.ipynb),
+   [Random Forest](models/model_2_random_forest.ipynb),
+   [HistGradientBoosting](models/model_3_hist_gradient_boosting.ipynb).
+   All use zone, hour, weekday, month, holiday, weather, demand lags (1h, 24h, 168h)
+   and rolling averages (3h, 24h).
+6. **Compare** – [models/model_comparison_error_analysis.ipynb](models/model_comparison_error_analysis.ipynb)
+   for errors by hour, zone and residuals. A weather ablation is in
+   [models/weather_ablation_histgradientboosting.ipynb](models/weather_ablation_histgradientboosting.ipynb).
 
-Run the notebooks in this order from the repository root.
+### Review 2: time series
 
-### 1. Collect the data
+7. **Prepare the series** – [scripts/time_series_data_preparation.ipynb](scripts/time_series_data_preparation.ipynb)
+   builds hourly and daily series for every zone, borough and service area, plus a
+   calendar/event table and rolling-origin folds, in `data/processed/time_series/`.
+   Details: [time_series_preparation.md](data/dataset-documents/time_series_preparation.md).
+8. **Model 1: seasonal and intermittent-demand forecasting** – in
+   [models/time_series/model_1/](models/time_series/model_1/README.md).
+   Each zone gets the best of four simple methods (adaptive seasonal, four-week
+   mean, weekly naive, TSB for sparse zones), chosen on past data only. Zone
+   forecasts are added up for borough and city totals, with calibrated 80% and
+   95% ranges.
 
-Open [scripts/data_collection.ipynb](scripts/data_collection.ipynb) and run all
-cells. This downloads the TLC source files, collects zone-level weather, joins
-weather to trips, and writes files under `data/raw/`. The first run downloads
-approximately 425 MB and requires network access.
+   ```bash
+   python models/time_series/model_1/test_time_series.py
+   python models/time_series/model_1/run_time_series.py
+   python models/time_series/model_1/validate_time_series.py
+   ```
 
-The small zone, weather, and collection-summary files are already in the
-repository. The large trip CSV is not.
+9. **Models 2 and 3: Dynamic Harmonic Regression and MSTL + ETS** – in
+   [timeSeries/](timeSeries/README.md). Run `python timeSeries/create_time_series_split.py`
+   first (70/15/15 split), then the model notebooks.
 
-### 2. Process and engineer features
+### Review 2: association rules
 
-Run [scripts/data_processing_engineering.ipynb](scripts/data_processing_engineering.ipynb).
-It cleans the trip data, aggregates demand to zone-hour rows, fills missing
-zone-hours, joins weather and calendar variables, and creates lag and rolling
-demand features.
+10. **Prepare transactions** – each transaction is one zone in one hour, described
+    by time band, day type, holiday, rain, snow, temperature band, zone cluster and
+    demand level (Low / Medium / High for that zone).
 
-Main outputs:
+    ```bash
+    python scripts/association_rule_data_preparation.py
+    python -m unittest discover -s tests -v
+    ```
 
-- `data/processed/features.csv`
-- `data/processed/features_manhattan.csv`
-- `data/processed/features_queens.csv`
-- `data/processed/cleaning_report.md`
+11. **Mine and validate rules** – [scripts/association_rule_mining.ipynb](scripts/association_rule_mining.ipynb)
+    compares Apriori with FP-Growth, re-checks every rule on the test period and
+    removes redundant rules. See [ARM_doc/association_rule_mining.md](ARM_doc/association_rule_mining.md).
 
-### 3. Run exploratory data analysis
+## Results
 
-The main reproducible EDA implementation is:
+### Review 1: next-hour prediction (test period)
 
-```bash
-python scripts/eda_arun.py
-python scripts/validate_eda_arun.py
-```
-
-The analysis can also be run from [scripts/EDA_Arun.ipynb](scripts/EDA_Arun.ipynb).
-Individual issue groups can be rerun, for example:
-
-```bash
-python scripts/eda_arun.py --issues 63
-python scripts/eda_arun.py --issues 64
-python scripts/eda_arun.py --issues 65
-python scripts/eda_arun.py --issues 66
-```
-
-EDA outputs are saved under `EDA_doc/figures/` and `EDA_doc/tables/`. Findings
-and interpretation are summarized in [EDA_doc/EDA_findings.md](EDA_doc/EDA_findings.md).
-See [EDA_doc/README.md](EDA_doc/README.md) for issue coverage and reproducibility
-details.
-
-### 4. Prepare the modeling split and baseline
-
-Run [models/modeling_preparation_baseline.ipynb](models/modeling_preparation_baseline.ipynb).
-It creates an 80/20 chronological split using unique timestamps, so every zone
-at the same hour is assigned to the same partition. It also evaluates the naive
-168-hour historical baseline.
-
-### 5. Train the models
-
-Run these notebooks in order:
-
-1. [models/model_1_linear_regression.ipynb](models/model_1_linear_regression.ipynb)
-2. [models/model_2_random_forest.ipynb](models/model_2_random_forest.ipynb)
-3. [models/model_3_hist_gradient_boosting.ipynb](models/model_3_hist_gradient_boosting.ipynb)
-
-The models use the same train/test split and the same core feature groups:
-
-- pickup location
-- hour, day of week, and month
-- holiday indicator
-- apparent temperature, rain, snowfall, and precipitation probability
-- 1-hour, 24-hour, and 168-hour demand lags
-- 3-hour and 24-hour rolling demand
-
-Model 3 uses Poisson loss and explicitly marks the ordinal-encoded categorical
-features as categorical features.
-
-### 6. Compare models
-
-Run [models/model_comparison_error_analysis.ipynb](models/model_comparison_error_analysis.ipynb)
-for the final comparison, train/test gaps, hourly errors, zone errors, residuals,
-and largest individual errors.
-
-### 7. Prepare the time-series dataset (Review 2)
-
-Run [scripts/time_series_data_preparation.ipynb](scripts/time_series_data_preparation.ipynb).
-It builds on `data/processed/features.csv`, recovers the dropped warm-up week
-(1-7 Sep) exactly from its 168-hour lag column so the series cover the full
-history, and writes analysis-ready series to `data/processed/time_series/`:
-
-- hourly and daily series for all zones, each borough and each service area
-- the zone-hour and zone-day panels
-- a calendar and event table (holiday names, holiday periods, special days and
-  nights, DST flags, heavy-snow days, daily and weekly Fourier terms)
-- train/validation/test splits that reuse the ML test period, plus rolling-origin
-  folds
-- per-zone demand profiles and readiness diagnostics
-- a feature catalogue giving every column's role (target, known-in-advance
-  regressor, weather regressor, trend or descriptive), checked for leakage,
-  extrapolation and collinearity
-
-Every step, file and field is documented in
-[data/dataset-documents/time_series_preparation.md](data/dataset-documents/time_series_preparation.md).
-All inputs are in the repository, so this step does not need the Kaggle data.
-
-### 8. Run time-series analysis and forecasting (Review 2)
-
-Review 2 **Model 1** is grouped in `models/time_series/model_1/`.
-The completed Review 2 workflow is separate from the Review 1 regression models.
-Start with the [executed analysis notebook](models/time_series/model_1/time_series_analysis1.ipynb),
-[results and reproduction guide](models/time_series/model_1/README.md).
-
-```bash
-pip install -r requirements.txt -r requirements-time-series.txt
-python models/time_series/model_1/test_time_series.py
-python models/time_series/model_1/run_time_series.py
-python models/time_series/model_1/validate_time_series.py
-```
-
-This contribution uses adaptive seasonal profiles, TSB intermittent-demand forecasting,
-and coherent bottom-up aggregation. It includes training-only median-profile decomposition,
-stationarity and dependence analysis, 24-hour and 168-hour forecasts, interval calibration,
-event/error analysis, and an unscored historical next-week forecast.
-
-The teammate's Dynamic Harmonic Regression (ARIMA + Fourier) and MSTL + ETS models
-are excluded from this branch's current implementation. Standalone ETS and ARIMA
-comparisons are also removed.
-
-The zone approach reduces day-ahead MAE from **9.3074 to 7.8200** (16.0%).
-Its summed forecast reduces combined-hourly MAE from **777.71 to 649.37** (16.5%).
-Daily adaptive forecasting reduces combined-daily MAE by **10.5%**.
-Four pre-test folds select models; two later weeks calibrate intervals.
-This ownership-driven revision reuses an already examined historical holdout;
-a fresh evaluation period is needed for a new blind confirmation.
-
-Review 1 uses observed recent-demand features; these Review 2 forecasts hide
-every outcome inside the issued day/week. The scores answer different
-forecasting questions and are not an equal-information model ranking.
-
-## Review 1 modeling results
-## Association-rule data preparation
-
-The Review 2 transaction preparation is available separately from the modelling
-workflow. It uses the same chronological split and fits demand/temperature bins
-and zone clusters on training data only.
-
-```bash
-python scripts/association_rule_data_preparation.py
-python scripts/association_rule_data_preparation.py --validate-only
-python -m unittest discover -s tests -v
-```
-
-See [ARM_doc/README.md](ARM_doc/README.md) and
-[data/dataset-documents/association_rule_preparation.md](data/dataset-documents/association_rule_preparation.md)
-for category definitions, audit/exclusion details, sparse Boolean outputs and the
-mining handoff. The executed
-[scripts/association_rule_data_preparation.ipynb](scripts/association_rule_data_preparation.ipynb)
-shows the preparation and readiness charts. Outputs go to
-`data/processed/association_rules/`. Frequent-itemset mining and rule evaluation
-remain the next stages.
-
-## Current modeling results
-
-The official test period is chronological:
-
-- **Training:** `2025-09-08 00:00` to `2026-01-25 03:00`
-- **Testing:** `2026-01-25 04:00` to `2026-02-28 23:00`
-- **Training rows:** 460,920
-- **Test rows:** 115,368
-
-| Model | Test MAE | Test RMSE | Test R² |
+| Model | MAE | RMSE | R² |
 |---|---:|---:|---:|
-| Naive 168-hour baseline | 9.3074 | 24.0566 | 0.8776 |
-| Linear Regression | 7.4861 | 15.7036 | 0.9478 |
-| Random Forest Regressor | 6.7993 | 15.2593 | 0.9507 |
-| HistGradientBoosting Regressor | 5.7841 | 13.1632 | 0.9633 |
+| Baseline (same hour last week) | 9.31 | 24.06 | 0.878 |
+| Linear Regression | 7.49 | 15.70 | 0.948 |
+| Random Forest | 6.80 | 15.26 | 0.951 |
+| **HistGradientBoosting** | **5.78** | **13.16** | **0.963** |
 
-## Feature importance
+- The strongest predictors are recent demand (1h, 24h and 168h lags, 24h
+  average), location and hour of day.
+- Removing weather barely changes the error (MAE 5.67 without vs 5.78 with):
+  recent demand already reflects most weather effects. Weather matters mainly
+  in extremes such as heavy snow.
 
-Model 2 saves Random Forest impurity importance to
-`models/modeling/model_2_feature_importance.csv`.
+### Review 2: day-ahead and week-ahead forecasts
 
-Model 3 saves permutation importance to
-`models/modeling/model_3_permutation_importance.csv`. It shuffles a feature on
-a sample of up to 20,000 test rows and measures the change in negative MAE.
-The strongest Model 3 predictors were the 1-hour lag, 24-hour lag, 24-hour
-rolling demand, 168-hour lag, pickup location, and hour of day.
+| Series | Baseline MAE (last week) | Model 1 MAE | Improvement |
+|---|---:|---:|---:|
+| Per zone, day-ahead | 9.31 | 7.82 | 16.0% |
+| All zones, day-ahead | 777.7 | 649.4 | 16.5% |
+| All zones, week-ahead | 777.7 | 675.6 | 13.1% |
+| All zones, daily totals | 14,270 | 12,774 | 10.5% |
 
-These rankings describe predictive usefulness for the fitted model. They are
-not causal effects.
+- The 80% forecast ranges contain the actual value 83% of the time day-ahead and
+  80% week-ahead.
+- The heavier models (Dynamic Harmonic Regression, MSTL + ETS) did not beat the
+  weekly naive baseline on their own split (test MAE 11.98 and 11.35 vs 8.85).
+  Simple seasonal methods won on these noisy zone series.
+- These forecasts hide every outcome inside the forecast day or week, while the
+  Review 1 models see the previous hour. The two scores answer different
+  questions and should not be ranked against each other.
 
-## Output layout
+### Review 2: association rules
 
-Modeling outputs are written to `models/modeling/`:
+| Step | Rules |
+|---|---:|
+| Mined on training data (FP-Growth, support 0.005, confidence ≥ 0.5, lift ≥ 1.2) | 897 |
+| Still hold on the unseen test period | 632 |
+| After removing redundant rules | **152** |
 
-```text
-train.csv
-test.csv
-split_summary.csv
-baseline_168h_predictions.csv
-baseline_metrics.csv
-model_1_predictions.csv
-model_1_metrics.csv
-model_1_coefficients.csv
-model_2_predictions.csv
-model_2_metrics.csv
-model_2_feature_importance.csv
-model_3_predictions.csv
-model_3_metrics.csv
-model_3_permutation_importance.csv
-model_comparison_final.csv
-model_improvement_vs_baseline.csv
-model_train_test_comparison.csv
-model_error_by_hour.csv
-model_3_error_by_zone.csv
-model_3_largest_errors.csv
+FP-Growth found exactly the same rules as Apriori, over 20× faster (1.3 s vs
+28.5 s). Time of day appears in every final rule. Extra weather or calendar
+conditions usually added nothing, so they were pruned.
+
+## Dashboard
+
+[dashboard/](dashboard/README.md) is an interactive Streamlit app that tells the
+project as a story (data → EDA → models → time series → rules → business impact)
+and lets users try the work live:
+
+| Tool | What the user does | What runs |
+|---|---|---|
+| Demand predictor | Pick a zone and hour, change weather or recent demand | The saved HistGradientBoosting model predicts pickups and compares them with normal demand |
+| Forecast planner | Pick an area or zone and a start date | Time-series Model 1 forecasts the next 24 hours or 7 days |
+| Dispatch advisor | Describe a situation (time, day, weather, zone type) | Matches it against the 152 validated rules |
+
+Nothing is retrained: the app uses the saved model, the team's forecasting code
+and the saved rules. Quick start:
+
+```bash
+pip install -r dashboard/requirements.txt
+python dashboard/build_data.py    # one time only
+cd dashboard && streamlit run app.py
 ```
 
-Serialized model files are local artifacts. The large Random Forest `.joblib`
-file is excluded from GitHub because it exceeds GitHub's 100 MB file limit.
+Step-by-step virtual-environment setup for macOS and Windows is in
+[dashboard/README.md](dashboard/README.md).
 
 ## Repository structure
 
 ```text
 data/
   DATA_GUIDE.md
-  dataset-documents/       collection, processing and time-series preparation docs
-  raw/                     zones, weather, collection summary, large local data
-  processed/               cleaned and feature-engineered datasets
-    time_series/           analysis-ready series for the time-series stage
-EDA_doc/
-  EDA_findings.md
-  README.md
-  figures/
-  tables/
+  dataset-documents/      how each dataset was collected and prepared
+  raw/                    zones, weather, collection summary (large trip file is local only)
+  processed/              features.csv, time_series/, association_rules/, arm_findings/
+EDA_doc/                  EDA findings, figures and tables
 models/
-  modeling_preparation_baseline.ipynb
-  model_1_linear_regression.ipynb
-  model_2_random_forest.ipynb
-  model_3_hist_gradient_boosting.ipynb
-  model_comparison_error_analysis.ipynb
-scripts/
-  data_collection.ipynb
-  data_processing_engineering.ipynb
-  time_series_data_preparation.ipynb
-  EDA_Arun.ipynb
-  eda_arun.py
-  validate_eda_arun.py
-requirements.txt
+  *.ipynb                 Review 1 baseline, regression models, comparison, weather ablation
+  modeling/               Review 1 predictions, metrics and saved models
+  time_series/model_1/    Review 2 time-series Model 1 (code, notebook, figures, tables)
+timeSeries/               Review 2 time-series Models 2 (DHR) and 3 (MSTL + ETS)
+ARM_doc/                  association-rule preparation and mining documentation
+scripts/                  data collection, processing, EDA, time-series and ARM notebooks
+tests/                    tests for the association-rule preparation
+dashboard/                Streamlit dashboard
 ```
 
-## Limitations and project status
+The large Random Forest `.joblib` file is not in GitHub (it exceeds the 100 MB
+limit); rerun its notebook to recreate it.
 
-- Review 1 models are first-pass baselines. Review 2 compares fixed statistical
-  candidates through rolling-origin validation; it does not claim exhaustive
-  hyperparameter search or universal superiority over seasonal naive forecasts.
-- The large raw trip CSV is external to GitHub.
-- Association-rule mining and an interactive dashboard are not implemented in
-  the current repository. Association-rule data preparation is ready for the
-  mining stage.
-- [scripts/EDA_visuallization.ipynb](scripts/EDA_visuallization.ipynb) is a legacy
-  visualization notebook and may contain stale dataset paths; use the Arun EDA
-  implementation for the reproducible current analysis.
+## Limitations
+
+- Only six months of data (autumn and winter), so there is no yearly seasonality.
+- Pickups measure served demand, not people who could not find a cab.
+- Sudden events such as the February 2026 blizzard cause large forecast errors.
+- The Review 2 test period had been looked at during earlier work; a fresh period
+  is needed for a fully blind check.
+- [scripts/EDA_visuallization.ipynb](scripts/EDA_visuallization.ipynb) is an older
+  notebook with outdated paths; use the Arun EDA scripts instead.
