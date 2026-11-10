@@ -3,8 +3,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from utils import (ARM_FINDINGS, BLUE, DEMAND_COLORS, GRAY, ITEM_TEXT, ORANGE, SEQ_BLUE, callout,
-                   describe_rule, hero, kpi_row, load_rules, next_chapter, read_csv, show_chart)
+from utils import (ARM_FINDINGS, INDIGO, DEMAND_COLORS, GRAY, ITEM_TEXT, AMBER, SEQ, callout,
+                   describe_rule, hero, kpi_row, load_rules, read_csv, show_chart)
 
 hero(
     "Chapter 5 · Review 2",
@@ -52,7 +52,7 @@ algos = read_csv(ARM_FINDINGS / "arm_algorithm_comparison.csv")
 left, right = st.columns([1.2, 1])
 with left:
     fig = px.line(algos, x="min_support", y="runtime_seconds", color="algorithm", markers=True,
-                  color_discrete_map={"Apriori": ORANGE, "FP-Growth": BLUE}, log_x=True,
+                  color_discrete_map={"Apriori": AMBER, "FP-Growth": INDIGO}, log_x=True,
                   labels={"min_support": "Minimum support (log scale)", "runtime_seconds": "Runtime (seconds)", "algorithm": ""},
                   title="Runtime as the support threshold falls")
     fig.update_traces(line_width=2, marker_size=9)
@@ -72,7 +72,7 @@ with left:
     fig = go.Figure(go.Funnel(
         y=["Mined on training data", "Stable on the unseen test period", "Non-redundant (final)"],
         x=[897, 632, 152], texttemplate="%{value}<br>%{percentInitial:.0%}",
-        marker=dict(color=[SEQ_BLUE[2], SEQ_BLUE[4], SEQ_BLUE[6]]),
+        marker=dict(color=[SEQ[2], SEQ[4], SEQ[6]]),
         hovertemplate="%{y}<br>%{x} rules<extra></extra>",
     ))
     fig.update_layout(title="Rule filtering", margin=dict(l=10, r=10, t=50, b=10))
@@ -151,7 +151,7 @@ for demand, group in rules.groupby("demand"):
         rows.append({"demand": demand, "family": family, "share": 100 * share})
 heat = pd.DataFrame(rows).pivot(index="demand", columns="family", values="share").loc[["High", "Medium", "Low"], families]
 fig = go.Figure(go.Heatmap(z=heat.values, x=heat.columns, y=heat.index, xgap=2, ygap=2,
-                           colorscale=[[i / 6, c] for i, c in enumerate(SEQ_BLUE)], text=heat.values.round(0),
+                           colorscale=[[i / 6, c] for i, c in enumerate(SEQ)], text=heat.values.round(0),
                            texttemplate="%{text:.0f}%", hovertemplate="%{y} demand rules<br>%{z:.0f}% contain %{x}<extra></extra>",
                            colorbar=dict(title="% of rules", thickness=12)))
 fig.update_layout(title="Share of rules that use each condition")
@@ -167,4 +167,3 @@ with c2:
             "confidence and <b>2.2–2.3× lift</b>; weekends in nightlife zones → High with 55% confidence (2.0× lift). "
             "Move evening cabs into nightlife zones, especially on Friday and Saturday.", "use")
 st.caption("Limitation: rules give a demand *level* (Low / Medium / High for that zone), not an exact count of pickups.")
-next_chapter("Business impact: what should an operator actually do?")

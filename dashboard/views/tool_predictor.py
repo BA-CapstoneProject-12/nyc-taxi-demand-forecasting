@@ -1,12 +1,10 @@
 import datetime as dt
 
-import numpy as np
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from utils import (BLUE, DEMAND_COLORS, GRAY, INK, LEVEL_MEANING, ORANGE, callout, compare_with_normal, hero,
+from utils import (INDIGO, DEMAND_COLORS, DEMAND_PALE, GRAY, INK, LEVEL_MEANING, AMBER, callout, compare_with_normal, hero,
                    kpi_row, load_features, load_zone_normal, load_zone_shapes, load_zones, predict_demand,
                    show_chart)
 
@@ -113,43 +111,21 @@ callout(f"<b>Recommended action ({level} demand, {LEVEL_MEANING[level]}):</b> {a
 # ---------------------------------------------------------------------------
 # The whole day for this zone
 # ---------------------------------------------------------------------------
-left, right = st.columns([1.5, 1])
-with left:
-    day = features[(features["PULocationID"] == zone_id) & (features["pickup_hour"].dt.date == date)].copy()
-    day["predicted"] = predict_demand(day)
-    fig = go.Figure()
-    fig.add_scatter(x=day["pickup_hour"].dt.hour, y=day["trip_count"], name="Actual", line=dict(color=INK, width=2))
-    fig.add_scatter(x=day["pickup_hour"].dt.hour, y=day["predicted"], name="Model prediction", line=dict(color=ORANGE, width=2))
-    fig.add_scatter(x=day["pickup_hour"].dt.hour, y=day["trip_count_lag_168h"], name="Last-week baseline",
-                    line=dict(color=GRAY, width=1.5, dash="dot"))
-    fig.add_scatter(x=[hour], y=[predicted], mode="markers", name="Selected hour" + (" (scenario)" if changed else ""),
-                    marker=dict(size=13, color=BLUE, line=dict(color="white", width=2)))
-    fig.update_layout(title=f"{zone['Zone']} on {date:%a %d %b %Y}: hour by hour", hovermode="x unified",
-                      xaxis=dict(title="Hour of day", dtick=2), yaxis_title="Pickups")
-    show_chart(fig, height=380)
-    day_mae = (day["predicted"] - day["trip_count"]).abs().mean()
-    st.caption(f"Model MAE for this zone and day: **{day_mae:.2f}** pickups per hour "
-               f"(last-week baseline: {(day['trip_count_lag_168h'] - day['trip_count']).abs().mean():.2f}).")
-
-with right:
-    variable = st.segmented_control("What-if curve", ["Rain", "Snowfall", "Temperature", "Last hour's demand"], default="Rain", required=True)
-    settings = {
-        "Rain": ("rain", np.linspace(0, 10, 21), "Rain (mm)"),
-        "Snowfall": ("snowfall", np.linspace(0, 4, 17), "Snowfall (cm)"),
-        "Temperature": ("apparent_temperature", np.linspace(-20, 30, 26), "Feels-like temperature (°C)"),
-        "Last hour's demand": ("trip_count_lag_1h", np.linspace(0, max(2 * lag_1, 20), 21), "Pickups 1 hour earlier"),
-    }
-    column, values, axis_title = settings[variable]
-    curve = pd.concat([scenario] * len(values), ignore_index=True)
-    curve[column] = values
-    curve["predicted"] = predict_demand(curve)
-    fig = px.line(curve, x=column, y="predicted", markers=True, labels={column: axis_title, "predicted": "Predicted pickups"},
-                  title=f"Sensitivity to {variable.lower()}")
-    fig.update_traces(line_color=BLUE, line_width=2, marker_size=6)
-    fig.update_yaxes(range=[0, max(curve["predicted"].max() * 1.2, 1)])  # start at 0 so small changes look small
-    show_chart(fig, height=330)
-    st.caption("All other inputs stay as set above. Recent demand moves the prediction much more than weather, "
-               "matching the feature-importance results in Chapter 3.")
+day = features[(features["PULocationID"] == zone_id) & (features["pickup_hour"].dt.date == date)].copy()
+day["predicted"] = predict_demand(day)
+fig = go.Figure()
+fig.add_scatter(x=day["pickup_hour"].dt.hour, y=day["trip_count"], name="Actual", line=dict(color=INK, width=2))
+fig.add_scatter(x=day["pickup_hour"].dt.hour, y=day["predicted"], name="Model prediction", line=dict(color=AMBER, width=2))
+fig.add_scatter(x=day["pickup_hour"].dt.hour, y=day["trip_count_lag_168h"], name="Last-week baseline",
+                line=dict(color=GRAY, width=1.5, dash="dot"))
+fig.add_scatter(x=[hour], y=[predicted], mode="markers", name="Selected hour" + (" (scenario)" if changed else ""),
+                marker=dict(size=13, color=INDIGO, line=dict(color="white", width=2)))
+fig.update_layout(title=f"{zone['Zone']} on {date:%a %d %b %Y}: hour by hour", hovermode="x unified",
+                  xaxis=dict(title="Hour of day", dtick=2), yaxis_title="Pickups")
+show_chart(fig, height=380)
+day_mae = (day["predicted"] - day["trip_count"]).abs().mean()
+st.caption(f"Model MAE for this zone and day: **{day_mae:.2f}** pickups per hour "
+           f"(last-week baseline: {(day['trip_count_lag_168h'] - day['trip_count']).abs().mean():.2f}).")
 
 # ---------------------------------------------------------------------------
 # Citywide view for the same hour
@@ -203,7 +179,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-PALE = {"High": "#f7cdb9", "Medium": "#c4dbf5", "Low": "#bde8d6"}  # light versions for the other zones
 left, right = st.columns([0.85, 1.5])
 with left:
     fig = go.Figure()
@@ -212,7 +187,7 @@ with left:
             part = city[(city["level"] == name) & (city["PULocationID"].isin(highlight) == in_top)]
             if part.empty:
                 continue
-            color = DEMAND_COLORS[name] if in_top else PALE[name]
+            color = DEMAND_COLORS[name] if in_top else DEMAND_PALE[name]
             fig.add_choropleth(
                 geojson=load_zone_shapes(), featureidkey="properties.id", locations=part["PULocationID"],
                 z=[1] * len(part), colorscale=[[0, color], [1, color]], showscale=False,
@@ -224,8 +199,8 @@ with left:
             )
     fig.add_scattergeo(
         lat=top["latitude"], lon=top["longitude"], text=top["rank"].astype(str), mode="markers+text",
-        marker=dict(size=18, color="white", line=dict(color="#0b0b0b", width=1.5)),
-        textfont=dict(size=10, color="#0b0b0b"), hoverinfo="skip",
+        marker=dict(size=18, color="white", line=dict(color=INK, width=1.5)),
+        textfont=dict(size=10, color=INK), hoverinfo="skip",
     )
     # Zoom to the 10 numbered zones (with some margin) so the numbers do not overlap.
     if len(top):
@@ -239,8 +214,10 @@ with left:
     fig.update_layout(margin=dict(l=0, r=0, t=10, b=0), dragmode=False, showlegend=False)
     show_chart(fig, height=440, toolbar=False)
 with right:
+    show_difference = st.toggle("Show difference column", value=False)
+    columns = ["rank", "Zone", "level", "predicted", "normal"] + (["difference"] if show_difference else []) + ["trip_count"]
     st.dataframe(
-        top[["rank", "Zone", "level", "predicted", "normal", "difference", "trip_count"]],
+        top[columns],
         hide_index=True, width="stretch", height=410,
         column_config={"rank": st.column_config.NumberColumn("#", width="small"),
                        "level": st.column_config.TextColumn("Level", width="small"),
@@ -260,6 +237,5 @@ st.caption(f"Right now: **{counts.get('High', 0)}** zones High, **{counts.get('M
            + (" **Your weather scenario is applied to every zone.**" if use_scenario else ""))
 
 callout("<b>How it helps users:</b> every hour a dispatcher sees which zones are about to be busy compared with "
-        "their normal level, and moves idle cabs there before passengers start waiting. Note: this is a "
-        "<b>next-hour</b> model. It uses the actual pickups of the previous hour, so for planning further "
-        "ahead use the <b>Forecast planner</b>.", "warn")
+        "their normal level, and moves idle cabs there before passengers start waiting. The model uses the "
+        "actual pickups of the previous hour, so for planning further ahead use the <b>Forecast planner</b>.", "warn")

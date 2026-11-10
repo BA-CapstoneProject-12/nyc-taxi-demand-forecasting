@@ -92,6 +92,8 @@ In Command Prompt (cmd) instead of PowerShell, activate with
 - Always run `streamlit` from inside the `dashboard` folder so the theme in
   `.streamlit/config.toml` is applied.
 - When you are done, leave the virtual environment with `deactivate`.
+- The app's font (Inter) loads from Google Fonts. Without internet the app uses
+  the system font instead; everything else works the same.
 - The app works fully offline. Only step 3 needs internet the first time: it
   downloads the official taxi-zone outlines from NYC Open Data and saves them as
   `data/taxi_zones.geojson`.
@@ -107,6 +109,7 @@ dashboard/
   build_data.py     joins saved project outputs into small files in data/
   views/            one file per page (home, ch1-ch6, three live tools)
   data/             files written by build_data.py
+  assets/           extra images shown in the app (teammate Model 2 charts)
   .streamlit/       theme
 ```
 

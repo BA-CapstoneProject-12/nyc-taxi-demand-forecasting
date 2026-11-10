@@ -39,9 +39,12 @@ pages = {
 page = st.navigation(pages)
 
 with st.sidebar:
-    st.caption(
-        "**Weather-Aware Taxi Demand Prediction and Forecasting in NYC**  \n"
-        "23CSE452 Business Analytics · Team 12"
+    st.markdown(
+        '<div class="sidebar-brand"><div class="bar"></div>'
+        '<div class="name">NYC Taxi Demand</div>'
+        '<div class="sub">Weather-Aware Taxi Demand Prediction and Forecasting in NYC<br>'
+        '23CSE452 Business Analytics · Team 12</div></div>',
+        unsafe_allow_html=True,
     )
 
 page.run()

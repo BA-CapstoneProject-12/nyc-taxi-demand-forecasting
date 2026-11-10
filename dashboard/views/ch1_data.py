@@ -3,8 +3,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from utils import (BLUE, GREEN, ORANGE, REPO, SEQ_BLUE, YELLOW, callout, hero, kpi_row,
-                   load_features, load_zones, next_chapter, read_csv, show_chart, steps, zone_map)
+from utils import (INDIGO, GREEN, AMBER, REPO, SEQ, YELLOW, callout, hero, kpi_row,
+                   load_features, load_zones, read_csv, show_chart, steps, zone_map)
 
 hero(
     "Chapter 1",
@@ -52,7 +52,7 @@ zones = load_zones()
 col_map, col_month = st.columns([1.1, 1])
 with col_map:
     st.subheader("The 138 study zones")
-    fig = zone_map(zones, "Borough", color_map={"Manhattan": BLUE, "Queens": ORANGE},
+    fig = zone_map(zones, "Borough", color_map={"Manhattan": INDIGO, "Queens": AMBER},
                    hover_data={"total_trips": ":,", "service_zone": True, "PULocationID": False},
                    labels={"total_trips": "Total pickups", "service_zone": "Service area"})
     show_chart(fig, height=430, toolbar=False)
@@ -106,7 +106,7 @@ with left:
     })
     fig = go.Figure(go.Funnel(
         y=funnel["stage"], x=funnel["trips"], texttemplate="%{value:,}<br>%{percentInitial:.1%}",
-        marker=dict(color=[SEQ_BLUE[2], SEQ_BLUE[3], SEQ_BLUE[4], SEQ_BLUE[5]]),
+        marker=dict(color=[SEQ[2], SEQ[3], SEQ[4], SEQ[5]]),
         hovertemplate="%{y}<br>%{x:,} trips<extra></extra>",
     ))
     fig.update_layout(title="Trip funnel", margin=dict(l=10, r=10, t=50, b=10))
@@ -119,7 +119,7 @@ with right:
     })
     fig = px.bar(rules, x="removed", y="rule", orientation="h", text="removed",
                  labels={"removed": "Trips removed", "rule": ""}, title="Records removed by each rule")
-    fig.update_traces(marker_color=ORANGE, texttemplate="%{text:,}", textposition="outside",
+    fig.update_traces(marker_color=AMBER, texttemplate="%{text:,}", textposition="outside",
                       hovertemplate="%{y}<br>%{x:,} trips removed<extra></extra>", cliponaxis=False)
     fig.update_yaxes(autorange="reversed")
     fig.update_xaxes(range=[0, 420_000])
@@ -160,4 +160,3 @@ callout(
     "documented, reproducible cleaning step, so operators can trust the demand figures they plan with.",
     "use",
 )
-next_chapter("Exploring demand: where, when and in what weather do people take taxis?")
