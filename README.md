@@ -191,7 +191,7 @@ and the saved rules. Quick start:
 ```bash
 pip install -r dashboard/requirements.txt
 python dashboard/build_data.py    # one time only
-cd dashboard && streamlit run app.py
+streamlit run dashboard/app.py
 ```
 
 Step-by-step virtual-environment setup for macOS and Windows is in

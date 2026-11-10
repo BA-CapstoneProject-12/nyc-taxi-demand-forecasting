@@ -37,16 +37,14 @@ pip install -r dashboard/requirements.txt
 python dashboard/build_data.py
 
 # 4. Start the dashboard
-cd dashboard
-streamlit run app.py
+streamlit run dashboard/app.py
 ```
 
 Next time, only activate the environment and start the app:
 
 ```bash
 source .venv/bin/activate
-cd dashboard
-streamlit run app.py
+streamlit run dashboard/app.py
 ```
 
 ### Windows (PowerShell)
@@ -64,16 +62,14 @@ pip install -r dashboard\requirements.txt
 python dashboard\build_data.py
 
 # 4. Start the dashboard
-cd dashboard
-streamlit run app.py
+streamlit run dashboard/app.py
 ```
 
 Next time, only activate the environment and start the app:
 
 ```powershell
 .venv\Scripts\Activate.ps1
-cd dashboard
-streamlit run app.py
+streamlit run dashboard/app.py
 ```
 
 If PowerShell refuses to run `Activate.ps1` ("running scripts is disabled"),
@@ -89,8 +85,9 @@ In Command Prompt (cmd) instead of PowerShell, activate with
 ### Notes
 
 - The app opens at http://localhost:8501. Stop it with `Ctrl + C` in the terminal.
-- Always run `streamlit` from inside the `dashboard` folder so the theme in
-  `.streamlit/config.toml` is applied.
+- Always run `streamlit` from the repository root so the theme in
+  `.streamlit/config.toml` (at the repository root) is applied. Streamlit
+  Community Cloud runs the app the same way.
 - When you are done, leave the virtual environment with `deactivate`.
 - The app's font (Inter) loads from Google Fonts. Without internet the app uses
   the system font instead; everything else works the same.
@@ -99,6 +96,18 @@ In Command Prompt (cmd) instead of PowerShell, activate with
   `data/taxi_zones.geojson`.
 - Step 3 reads `data/processed/features.csv` and the model outputs in `models/`.
   If those files are missing, run the project notebooks first (see the main README).
+
+## Deploy on Streamlit Community Cloud (free)
+
+1. Sign in at [share.streamlit.io](https://share.streamlit.io) with GitHub.
+2. Click **Create app** and choose the repository, branch `main` and main file
+   path `dashboard/app.py`.
+3. Under **Advanced settings**, choose Python 3.12.
+4. Click **Deploy**. Community Cloud installs `dashboard/requirements.txt` and
+   reads the theme from `.streamlit/config.toml` at the repository root. All data
+   files are already in the repository, so no build step is needed.
+
+The first visit after the app wakes up takes a little longer while the data loads.
 
 ## Files
 
@@ -110,8 +119,9 @@ dashboard/
   views/            one file per page (home, ch1-ch6, three live tools)
   data/             files written by build_data.py
   assets/           extra images shown in the app (teammate Model 2 charts)
-  .streamlit/       theme
 ```
+
+The theme lives in `.streamlit/config.toml` at the repository root.
 
 ## Where the numbers come from
 

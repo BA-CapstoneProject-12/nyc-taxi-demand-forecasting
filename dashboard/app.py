@@ -1,8 +1,8 @@
 """
 NYC Taxi Demand Forecasting - interactive story dashboard.
 
-Run from this folder:
-    streamlit run app.py
+Run from the repository root:
+    streamlit run dashboard/app.py
 """
 
 import streamlit as st
