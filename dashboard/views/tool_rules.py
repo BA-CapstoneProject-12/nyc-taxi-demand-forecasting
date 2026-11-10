@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from utils import (DEMAND_COLORS, INK_2, TIME_BANDS, callout, describe_rule, hero, kpi_row, load_rules,
+from utils import (DEMAND_COLORS, INK_2, LINE, TIME_BANDS, callout, describe_rule, hero, kpi_row, load_rules,
                    load_zones, show_chart)
 
 hero(
@@ -158,7 +158,7 @@ for h in range(24):
         outlook.append({"hour": h, "demand": found.iloc[0]["demand"], "confidence": found.iloc[0]["test_confidence"]})
 outlook = pd.DataFrame(outlook)
 
-colors = {**DEMAND_COLORS, "No rule": "#e6e5e0"}
+colors = {**DEMAND_COLORS, "No rule": LINE}
 fig = go.Figure()
 for demand in ["High", "Medium", "Low", "No rule"]:
     part = outlook[outlook["demand"] == demand]

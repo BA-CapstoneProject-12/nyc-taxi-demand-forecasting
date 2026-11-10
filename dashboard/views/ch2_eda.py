@@ -4,9 +4,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from utils import (AQUA, BLUE, CLUSTER_COLORS, DAY_NAMES, EDA_FIG, EDA_TAB, GRAY, INK_2,
-                   ORANGE, SEQ_BLUE, callout, figure, hero, kpi_row, load_aggregate_hourly,
-                   load_zone_hourly, load_zones, next_chapter, read_csv, show_chart, zone_map)
+from utils import (ROSE, TEAL, INDIGO, CLUSTER_COLORS, DAY_NAMES, EDA_FIG, EDA_TAB, GRAY, INK_2,
+                   AMBER, SEQ, callout, figure, hero, kpi_row, load_aggregate_hourly,
+                   load_zone_hourly, load_zones, read_csv, show_chart, tint, zone_map)
 
 hero(
     "Chapter 2",
@@ -40,18 +40,18 @@ with tab_where:
         fig = px.area(ranked, x="rank", y="cumulative_share", hover_name="Zone",
                       labels={"rank": "Zones ranked by pickups", "cumulative_share": "Cumulative share of trips (%)"},
                       title="A few zones carry most of the demand")
-        fig.update_traces(line_color=BLUE, line_width=2, fillcolor="rgba(42,120,214,0.12)",
+        fig.update_traces(line_color=INDIGO, line_width=2, fillcolor=tint(INDIGO, 0.12),
                           hovertemplate="Top %{x} zones<br>%{y:.1f}% of trips<extra>%{hovertext}</extra>")
         for rank, share in [(16, 50), (33, 80)]:
             fig.add_scatter(x=[rank], y=[ranked.loc[rank - 1, "cumulative_share"]], mode="markers+text",
-                            marker=dict(size=10, color=ORANGE, line=dict(color="white", width=2)),
+                            marker=dict(size=10, color=AMBER, line=dict(color="white", width=2)),
                             text=[f"  {rank} zones → {share}%"], textposition="middle right",
                             textfont=dict(color=INK_2), showlegend=False, hoverinfo="skip")
         show_chart(fig, height=380)
     with right:
         top = ranked.head(15)
         fig = px.bar(top, x="total_trips", y="Zone", orientation="h", color="Borough",
-                     color_discrete_map={"Manhattan": BLUE, "Queens": ORANGE},
+                     color_discrete_map={"Manhattan": INDIGO, "Queens": AMBER},
                      labels={"total_trips": "Total pickups", "Zone": ""}, title="Top 15 pickup zones")
         fig.update_traces(hovertemplate="%{y}<br>%{x:,} pickups<extra></extra>")
         fig.update_yaxes(categoryorder="total ascending")
@@ -85,7 +85,7 @@ with tab_when:
     grid = data.pivot_table(index="day_of_week", columns="hour", values="trip_count_adj", aggfunc="mean")
     fig = go.Figure(go.Heatmap(
         z=grid.values, x=[f"{h:02d}:00" for h in grid.columns], y=DAY_NAMES,
-        colorscale=[[i / 6, c] for i, c in enumerate(SEQ_BLUE)], xgap=2, ygap=2,
+        colorscale=[[i / 6, c] for i, c in enumerate(SEQ)], xgap=2, ygap=2,
         hovertemplate="%{y} %{x}<br>%{z:,.0f} pickups per hour<extra></extra>",
         colorbar=dict(title="Pickups / hour", thickness=12),
     ))
@@ -98,7 +98,7 @@ with tab_when:
     daily = daily.groupby("date", as_index=False)["trip_count_adj"].sum()
     fig = px.line(daily, x="date", y="trip_count_adj", labels={"trip_count_adj": "Pickups per day", "date": ""},
                   title=f"Daily pickups – {series}")
-    fig.update_traces(line_color=BLUE, line_width=2, hovertemplate="%{x|%a %d %b %Y}<br>%{y:,.0f} pickups<extra></extra>")
+    fig.update_traces(line_color=INDIGO, line_width=2, hovertemplate="%{x|%a %d %b %Y}<br>%{y:,.0f} pickups<extra></extra>")
     fig.update_layout(hovermode="x unified")
     for day, label in [("2025-11-27", "Thanksgiving"), ("2025-12-25", "Christmas"), ("2026-02-23", "Snowstorm")]:
         row = daily[daily["date"] == day]
@@ -112,7 +112,7 @@ with tab_when:
     with left:
         fig = px.line(airports, x="hour", y=["JFK Airport", "LaGuardia Airport"], markers=True,
                       labels={"value": "Average pickups / hour", "hour": "Hour of day", "variable": ""},
-                      color_discrete_sequence=[BLUE, ORANGE], title="Airports peak earlier than Manhattan")
+                      color_discrete_sequence=[INDIGO, AMBER], title="Airports peak earlier than Manhattan")
         fig.update_traces(line_width=2, marker_size=6)
         fig.update_layout(hovermode="x unified")
         show_chart(fig, height=330)
@@ -135,7 +135,7 @@ with tab_weather:
                                      default="Heavy snow (> 0.5 cm)", key="weather_condition", required=True)
     chosen = effects[effects["condition"] == condition]
     fig = px.bar(chosen, x="time_band", y="change_%", color="borough", barmode="group",
-                 color_discrete_map={"Manhattan": BLUE, "Queens": ORANGE},
+                 color_discrete_map={"Manhattan": INDIGO, "Queens": AMBER},
                  labels={"change_%": "Change vs a normal dry hour (%)", "time_band": ""},
                  title=f"{condition}: change in pickups by time of day",
                  hover_data={"zone_hours": ":,"})
@@ -164,7 +164,7 @@ with tab_events:
     events = events.sort_values("pct_change")
     events["direction"] = np.where(events["pct_change"] >= 0, "More pickups", "Fewer pickups")
     fig = px.bar(events, x="pct_change", y="label", orientation="h", color="direction",
-                 color_discrete_map={"More pickups": BLUE, "Fewer pickups": "#d03b3b"},
+                 color_discrete_map={"More pickups": INDIGO, "Fewer pickups": ROSE},
                  labels={"pct_change": "Change vs matched normal days (%)", "label": ""},
                  title="Every unusual day has a reason", hover_data={"kind": True, "direction": False})
     fig.update_traces(texttemplate="%{x:+.0f}%", textposition="outside", cliponaxis=False)
@@ -198,7 +198,7 @@ with tab_zone:
     grid = frame.pivot_table(index="dow", columns="hour", values="pickups", aggfunc="mean")
     fig = go.Figure(go.Heatmap(
         z=grid.values, x=[f"{h:02d}" for h in grid.columns], y=DAY_NAMES,
-        colorscale=[[i / 6, c] for i, c in enumerate(SEQ_BLUE)], xgap=2, ygap=2,
+        colorscale=[[i / 6, c] for i, c in enumerate(SEQ)], xgap=2, ygap=2,
         hovertemplate="%{y} %{x}:00<br>%{z:.1f} pickups per hour<extra></extra>",
         colorbar=dict(title="Pickups / hour", thickness=12),
     ))
@@ -209,7 +209,7 @@ with tab_zone:
     frame["day_type"] = np.where(frame["dow"] >= 5, "Weekend", "Weekday")
     profile = frame.groupby(["day_type", "hour"], as_index=False)["pickups"].mean()
     fig = px.line(profile, x="hour", y="pickups", color="day_type", markers=True,
-                  color_discrete_map={"Weekday": BLUE, "Weekend": AQUA},
+                  color_discrete_map={"Weekday": INDIGO, "Weekend": TEAL},
                   labels={"pickups": "Average pickups / hour", "hour": "Hour of day", "day_type": ""},
                   title="Weekday vs weekend daily shape")
     fig.update_traces(line_width=2, marker_size=6)
@@ -231,4 +231,3 @@ with st.expander("More figures from the original EDA notebooks"):
             with col:
                 figure(EDA_FIG / file_name, caption)
 
-next_chapter("Predicting demand: can a model learn these patterns hour by hour?")

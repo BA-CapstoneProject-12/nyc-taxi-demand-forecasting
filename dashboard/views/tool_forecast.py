@@ -6,8 +6,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from utils import (AQUA, BLUE, GRAY, INK, METHOD_NAMES, ORANGE, TS_MODEL, VIOLET, callout, forecast_bottom_up,
-                   hero, kpi_row, lead_bucket, load_zone_hourly, load_zones, read_csv, run_method, show_chart)
+from utils import (TEAL, INDIGO, GRAY, INK, METHOD_NAMES, AMBER, COPPER, TS_MODEL, callout, forecast_bottom_up,
+                   hero, kpi_row, lead_bucket, load_zone_hourly, load_zones, read_csv, run_method, show_chart, tint)
 
 hero(
     "Try it live · Time series",
@@ -93,12 +93,12 @@ recent = history[history.index >= origin - pd.Timedelta(days=3)]
 fig.add_scatter(x=recent.index, y=recent.values, name="History (known)", line=dict(color=GRAY, width=1.5))
 if lower is not None:
     fig.add_scatter(x=future_hours, y=upper, line=dict(width=0), showlegend=False, hoverinfo="skip")
-    fig.add_scatter(x=future_hours, y=lower, fill="tonexty", fillcolor="rgba(235,104,52,0.15)", line=dict(width=0),
+    fig.add_scatter(x=future_hours, y=lower, fill="tonexty", fillcolor=tint(AMBER, 0.15), line=dict(width=0),
                     name="80% range", hoverinfo="skip")
 if has_actual:
     fig.add_scatter(x=future_hours, y=actual.values, name="Actual", line=dict(color=INK, width=2))
-fig.add_scatter(x=future_hours, y=baseline, name="Last-week forecast", line=dict(color=BLUE, width=1.5, dash="dot"))
-fig.add_scatter(x=future_hours, y=forecast, name="Model 1 forecast", line=dict(color=ORANGE, width=2.5))
+fig.add_scatter(x=future_hours, y=baseline, name="Last-week forecast", line=dict(color=INDIGO, width=1.5, dash="dot"))
+fig.add_scatter(x=future_hours, y=forecast, name="Model 1 forecast", line=dict(color=AMBER, width=2.5))
 fig.add_vline(x=origin, line_color=GRAY, line_dash="dash", line_width=1)
 fig.add_annotation(x=origin, y=1, yref="paper", text="forecast issued", showarrow=False, xanchor="left", font=dict(size=11))
 fig.update_layout(title=f"{title}: hourly pickups", hovermode="x unified", yaxis_title="Pickups per hour")
@@ -114,7 +114,7 @@ if level == "Single zone":
         if has_actual:
             comparison.add_scatter(x=future_hours, y=actual.values, name="Actual", line=dict(color=INK, width=2))
         rows = []
-        for (method, name), color in zip(METHOD_NAMES.items(), [ORANGE, AQUA, VIOLET, BLUE]):
+        for (method, name), color in zip(METHOD_NAMES.items(), [AMBER, TEAL, COPPER, INDIGO]):
             values = run_method(method, zone_history, horizon)
             comparison.add_scatter(x=future_hours, y=values, name=name, line=dict(color=color, width=1.8))
             if has_actual:
@@ -145,7 +145,7 @@ with left:
     melted = daily.melt(id_vars="day", value_vars=[c for c in ["forecast", "actual"] if c in daily], var_name="Series", value_name="Pickups")
     melted["Series"] = melted["Series"].map({"forecast": "Model 1 forecast", "actual": "Actual"})
     fig = px.bar(melted, x="day", y="Pickups", color="Series", barmode="group",
-                 color_discrete_map={"Model 1 forecast": ORANGE, "Actual": INK}, title="Daily totals")
+                 color_discrete_map={"Model 1 forecast": AMBER, "Actual": INK}, title="Daily totals")
     fig.update_traces(marker_line_color="white", marker_line_width=2)
     fig.update_layout(xaxis_title="")
     show_chart(fig, height=320)

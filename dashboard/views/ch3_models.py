@@ -3,8 +3,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from utils import (BLUE, INK, MODEL_COLORS, MODELING, ORANGE, callout, hero, kpi_row,
-                   load_test_predictions, load_zones, next_chapter, read_csv, show_chart)
+from utils import (INDIGO, INK, MODEL_COLORS, MODELING, AMBER, callout, hero, kpi_row,
+                   load_test_predictions, load_zones, read_csv, show_chart)
 
 hero(
     "Chapter 3 · Review 1",
@@ -28,9 +28,9 @@ with left:
 with right:
     fig = go.Figure()
     fig.add_bar(y=["Split"], x=[3340], orientation="h", name="Train · 460,920 rows · 8 Sep → 25 Jan",
-                marker_color=BLUE, hovertemplate="Training: 3,340 hours<extra></extra>")
+                marker_color=INDIGO, hovertemplate="Training: 3,340 hours<extra></extra>")
     fig.add_bar(y=["Split"], x=[836], orientation="h", name="Test · 115,368 rows · 25 Jan → 28 Feb",
-                marker_color=ORANGE, hovertemplate="Testing: 836 hours<extra></extra>")
+                marker_color=AMBER, hovertemplate="Testing: 836 hours<extra></extra>")
     fig.update_layout(barmode="stack", height=170, showlegend=True, xaxis_title="Hours",
                       yaxis=dict(showticklabels=False), margin=dict(l=10, r=10, t=40, b=10))
     show_chart(fig)
@@ -105,7 +105,7 @@ gap_long["Dataset"] = gap_long["Dataset"].map({"MAE_train": "Train", "MAE_test":
 left, right = st.columns(2)
 with left:
     fig = px.bar(gap_long, x="Model", y="MAE", color="Dataset", barmode="group",
-                 color_discrete_map={"Train": BLUE, "Test": ORANGE}, title="No major overfitting: train vs test MAE")
+                 color_discrete_map={"Train": INDIGO, "Test": AMBER}, title="No major overfitting: train vs test MAE")
     fig.update_traces(marker_line_color="white", marker_line_width=2, hovertemplate="%{x}<br>MAE %{y:.3f}<extra></extra>")
     fig.update_layout(xaxis_title="")
     show_chart(fig, height=340)
@@ -114,7 +114,7 @@ with right:
     fig = px.bar(importance, x="importance_mean", y="feature", orientation="h", error_x="importance_std",
                  labels={"importance_mean": "Increase in MAE when the feature is shuffled", "feature": ""},
                  title="What drives the HistGradientBoosting prediction")
-    fig.update_traces(marker_color=BLUE, hovertemplate="%{y}<br>+%{x:.3f} MAE<extra></extra>")
+    fig.update_traces(marker_color=INDIGO, hovertemplate="%{y}<br>+%{x:.3f} MAE<extra></extra>")
     show_chart(fig, height=340)
 
 callout("<b>Insight:</b> the previous hour's demand is by far the strongest predictor, followed by the "
@@ -165,4 +165,3 @@ if len(view) and shown:
 
 callout("<b>How it helps users:</b> with an average error of under 6 pickups per zone-hour, a dispatcher "
         "can see an hour in advance which zones will need cabs. Try it in <b>Demand predictor</b>.", "use")
-next_chapter("Forecasting ahead: planning a full day or week, not just the next hour.")

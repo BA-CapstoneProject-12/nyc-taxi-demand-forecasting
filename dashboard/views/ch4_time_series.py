@@ -5,8 +5,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from utils import (BLUE, GRAY, INK, ORANGE, REPO, TS_DATA, TS_MODEL, callout,
-                   figure, hero, kpi_row, next_chapter, read_csv, show_chart, steps)
+from utils import (INDIGO, GRAY, INK, AMBER, REPO, TS_DATA, TS_MODEL, callout,
+                   figure, hero, kpi_row, read_csv, show_chart, steps)
 
 TABLES = TS_MODEL / "tables"
 FIGS = TS_MODEL / "figures"
@@ -47,7 +47,7 @@ with left:
                  labels={"lag_hours": "Lag (hours)", "autocorrelation": "Autocorrelation"},
                  title="Demand repeats every day and every week")
     fig.update_xaxes(type="category")
-    fig.update_traces(marker_color=[ORANGE if lag in (24, 168) else BLUE for lag in acf["lag_hours"]],
+    fig.update_traces(marker_color=[AMBER if lag in (24, 168) else INDIGO for lag in acf["lag_hours"]],
                       texttemplate="%{text:.2f}", textposition="outside", cliponaxis=False)
     fig.add_hline(y=0, line_color=GRAY, line_width=1)
     show_chart(fig, height=340)
@@ -55,7 +55,7 @@ with right:
     strength = strength[strength["component"] != "trend"]
     strength["component"] = strength["component"].str.title()
     fig = px.bar(strength, x="series_id", y="strength", color="component", barmode="group",
-                 color_discrete_map={"Daily": BLUE, "Weekly": ORANGE},
+                 color_discrete_map={"Daily": INDIGO, "Weekly": AMBER},
                  labels={"series_id": "", "strength": "Seasonal strength", "component": ""},
                  title="Seasonal strength by area")
     fig.update_traces(marker_line_color="white", marker_line_width=2)
@@ -113,7 +113,7 @@ with right:
     improvement = read_csv(TABLES / "bottom_up_improvement.csv")
     improvement["Horizon"] = improvement["schedule"].map({24: "Day-ahead (24 h)", 168: "Week-ahead (168 h)"})
     fig = px.bar(improvement, x="series_id", y="MAE_reduction_pct", color="Horizon", barmode="group",
-                 color_discrete_map={"Day-ahead (24 h)": BLUE, "Week-ahead (168 h)": ORANGE},
+                 color_discrete_map={"Day-ahead (24 h)": INDIGO, "Week-ahead (168 h)": AMBER},
                  labels={"series_id": "", "MAE_reduction_pct": "Error reduction vs last week (%)"},
                  title="Model 1 beats the weekly baseline in every area")
     fig.update_traces(marker_line_color="white", marker_line_width=2, hovertemplate="%{x}<br>%{y:.1f}% less error<extra></extra>")
@@ -132,7 +132,7 @@ view = predictions[(predictions["series_id"] == series) & (predictions["schedule
 fig = go.Figure()
 fig.add_scatter(x=view["ds"], y=view["actual"], name="Actual", line=dict(color=INK, width=2))
 fig.add_scatter(x=view["ds"], y=view["baseline"], name="Last-week forecast", line=dict(color=GRAY, width=1.5, dash="dot"))
-fig.add_scatter(x=view["ds"], y=view["prediction"], name="Model 1 (sum of zones)", line=dict(color=ORANGE, width=2))
+fig.add_scatter(x=view["ds"], y=view["prediction"], name="Model 1 (sum of zones)", line=dict(color=AMBER, width=2))
 fig.update_layout(hovermode="x unified", yaxis_title="Pickups per hour", title=f"{series}: hourly pickups")
 show_chart(fig, height=400)
 if len(view):
@@ -158,12 +158,11 @@ other["model"] = other["model"].replace({"DynamicHarmonicRegression": "Dynamic H
                                          "MSTL_ETS": "MSTL + ETS", "SeasonalNaive168": "Weekly naive (same split)"})
 left, right = st.columns([1.2, 1])
 with left:
-    st.dataframe(other[["split", "model", "MAE", "RMSE", "R2", "MAPE_pct"]].sort_values(["split", "MAE"]),
+    st.dataframe(other[["split", "model", "MAE", "RMSE", "R2"]].sort_values(["split", "MAE"]),
                  hide_index=True, width="stretch",
                  column_config={"MAE": st.column_config.NumberColumn(format="%.2f"),
                                 "RMSE": st.column_config.NumberColumn(format="%.2f"),
-                                "R2": st.column_config.NumberColumn("R²", format="%.3f"),
-                                "MAPE_pct": st.column_config.NumberColumn("MAPE (%)", format="%.1f")})
+                                "R2": st.column_config.NumberColumn("R²", format="%.3f")})
     callout("Fitting heavier models (Fourier + ARIMA errors, MSTL + ETS) to 138 noisy zone series did "
             "<b>not</b> beat the simple weekly naive forecast on the test window. That is why the final "
             "Model 1 uses robust seasonal profiles chosen zone by zone.")
@@ -172,7 +171,7 @@ with right:
     folds["Week"] = pd.to_datetime(folds["forecast_start"]).dt.strftime("%d %b")
     fig = px.bar(folds, x="Week", y="MAE", text="MAE", title="DHR rolling-origin test: the blizzard week fails",
                  labels={"Week": "Forecast week starting", "MAE": "MAE (pickups)"})
-    fig.update_traces(marker_color=[ORANGE if f == 3 else BLUE for f in folds["fold"]],
+    fig.update_traces(marker_color=[AMBER if f == 3 else INDIGO for f in folds["fold"]],
                       texttemplate="%{text:.2f}", textposition="outside", cliponaxis=False)
     show_chart(fig, height=330)
     st.caption("Fold 3 (16–23 Feb) covers the 22–23 Feb blizzard and travel ban: daily MAE rose from 13.7 to 25.5.")
@@ -198,4 +197,3 @@ with st.expander("Original analysis figures from the time-series notebook"):
 
 callout("<b>How it helps users:</b> managers can plan driver rosters and maintenance 1–7 days ahead from "
         "the forecast instead of reacting day by day. Generate your own forecast in <b>Forecast planner</b>.", "use")
-next_chapter("Demand rules: which combinations of time, place and weather trigger high demand?")

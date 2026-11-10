@@ -75,4 +75,3 @@ team = pd.DataFrame([
     ["CB.SC.U4CSE23441", "Sadhana T P", "Predictive modelling & evaluation, time-series analysis (DHR, MSTL + ETS)"],
 ], columns=["Roll no.", "Name", "Responsibility"])
 st.dataframe(team, hide_index=True, width="stretch")
-st.caption("Guide / Faculty: Ms. Rohini S · Repository: github.com/BA-CapstoneProject-12/nyc-taxi-demand-forecasting")

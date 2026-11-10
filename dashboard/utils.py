@@ -35,45 +35,62 @@ sys.path.insert(0, str(TS_MODEL))
 from tsa.baselines import adaptive_week, seasonal_mean, seasonal_naive, tsb  # noqa: E402
 
 # ---------------------------------------------------------------------------
-# Colours (validated colour-blind-safe categorical order)
+# Colours
+# Chart palette: fixed order, checked for colour-blind safety (the first three
+# also stay distinct on maps, where any two zones can touch).
 # ---------------------------------------------------------------------------
-BLUE, ORANGE, AQUA, YELLOW = "#2a78d6", "#eb6834", "#1baf7a", "#eda100"
-MAGENTA, GREEN, VIOLET, RED = "#e87ba4", "#008300", "#6250d6", "#e34948"
-SERIES = [BLUE, ORANGE, AQUA, YELLOW, MAGENTA, GREEN, VIOLET, RED]
-GRAY = "#8a8984"
-INK, INK_2, INK_3 = "#0b0b0b", "#52514e", "#8a8984"
-SEQ_BLUE = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"]
-DIVERGING = [[0, "#d03b3b"], [0.5, "#f0efec"], [1, "#2a78d6"]]
+INDIGO, AMBER, TEAL, COPPER = "#3456c4", "#d08c00", "#00917f", "#b8622a"
+VIOLET, ROSE, SKY, OLIVE = "#8a63c9", "#d2475e", "#3f97d6", "#6f8f00"
+SERIES = [INDIGO, AMBER, TEAL, COPPER, VIOLET, ROSE, SKY, OLIVE]
+YELLOW, GREEN = AMBER, TEAL  # Yellow and Green taxi
+GRAY = "#7c8798"
+INK, INK_2, INK_3 = "#0f172a", "#475569", "#64748b"
+NAVY = "#0f1b33"
+LINE = "#e2e8f0"
+SEQ = ["#e3e9f8", "#bccbf0", "#93a9e5", "#6a87d8", "#4566c9", "#2f4ea6", "#1f3577"]  # light -> dark indigo
 
 # Fixed colours per entity so the same thing always has the same colour.
 MODEL_COLORS = {
     "Naive 168-hour baseline": GRAY,
-    "Linear Regression": BLUE,
-    "Random Forest": AQUA,
-    "HistGradientBoosting": ORANGE,
+    "Linear Regression": INDIGO,
+    "Random Forest": TEAL,
+    "HistGradientBoosting": AMBER,
 }
-DEMAND_COLORS = {"High": ORANGE, "Medium": BLUE, "Low": AQUA}
+DEMAND_COLORS = {"High": AMBER, "Medium": INDIGO, "Low": TEAL}
+DEMAND_PALE = {"High": "#f5dfb3", "Medium": "#c9d4f2", "Low": "#b3e0d9"}  # light versions of the above
 CLUSTER_COLORS = {
-    "Core business and airports (daytime)": BLUE,
-    "Nightlife (late night and weekends)": ORANGE,
-    "Residential (morning commute)": AQUA,
-    "Near-empty (not clustered)": "#c3c2b7",
+    "Core business and airports (daytime)": INDIGO,
+    "Nightlife (late night and weekends)": AMBER,
+    "Residential (morning commute)": TEAL,
+    "Near-empty (not clustered)": "#cbd5e1",
 }
+
+
+def tint(hex_color, alpha):
+    """A see-through version of a colour, e.g. for shaded areas."""
+    r, g, b = (int(hex_color[i:i + 2], 16) for i in (1, 3, 5))
+    return f"rgba({r},{g},{b},{alpha})"
+
 
 # Plotly template used by every chart.
 pio.templates["taxi"] = go.layout.Template(
     layout=dict(
         colorway=SERIES,
-        font=dict(family="Inter, -apple-system, Segoe UI, sans-serif", size=13, color=INK_2),
-        title=dict(font=dict(size=15, color=INK), x=0, xanchor="left", y=1, yref="container", yanchor="top", pad=dict(t=10)),
+        font=dict(family="Inter, -apple-system, 'Segoe UI', Roboto, sans-serif", size=13, color=INK_2),
+        title=dict(font=dict(size=15, color=INK, weight=600), x=0, xanchor="left", y=1, yref="container",
+                   yanchor="top", pad=dict(t=12, l=4)),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        xaxis=dict(showgrid=False, linecolor="#d9d8d3", ticks="outside", tickcolor="#d9d8d3", zeroline=False, automargin=True),
-        yaxis=dict(gridcolor="#ecebe7", zeroline=False, linecolor="rgba(0,0,0,0)", automargin=True),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0, title_text=""),
-        hoverlabel=dict(bgcolor="white", font_size=12, bordercolor="#d9d8d3"),
+        xaxis=dict(showgrid=False, linecolor="#cbd5e1", ticks="outside", tickcolor="#cbd5e1", ticklen=4,
+                   zeroline=False, automargin=True, title_font=dict(size=12, color=INK_3)),
+        yaxis=dict(gridcolor="#edf1f7", zeroline=False, linecolor="rgba(0,0,0,0)", automargin=True,
+                   title_font=dict(size=12, color=INK_3)),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0, title_text="",
+                    font=dict(size=12, color=INK_2)),
+        hoverlabel=dict(bgcolor="white", font=dict(size=12, color=INK), bordercolor=LINE),
         margin=dict(l=10, r=10, t=80, b=10),
-        bargap=0.25,
+        bargap=0.3,
+        modebar=dict(bgcolor="rgba(0,0,0,0)", color="#94a3b8", activecolor=INDIGO),
     )
 )
 pio.templates.default = "taxi"
@@ -93,42 +110,91 @@ TIME_BANDS = {
 # ---------------------------------------------------------------------------
 CSS = """
 <style>
-.block-container {padding-top: 2rem; max-width: 1250px;}
-h1, h2, h3 {letter-spacing: -0.01em;}
+:root {
+  --ink: #0f172a; --ink-2: #475569; --ink-3: #64748b; --line: #e2e8f0; --soft: #f6f8fb;
+  --indigo: #3456c4; --amber: #d08c00; --teal: #00917f; --navy: #0f1b33;
+  --shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 2px 8px rgba(15, 23, 42, .04);
+}
+[data-testid="stMainBlockContainer"] {padding-top: 3.6rem !important; padding-bottom: 3rem !important; max-width: 1280px;}
+h1, h2, h3 {letter-spacing: -0.015em; color: var(--ink);}
+[data-testid="stMain"] h2 {font-size: 1.4rem; font-weight: 650; margin-top: 1.4rem;}
+[data-testid="stMain"] h2::before {
+  content: ""; display: block; width: 28px; height: 3px; border-radius: 2px;
+  background: var(--amber); margin-bottom: .55rem;
+}
+[data-testid="stMain"] h3 {font-size: 1.1rem; font-weight: 650;}
+[data-testid="stCaptionContainer"] {color: var(--ink-3) !important; opacity: 1 !important;}
+hr {border-color: var(--line) !important;}
+
+/* Page header */
 .hero {
-  background: linear-gradient(120deg, #0d366b 0%, #1c5cab 60%, #2a78d6 100%);
-  color: white; border-radius: 14px; padding: 1.6rem 1.9rem; margin-bottom: 1.2rem;
+  position: relative; overflow: hidden; background: var(--navy); color: #fff;
+  border-radius: 16px; padding: 1.7rem 2rem 2.1rem 2rem; margin-bottom: 1.4rem;
 }
-.hero .kicker {text-transform: uppercase; font-size: 0.78rem; letter-spacing: .12em; opacity: .8;}
-.hero h1 {color: white; margin: .2rem 0 .4rem 0; font-size: 2rem; padding: 0;}
-.hero p {margin: 0; opacity: .92; font-size: 1.02rem; max-width: 900px;}
+.hero::after {   /* taxi checker strip */
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 8px;
+  background: repeating-linear-gradient(90deg, var(--amber) 0 8px, transparent 8px 16px) top / 100% 4px no-repeat,
+              repeating-linear-gradient(90deg, transparent 0 8px, var(--amber) 8px 16px) bottom / 100% 4px no-repeat;
+  opacity: .9;
+}
+.hero .kicker {
+  display: inline-block; text-transform: uppercase; font-size: .72rem; font-weight: 600;
+  letter-spacing: .12em; color: #f5c35b;
+}
+.hero h1 {color: #fff; margin: .35rem 0 .5rem 0; font-size: 2.05rem; font-weight: 700; padding: 0;}
+.hero p {margin: 0; color: #c8d2e3; font-size: 1.02rem; line-height: 1.6; max-width: 920px;}
+.hero b {color: #fff;}
+
+/* Cards */
 .kpi {
-  border: 1px solid #e6e5e0; border-radius: 12px; padding: .9rem 1rem; background: #fcfcfb; height: 100%;
+  background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow);
+  padding: .95rem 1.1rem; min-height: 122px; border-top: 3px solid var(--indigo);
 }
-.kpi .label {font-size: .78rem; color: #52514e; text-transform: uppercase; letter-spacing: .06em;}
-.kpi .value {font-size: 1.75rem; font-weight: 700; color: #0b0b0b; line-height: 1.25;}
-.kpi .note {font-size: .82rem; color: #8a8984;}
+.kpi .label {font-size: .7rem; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: .08em;}
+.kpi .value {font-size: 1.7rem; font-weight: 700; color: var(--ink); line-height: 1.3; margin-top: .15rem;}
+.kpi .note {font-size: .8rem; color: var(--ink-3);}
 .callout {
-  border-left: 4px solid #2a78d6; background: #f3f7fd; padding: .8rem 1rem;
-  border-radius: 6px; margin: .4rem 0 1rem 0; color: #1f1f1e;
+  background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--indigo);
+  border-radius: 10px; box-shadow: var(--shadow); padding: .85rem 1.1rem; margin: .5rem 0 1rem 0;
+  color: var(--ink-2); line-height: 1.6;
 }
-.callout.use {border-left-color: #1baf7a; background: #f1faf6;}
-.callout.warn {border-left-color: #eda100; background: #fdf8ec;}
-.callout b {color: #0b0b0b;}
+.callout.use {border-left-color: var(--teal); background: #f4fbf9;}
+.callout.warn {border-left-color: var(--amber); background: #fffaf0;}
+.callout b {color: var(--ink);}
 .step {
-  border: 1px solid #e6e5e0; border-radius: 12px; padding: .9rem 1rem; background: white; height: 100%;
+  background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow);
+  padding: 1rem 1.1rem; min-height: 148px;
 }
 .step .num {
-  display: inline-block; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: #2a78d6;
-  color: white; text-align: center; line-height: 1.7rem; font-weight: 700; font-size: .85rem; margin-bottom: .4rem;
+  display: inline-flex; align-items: center; justify-content: center; width: 1.9rem; height: 1.9rem;
+  border-radius: 8px; background: #e8edfb; color: var(--indigo); font-weight: 700; font-size: .85rem;
+  margin-bottom: .55rem;
 }
-.step .title {font-weight: 650; color: #0b0b0b; margin-bottom: .2rem;}
-.step .body {font-size: .88rem; color: #52514e;}
-.big-number {font-size: 3rem; font-weight: 800; color: #0b0b0b; line-height: 1.1;}
+.step .title {font-weight: 650; color: var(--ink); margin-bottom: .2rem;}
+.step .body {font-size: .88rem; color: var(--ink-2); line-height: 1.55;}
+.big-number {font-size: 3rem; font-weight: 800; color: var(--ink); line-height: 1.1;}
 .pill {
-  display: inline-block; padding: .15rem .6rem; border-radius: 999px; font-size: .8rem;
-  font-weight: 600; margin-right: .3rem; border: 1px solid #d9d8d3; background: #f6f6f4; color: #1f1f1e;
+  display: inline-block; padding: .2rem .65rem; border-radius: 999px; font-size: .78rem; font-weight: 600;
+  margin: 0 .3rem .3rem 0; background: #eef2fb; color: #2f4ea6; border: 1px solid #dbe3f7;
 }
+
+/* Streamlit elements as cards */
+[data-testid="stPlotlyChart"] {
+  background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow);
+  padding: 0 .5rem; overflow: hidden;
+}
+[data-testid="stDataFrame"] {border-radius: 10px; overflow: hidden; box-shadow: var(--shadow);}
+[data-testid="stExpander"] details {border-radius: 12px; border-color: var(--line); background: #fff;}
+[data-testid="stImage"] img {border-radius: 8px; border: 1px solid var(--line);}
+[data-testid="stTabs"] button[role="tab"] p {font-weight: 600;}
+
+/* Sidebar */
+[data-testid="stSidebar"] {border-right: none;}
+[data-testid="stSidebarNav"] a {border-radius: 8px;}
+.sidebar-brand {padding: .2rem 0 .6rem 0;}
+.sidebar-brand .name {color: #fff; font-weight: 700; font-size: 1.02rem; letter-spacing: -0.01em;}
+.sidebar-brand .sub {color: #93a3bf; font-size: .78rem; line-height: 1.45; margin-top: .2rem;}
+.sidebar-brand .bar {width: 32px; height: 3px; background: #f5c35b; border-radius: 2px; margin-bottom: .6rem;}
 </style>
 """
 
@@ -156,7 +222,7 @@ def kpi_row(items):
 
 
 def callout(text, kind="info"):
-    """kind: 'info' (blue), 'use' (green, how it helps users) or 'warn' (amber)."""
+    """kind: 'info' (indigo), 'use' (teal, how it helps users) or 'warn' (amber)."""
     css_class = {"info": "callout", "use": "callout use", "warn": "callout warn"}[kind]
     st.markdown(f'<div class="{css_class}">{text}</div>', unsafe_allow_html=True)
 
@@ -166,7 +232,7 @@ def steps(items):
     columns = st.columns(len(items))
     for i, (column, (title, body)) in enumerate(zip(columns, items), start=1):
         column.markdown(
-            f'<div class="step"><div class="num">{i}</div><div class="title">{title}</div>'
+            f'<div class="step"><div class="num">{i:02d}</div><div class="title">{title}</div>'
             f'<div class="body">{body}</div></div>',
             unsafe_allow_html=True,
         )
@@ -176,7 +242,7 @@ def show_chart(fig, height=None, toolbar=True):
     fig.update_layout(legend_title_text="")  # the chart title already names what is shown
     if height:
         fig.update_layout(height=height)
-    st.plotly_chart(fig, width="stretch", theme=None, config={"displaylogo": False, "displayModeBar": toolbar})
+    st.plotly_chart(fig, width="stretch", theme=None, config={"displaylogo": False, "displayModeBar": "hover" if toolbar else False})
 
 
 def figure(path, caption):
@@ -184,10 +250,6 @@ def figure(path, caption):
     if Path(path).exists():
         st.image(str(path), caption=caption, width="stretch")
 
-
-def next_chapter(text):
-    st.divider()
-    st.caption(f"Next chapter → {text}")
 
 
 # ---------------------------------------------------------------------------
